@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getUser } from "./api/api";
 
 export default function Home() {
   const [message, setMessage] = useState<string>("Loading...");
@@ -18,11 +19,16 @@ export default function Home() {
       .then((data) => setMessage(data.message))
       .catch(() => setMessage("Failed to load content."));
 
-    fetch("http://localhost:5000/api/users/1")
-      .then((res) => res.json())
-      .then((data) => setUser(data))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    getUser(2)
+      .then((data) => {
+        setUser(data);
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return (

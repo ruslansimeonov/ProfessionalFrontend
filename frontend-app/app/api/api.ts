@@ -11,9 +11,19 @@ export const api = axios.create({
 });
 
 export async function getUser(id: number) {
+  const start = performance.now();
+
   const response = await fetch(`${API_BASE_URL}/api/users/${id}`);
   if (!response.ok) {
     throw new Error("Failed to fetch user");
   }
-  return response.json();
+
+  const user = await response.json();
+
+  const end = performance.now(); // Record the end time
+  const duration = end - start; // Calculate how long it took
+
+  console.log(`Fetching user ${id} took ${duration} ms.`);
+
+  return user;
 }
