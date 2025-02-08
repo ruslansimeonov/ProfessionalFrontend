@@ -33,3 +33,7 @@ typings/
 
 # Yarn Integrity file
 .yarn-integrity
+
+#Envirnment files
+.env*
+.env.local

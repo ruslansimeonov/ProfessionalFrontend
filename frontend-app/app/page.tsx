@@ -1,4 +1,5 @@
 "use client"; // ✅ Correctly marks this as a client component
+export const dynamic = "force-dynamic"; // ✅ Prevents Next.js from making this a static page
 
 import { useEffect, useState } from "react";
 import { getUser } from "./api/api";
@@ -13,7 +14,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/hello")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hello`)
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
       .catch(() => setMessage("Failed to load content."));
