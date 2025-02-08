@@ -1,4 +1,4 @@
-"use client";
+"use client"; // ✅ Correctly marks this as a client component
 
 import { useEffect, useState } from "react";
 import { getUser } from "./api/api";
@@ -10,7 +10,6 @@ export default function Home() {
     name: string;
     email: string;
   } | null>(null);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
