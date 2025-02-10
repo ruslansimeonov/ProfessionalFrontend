@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { getUser } from "./api/api";
 
 export default function Home() {
+  console.log("NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+
   const [message, setMessage] = useState<string>("Loading...");
   const [user, setUser] = useState<{
     id: number;
@@ -12,7 +14,6 @@ export default function Home() {
     email: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hello`)
