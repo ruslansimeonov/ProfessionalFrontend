@@ -12,6 +12,7 @@ export default function Home() {
     email: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hello`)
