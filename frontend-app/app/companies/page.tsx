@@ -12,6 +12,11 @@ async function getCompanies() {
   }
 }
 
+type Company = {
+    id: number;
+    companyName: string;
+}
+
 export default async function CompaniesPage() {
   const companies = await getCompanies();
 
@@ -20,7 +25,7 @@ export default async function CompaniesPage() {
       <h1 className="text-2xl font-bold mb-4">Companies</h1>
       <ul className="list-disc ml-6">
         {companies.length > 0 ? (
-          companies.map((company: any) => (
+          companies.map((company: Company) => (
             <li key={company.id} className="text-lg">
               {company.companyName}
             </li>

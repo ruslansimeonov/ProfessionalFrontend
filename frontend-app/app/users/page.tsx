@@ -2,6 +2,13 @@ import { getUsers } from "../utils/api";
 
 export const dynamic = "force-dynamic";
 
+type User = {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+}
+
 export default async function UsersPage() {
   const users = await getUsers();
 
@@ -18,7 +25,7 @@ export default async function UsersPage() {
         </thead>
         <tbody>
           {users.length > 0 ? (
-            users.map((user: any) => (
+            users.map((user: User) => (
               <tr key={user.id} className="text-center">
                 <td className="border p-2">{user.id}</td>
                 <td className="border p-2">

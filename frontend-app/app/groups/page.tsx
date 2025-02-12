@@ -12,6 +12,11 @@ async function getGroups() {
   }
 }
 
+type Group = {
+    id: number;
+    name: string;
+}
+
 export default async function GroupsPage() {
   const groups = await getGroups();
 
@@ -20,7 +25,7 @@ export default async function GroupsPage() {
       <h1 className="text-2xl font-bold mb-4">Groups</h1>
       <ul className="list-disc ml-6">
         {groups.length > 0 ? (
-          groups.map((group: any) => (
+          groups.map((group: Group) => (
             <li key={group.id} className="text-lg">
               {group.name}
             </li>
