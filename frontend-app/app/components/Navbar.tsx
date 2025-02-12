@@ -8,13 +8,13 @@ export default function Navbar() {
           <Link href="/">🏠 Home</Link>
         </li>
         <li>
-          <Link href="/users">👤 Users</Link>
+          <Link href="/routes/users">👤 Users</Link>
         </li>
         <li>
-          <Link href="/companies">🏢 Companies</Link>
+          <Link href="/routes/companies">🏢 Companies</Link>
         </li>
         <li>
-          <Link href="/groups">👥 Groups</Link>
+          <Link href="/routes/groups">👥 Groups</Link>
         </li>
       </ul>
     </nav>

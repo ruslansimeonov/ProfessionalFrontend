@@ -1,24 +1,10 @@
-import { api } from "../utils/api";
+import { Company } from "@/app/utils/types";
+import { getCompanies } from "../../utils/api";
 
 export const dynamic = "force-dynamic";
 
-async function getCompanies() {
-  try {
-    const { data } = await api.get("/api/companies");
-    return data;
-  } catch (error) {
-    console.error("Failed to fetch companies:", error);
-    return [];
-  }
-}
-
-type Company = {
-    id: number;
-    companyName: string;
-}
-
 export default async function CompaniesPage() {
-  const companies = await getCompanies();
+  const companies: Company[] = await getCompanies();
 
   return (
     <div className="p-6">

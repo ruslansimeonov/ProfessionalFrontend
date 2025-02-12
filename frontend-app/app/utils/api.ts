@@ -41,3 +41,23 @@ export async function getUsers() {
     return [];
   }
 }
+
+export async function getCompanies() {
+  try {
+    const { data } = await api.get("/api/companies");
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch companies:", error);
+    return [];
+  }
+}
+
+export async function getGroups() {
+  try {
+    const { data } = await api.get("/api/groups");
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch groups:", error);
+    return [];
+  }
+}
