@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Backend API Base URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const api = axios.create({
@@ -10,21 +9,35 @@ export const api = axios.create({
   },
 });
 
-// export async function getUser(id: number) {
-//   const start = performance.now();
-//   console.log(api, "api url")
-//   const { data } = await api.get(`/api/users/${id}`);
-//   const end = performance.now();
-//   console.log(`Fetching user ${id} took ${end - start} ms.`);
-//   return data;
-// }
-
+// Fetch user data
 export async function getUser(userId: number) {
-  console.log(api.getUri(), "api url");
+  try {
+    const { data } = await api.get(`/api/users/${userId}`);
+    return data;
+  } catch (error) {
+    console.error(`Failed to fetch user ${userId}:`, error);
+    return null;
+  }
+}
 
-  const start = performance.now();
-  const { data } = await api.get(`/api/users/${userId}`);
-  const end = performance.now();
-  console.log(`Fetching user ${userId} took ${end - start} ms.`);
-  return data;
+// Fetch server message
+export async function getServerMessage() {
+  try {
+    const { data } = await api.get("/");
+    return data.message;
+  } catch (error) {
+    console.error("Failed to fetch server message:", error);
+    return "Error fetching message.";
+  }
+}
+
+// Fetch all users
+export async function getUsers() {
+  try {
+    const { data } = await api.get("/api/users");
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    return [];
+  }
 }
