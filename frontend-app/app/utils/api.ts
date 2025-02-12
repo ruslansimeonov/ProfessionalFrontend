@@ -1,8 +1,10 @@
 import axios from "axios";
 import { Company, User, Group } from "./types"; // Ensure types exist
+import { getAuthToken } from "./helpers"; // Import reusable function
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
+// Create an axios instance
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -19,7 +21,6 @@ export interface ApiSuccessResponse<T> {
 
 export interface ApiErrorResponse {
   success: false;
-  data?: never;
   error: string;
 }
 
@@ -27,14 +28,11 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 // ✅ Centralized API Error Handler
 function handleApiError(error: unknown): ApiErrorResponse {
-  let errorMessage: string = "Something went wrong. Please try again.";
+  let errorMessage = "Something went wrong. Please try again.";
 
   if (axios.isAxiosError(error)) {
-    if (error.response) {
-      errorMessage =
-        typeof error.response.data?.error === "string"
-          ? error.response.data.error
-          : "An unknown error occurred on the server.";
+    if (error.response?.data?.error) {
+      errorMessage = error.response.data.error;
     } else if (error.request) {
       errorMessage = "No response from the server. Please try again later.";
     }
@@ -54,17 +52,25 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
   try {
     const { data } = await api.get<User>(`/api/users/${userId}`);
     return { success: true, data, error: "" };
-  } catch (error: unknown) {
+  } catch (error) {
     return handleApiError(error);
   }
 }
 
-// ✅ Fetch all users
+// ✅ Fetch all users (requires authentication)
 export async function getUsers(): Promise<ApiResponse<User[]>> {
   try {
-    const { data } = await api.get<User[]>("/api/users");
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No token found" };
+    }
+
+    const { data } = await api.get<User[]>("/api/users", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     return { success: true, data, error: "" };
-  } catch (error: unknown) {
+  } catch (error) {
     return handleApiError(error);
   }
 }
@@ -74,27 +80,83 @@ export async function getServerMessage(): Promise<ApiResponse<string>> {
   try {
     const { data } = await api.get<{ message: string }>("/");
     return { success: true, data: data.message, error: "" };
-  } catch (error: unknown) {
+  } catch (error) {
     return handleApiError(error);
   }
 }
 
-// ✅ Fetch all companies
+// ✅ Fetch all companies (requires authentication)
 export async function getCompanies(): Promise<ApiResponse<Company[]>> {
   try {
-    const { data } = await api.get<Company[]>("/api/companies");
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No token found" };
+    }
+
+    const { data } = await api.get<Company[]>("/api/companies", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     return { success: true, data, error: "" };
-  } catch (error: unknown) {
+  } catch (error) {
     return handleApiError(error);
   }
 }
 
-// ✅ Fetch all groups
+// ✅ Fetch all groups (requires authentication)
 export async function getGroups(): Promise<ApiResponse<Group[]>> {
   try {
-    const { data } = await api.get<Group[]>("/api/groups");
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No token found" };
+    }
+
+    const { data } = await api.get<Group[]>("/api/groups", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return { success: true, data, error: "" };
-  } catch (error: unknown) {
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+// ✅ Register a User
+export async function registerUser(data: {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}): Promise<ApiResponse<{ message: string }>> {
+  try {
+    const response = await api.post<{ message: string }>(
+      "/api/auth/register",
+      data
+    );
+    return { success: true, data: response.data, error: "" };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+// ✅ Login a User
+export async function loginUser(data: {
+  emailOrUsername: string;
+  password: string;
+}): Promise<ApiResponse<{ token: string }>> {
+  try {
+    const response = await api.post<{ token: string }>("/api/auth/login", data);
+
+    console.log("🔑 Login response:", response); // Debugging
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token); // Store token in `localStorage`
+      console.log("✅ Token saved in localStorage:", response.data.token); // Debugging
+    } else {
+      console.error("🚨 Login successful but no token received!");
+    }
+
+    return { success: true, data: response.data, error: "" };
+  } catch (error) {
     return handleApiError(error);
   }
 }

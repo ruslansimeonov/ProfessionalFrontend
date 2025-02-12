@@ -1,29 +1,12 @@
-import { Company } from "@/app/utils/types";
-import { getCompanies } from "../../utils/api";
+import CompaniesTable from "./CompaniesTable"; // Import the Client Component
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // Ensures fresh data
 
 export default async function CompaniesPage() {
-  const response = await getCompanies(); // ✅ Now TypeScript understands the response
-  const companies: Company[] = response.success ? response.data : []; // ✅ Handle errors gracefully
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Companies</h1>
-
-      {/* ✅ Show error if API request failed */}
-      {!response.success ? (
-        <p className="text-red-500">{JSON.stringify(response.error)}</p>
-      ) : response.data.length === 0 ? (
-        <p className="text-gray-500">No companies found.</p>
-      ) : (
-        <ul className="list-disc ml-6">
-          {companies.map((company: Company) => (
-            <li key={company.id} className="text-lg">
-              {company.companyName}
-            </li>
-          ))}
-        </ul>
-      )}
+      <CompaniesTable /> {/* Move API fetching logic to a Client Component */}
     </div>
   );
 }
