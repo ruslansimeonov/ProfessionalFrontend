@@ -6,7 +6,12 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   let serverMessage = "No message from server.";
   try {
-    serverMessage = await getServerMessage();
+    const response = await getServerMessage();
+    if (response.success) {
+      serverMessage = response.data;
+    } else {
+      console.error("Failed to fetch server message:", response.error);
+    }
   } catch (error) {
     console.error("Failed to fetch server message:", error);
   }
@@ -16,8 +21,18 @@ export default async function Home() {
       <h1 className="text-3xl font-bold">Welcome to the Dashboard</h1>
       <p className="text-lg text-gray-700">{serverMessage}</p>
       <div className="flex gap-4">
-        <Link href="/users" className="px-4 py-2 bg-blue-500 text-white rounded-md">View Users</Link>
-        <Link href="/companies" className="px-4 py-2 bg-green-500 text-white rounded-md">View Companies</Link>
+        <Link
+          href="/users"
+          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          View Users
+        </Link>
+        <Link
+          href="/companies"
+          className="px-4 py-2 bg-green-500 text-white rounded-md"
+        >
+          View Companies
+        </Link>
       </div>
     </div>
   );
