@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "iqeurizrhtiz24sr.public.blob.vercel-storage.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

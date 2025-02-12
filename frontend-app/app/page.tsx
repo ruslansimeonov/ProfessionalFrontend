@@ -1,44 +1,36 @@
-"use client"; // ✅ Correctly marks this as a client component
-export const dynamic = "force-dynamic"; // ✅ Prevents Next.js from making this a static page
+import Image from "next/image";
+import { getUser } from "./utils/api";
 
-import { useEffect, useState } from "react";
-import { getUser } from "./api/api";
+// app/page.tsx
+export const dynamic = "force-dynamic";
+// ^ Ensures fresh data on every request (disables Next caching).
 
-export default function Home() {
-  console.log("NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+export default async function Home() {
+  // Parallel fetch: get both "/" message and user info at once.
 
-  const [message, setMessage] = useState<string>("Loading...");
-  const [user, setUser] = useState<{
-    id: number;
-    name: string;
-    email: string;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [rootRes, userRes] = await Promise.all([
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, { cache: "no-store" }),
+    getUser(12),
+  ]);
 
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/`)
-      .then((res) => res.json())
-      .then((data) => setMessage(data.message))
-      .catch(() => setMessage("Failed to load content."));
+  console.log(userRes, "userRes");
 
-    getUser(2)
-      .then((data) => {
-        setUser(data);
-      })
-      .catch(() => {
-        setUser(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  if (!rootRes || !userRes) {
+    throw new Error("Failed to fetch data from the server.");
+  }
+
+  // Parse JSON responses
+  const rootData = await rootRes.json(); // { message: "..." }
+  // const user = await userRes.json; // { id: 2, name: "...", email: "..." }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center gap-10">
       {/* Welcome Section */}
       <div>
         <h1 className="text-3xl font-bold mb-4">Welcome</h1>
-        <p className="text-lg text-gray-700">{message}</p>
+        <p className="text-lg text-gray-700">
+          {rootData?.message ?? "No message from server."}
+        </p>
       </div>
 
       {/* User Information Section */}
@@ -46,12 +38,17 @@ export default function Home() {
         <h1 className="text-2xl font-bold mb-4 text-center">
           User Information
         </h1>
-        {loading ? (
-          <p className="text-lg text-center">Loading...</p>
-        ) : user ? (
+        {userRes ? (
           <div className="text-center">
-            <p className="text-xl font-semibold">{user.name}</p>
-            <p className="text-gray-400">{user.email}</p>
+            <Image
+              src={userRes.pictureUrl}
+              alt={`${userRes.name}'s profile picture`}
+              className="w-24 h-24 rounded-full mx-auto mb-4"
+              width={500}
+              height={500}
+            />
+            <p className="text-xl font-semibold">{userRes.name}</p>
+            <p className="text-gray-400">{userRes.email}</p>
           </div>
         ) : (
           <p className="text-red-500 text-center">User not found</p>
