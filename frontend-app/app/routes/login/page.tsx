@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -10,6 +11,7 @@ import {
   Box,
   Alert,
 } from "@mui/material";
+import { useAuthStore } from "../../store/zustandStore"; // Import Zustand store
 import { loginUser } from "../../utils/api"; // Import API function
 
 type LoginForm = {
@@ -24,6 +26,7 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { login } = useAuthStore(); // Zustand login function
   const router = useRouter();
 
   const onSubmit = async (data: LoginForm) => {
@@ -33,10 +36,11 @@ export default function LoginPage() {
     const result = await loginUser(data);
     console.log("🔑 Login result:", result); // Debugging
 
-    if (result.success) {
-      router.push("/");
+    if (result.success && result.data?.token) {
+      await login(data); // Call Zustand's login function to update the state
+      router.push("/"); // Redirect to home page after login
     } else {
-      setErrorMessage(result.error);
+      setErrorMessage(result.error || "Invalid credentials");
     }
   };
 
