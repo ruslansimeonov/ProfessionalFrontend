@@ -160,3 +160,21 @@ export async function loginUser(data: {
     return handleApiError(error);
   }
 }
+
+// ✅ Get the authenticated user
+export async function getAuthenticatedUser(): Promise<ApiResponse<User>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No token found" };
+    }
+
+    const { data } = await api.get<User>("/api/auth/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return { success: true, data, error: "" };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

@@ -24,6 +24,9 @@ export default function Navbar() {
             <li>
               <Link href="/routes/groups">👥 Groups</Link>
             </li>
+            <li>
+              <Link href="/routes/profile">📝 Profile</Link>
+            </li>
           </>
         ) : (
           <>
