@@ -1,7 +1,7 @@
 "use client"; // This makes the component a Client Component
 
 import { useEffect, useState } from "react";
-import { getUsers } from "@/app/utils/api";
+import { getUsers } from "@/app/utils/apis/api";
 import { User } from "@/app/utils/types";
 
 export default function UsersTable() {

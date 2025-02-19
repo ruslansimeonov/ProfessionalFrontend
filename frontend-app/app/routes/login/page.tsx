@@ -11,13 +11,9 @@ import {
   Box,
   Alert,
 } from "@mui/material";
-import { useAuthStore } from "../../store/zustandStore"; // Import Zustand store
-import { loginUser } from "../../utils/api"; // Import API function
-
-type LoginForm = {
-  emailOrUsername: string;
-  password: string;
-};
+import { loginUser } from "../../utils/apis/api"; // Import API function
+import { useStore } from "@/app/store/useStore";
+import { LoginForm } from "@/app/utils/types";
 
 export default function LoginPage() {
   const {
@@ -26,7 +22,7 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { login } = useAuthStore(); // Zustand login function
+  const { login } = useStore();
   const router = useRouter();
 
   const onSubmit = async (data: LoginForm) => {

@@ -10,15 +10,8 @@ import {
   Box,
   Alert,
 } from "@mui/material";
-import { registerUser } from "../../utils/api"; // Import API function
-
-type RegisterForm = {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-};
+import { registerUser } from "../../utils/apis/api"; // Import API function
+import { RegisterForm } from "@/app/utils/types";
 
 export default function RegisterPage() {
   const {

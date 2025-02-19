@@ -1,7 +1,7 @@
 "use client"; // Mark as Client Component
 
 import { useEffect, useState } from "react";
-import { getCompanies } from "@/app/utils/api";
+import { getCompanies } from "@/app/utils/apis/api";
 import { Company } from "@/app/utils/types";
 
 export default function CompaniesTable() {

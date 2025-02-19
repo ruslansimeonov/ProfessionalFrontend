@@ -21,3 +21,29 @@ export interface Group {
   name: string;
   companyId: number;
 }
+
+export type RegisterForm = {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+};
+
+export type AuthState = {
+  isAuthenticated: boolean;
+  token: string | null;
+  user: User | null;
+  login: (data: {
+    emailOrUsername: string;
+    password: string;
+  }) => Promise<boolean>;
+  logout: () => void;
+  checkTokenValidity: () => void;
+  fetchUser: () => Promise<void>;
+};
+
+export type LoginForm = {
+  emailOrUsername: string;
+  password: string;
+};

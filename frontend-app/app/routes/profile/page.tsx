@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuthStore } from "../../store/zustandStore";
 import {
   Container,
   Typography,
@@ -11,9 +10,10 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
+import { useStore } from "@/app/store/useStore";
 
 export default function ProfilePage() {
-  const { user, fetchUser } = useAuthStore();
+  const { user, fetchUser } = useStore();
 
   useEffect(() => {
     if (!user) {

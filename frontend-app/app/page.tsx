@@ -1,4 +1,4 @@
-import { getServerMessage } from "./utils/api";
+import { getServerMessage } from "./utils/apis/api";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";

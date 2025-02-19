@@ -1,7 +1,7 @@
 "use client"; // Mark as Client Component
 
 import { useEffect, useState } from "react";
-import { getGroups } from "@/app/utils/api";
+import { getGroups } from "@/app/utils/apis/api";
 import { Group } from "@/app/utils/types";
 
 export default function GroupsTable() {

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useAuthStore } from "../store/zustandStore";
+import { useStore } from "../store/useStore";
 
 export default function Navbar() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useStore();
 
   return (
     <nav className="w-full bg-gray-800 p-4">
@@ -35,6 +35,9 @@ export default function Navbar() {
             </li>
             <li>
               <Link href="/routes/register">📝 Register</Link>
+            </li>
+            <li>
+              <Link href="/routes/userDocumentUpload">UploadDocumentsPage</Link>
             </li>
           </>
         )}
