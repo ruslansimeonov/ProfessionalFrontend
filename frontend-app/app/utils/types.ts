@@ -1,11 +1,34 @@
-// utils/types.ts
-
 export interface User {
   id: number;
   firstName: string;
   lastName: string;
   email: string;
   companyId?: number;
+  documents?: string[];
+  certificates?: Certificates[];
+  groups?: Group[];
+}
+
+export interface Documents {
+  id: number;
+  userId: number;
+  documentType: string;
+  documentUrl: string;
+  uploadedAt: Date;
+  isActive: boolean;
+  supersededBy?: number;
+  deletedAt?: Date;
+}
+
+export interface Certificates {
+  id: number;
+  userId: number;
+  certificateUrl: string;
+  issuedAt: Date;
+  expirationDate: Date;
+  isActive: boolean;
+  supersededBy?: number;
+  deletedAt?: Date;
 }
 
 export interface Company {

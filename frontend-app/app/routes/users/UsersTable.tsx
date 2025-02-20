@@ -42,6 +42,16 @@ export default function UsersTable() {
               {user.firstName} {user.lastName}
             </td>
             <td className="border p-2">{user.email}</td>
+            <td className="border p-2">
+              {
+                // fix this
+                user?.documents?.length > 0 ? (
+                  <a href={user.documents}>View</a>
+                ) : (
+                  ""
+                )
+              }
+            </td>
           </tr>
         ))}
       </tbody>
