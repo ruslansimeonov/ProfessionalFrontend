@@ -32,7 +32,15 @@ export default function UploadDocumentsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      setFormData((prev) => ({ ...prev, document: selectedFile }));
+      // Rename the file
+      const renamedFile = new File(
+        [selectedFile],
+        `${formData.firstName}_${formData.lastName}_${selectedFile.name}`,
+        {
+          type: selectedFile.type,
+        }
+      );
+      setFormData((prev) => ({ ...prev, document: renamedFile }));
     }
   };
 

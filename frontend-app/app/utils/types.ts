@@ -3,8 +3,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  companyId?: number;
-  documents?: string[];
+  companyId: number;
+  documents: string; // THIS WILL BE ARRAY SOON
   certificates?: Certificates[];
   groups?: Group[];
 }
