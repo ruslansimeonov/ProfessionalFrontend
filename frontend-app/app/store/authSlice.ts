@@ -1,4 +1,3 @@
-// stores/authSlice.ts
 import { StateCreator } from "zustand";
 import { loginUser, getAuthenticatedUser } from "../utils/apis/api";
 import { User } from "../utils/types";
@@ -16,7 +15,10 @@ export type AuthState = {
   fetchUser: () => Promise<void>;
 };
 
-export const createAuthSlice: StateCreator<AuthState> = (set, get) => ({
+export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
+  set,
+  get
+) => ({
   isAuthenticated: false,
   token: null,
   user: null,

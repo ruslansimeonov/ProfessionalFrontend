@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/Navbar"; // Import Navbar component
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+import { Box } from "@mui/material";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +30,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* ✅ Navbar Stays Fixed at the Top */}
         <Navbar />
-        <main className="container mx-auto p-6">{children}</main>
+
+        {/* ✅ Sidebar is Fixed & Overlaps Content */}
+        <Sidebar />
+
+        {/* ✅ Main Content Stays in Place */}
+        <Box
+          component="main"
+        >
+          {children}
+        </Box>
       </body>
     </html>
   );

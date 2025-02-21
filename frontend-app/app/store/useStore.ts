@@ -1,15 +1,21 @@
-// stores/useStore.ts
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { AuthState, createAuthSlice } from "./authSlice";
+import { UIState, createUISlice } from "./uiSlice";
 
-type StoreState = AuthState;
+type StoreState = AuthState & UIState;
 
 export const useStore = create<StoreState>()(
   persist(
-    (...args) => ({
-      ...createAuthSlice(...args), // Add more slices here as needed
+    (set, get, store) => ({
+      ...createAuthSlice(set, get, store),
+      ...createUISlice(set, get, store),
     }),
-    { name: "app-store" }
+    {
+      name: "app-store",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? localStorage : sessionStorage
+      ),
+    }
   )
 );
