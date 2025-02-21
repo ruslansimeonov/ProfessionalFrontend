@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import { Box } from "@mui/material";
+import ClientWrapper from "./components/ClientWrapper"; // ✅ Import ClientWrapper
+import ClientProvider from "./components/ClientProvider"; // ✅ Import ClientProvider
+import ClientContent from "./components/ClientContent"; // ✅ Import ClientContent
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,18 +32,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* ✅ Navbar Stays Fixed at the Top */}
-        <Navbar />
-
-        {/* ✅ Sidebar is Fixed & Overlaps Content */}
-        <Sidebar />
-
-        {/* ✅ Main Content Stays in Place */}
-        <Box
-          component="main"
-        >
-          {children}
-        </Box>
+        <ClientWrapper>
+          {" "}
+          {/* ✅ This ensures `useDeviceContext()` works */}
+          <ClientProvider /> {/* ✅ Updates `isDesktop` in Zustand */}
+          <Navbar />
+          <Sidebar />
+          {/* ✅ Now ClientContent is inside the correct wrapper */}
+          <ClientContent>{children}</ClientContent>
+        </ClientWrapper>
       </body>
     </html>
   );

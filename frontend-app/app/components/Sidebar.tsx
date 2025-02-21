@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import Image from "next/image";
 
-const drawerWidth = 210;
+const drawerWidth = 230;
 const collapsedWidth = 60;
 
 const StyledDrawer = styled(Drawer)({
