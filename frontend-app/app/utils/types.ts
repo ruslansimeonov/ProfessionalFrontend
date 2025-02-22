@@ -1,35 +1,40 @@
 export interface User {
   id: number;
   firstName: string;
-  middleName: string;
+  middleName?: string;
   lastName: string;
   email: string;
-  companyId: number;
-  documents: string; // THIS WILL BE ARRAY SOON
-  certificates?: Certificates[];
+  phoneNumber?: string;
+  company?: Company;
+  roles?: string[]; // User roles (e.g., ["Admin", "Student"])
+  enrolledCourses?: EnrolledCourse[];
+  documents?: Document[];
+  certificates?: Certificate[];
   groups?: Group[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface Documents {
+export interface Document {
   id: number;
-  userId: number;
   documentType: string;
   documentUrl: string;
   uploadedAt: Date;
   isActive: boolean;
-  supersededBy?: number;
-  deletedAt?: Date;
 }
 
-export interface Certificates {
+export interface Certificate {
   id: number;
-  userId: number;
   certificateUrl: string;
   issuedAt: Date;
   expirationDate: Date;
   isActive: boolean;
-  supersededBy?: number;
-  deletedAt?: Date;
+}
+
+export interface EnrolledCourse {
+  courseId: number;
+  courseName: string;
+  enrolledAt: Date;
 }
 
 export interface Company {
