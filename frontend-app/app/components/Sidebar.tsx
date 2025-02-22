@@ -23,7 +23,6 @@ import {
   Archive as ArchiveIcon,
   Settings as SettingsIcon,
 } from "@mui/icons-material";
-import Image from "next/image";
 
 const drawerWidth = 230;
 const collapsedWidth = 60;
