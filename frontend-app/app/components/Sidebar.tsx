@@ -67,15 +67,6 @@ export default function Sidebar() {
             paddingTop: "20px",
           }}
         >
-          {isSidebarOpen && (
-            <Image
-              src="/your-logo.png"
-              alt="Company Logo"
-              width={120}
-              height={40}
-            />
-          )}
-
           {!isMobile && (
             <IconButton onClick={toggleSidebar}>
               {isSidebarOpen ? <ChevronLeftIcon /> : <MenuIcon />}

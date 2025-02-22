@@ -4,10 +4,14 @@ import { api, ApiResponse, handleApiError } from "./api";
 
 // ✅ Register a User
 export async function registerUser(data: {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  phoneNumber: string;
+  courseId: number;
+  cityId: number;
   username: string;
   email: string;
-  firstName: string;
-  lastName: string;
   password: string;
 }): Promise<ApiResponse<{ message: string }>> {
   try {

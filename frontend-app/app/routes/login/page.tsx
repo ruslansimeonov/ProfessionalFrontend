@@ -11,9 +11,9 @@ import {
   Box,
   Alert,
 } from "@mui/material";
-import { loginUser } from "../../utils/apis/api"; // Import API function
 import { useStore } from "@/app/store/useStore";
 import { LoginForm } from "@/app/utils/types";
+import { handleUserAuth } from "@/app/utils/helpers";
 
 export default function LoginPage() {
   const {
@@ -25,19 +25,8 @@ export default function LoginPage() {
   const { login } = useStore();
   const router = useRouter();
 
-  const onSubmit = async (data: LoginForm) => {
-    setErrorMessage(null);
-
-    console.log("🔑 Login form data:", data); // Debugging
-    const result = await loginUser(data);
-    console.log("🔑 Login result:", result); // Debugging
-
-    if (result.success && result.data?.token) {
-      await login(data); // Call Zustand's login function to update the state
-      router.push("/"); // Redirect to home page after login
-    } else {
-      setErrorMessage(result.error || "Invalid credentials");
-    }
+  const onSubmitForUserLogin = (data: LoginForm) => {
+    handleUserAuth(data, login, router, setErrorMessage);
   };
 
   return (
@@ -57,7 +46,7 @@ export default function LoginPage() {
 
         {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmitForUserLogin)}>
           <TextField
             fullWidth
             label="Email or Username"

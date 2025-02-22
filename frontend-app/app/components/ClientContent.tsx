@@ -16,7 +16,7 @@ export default function ClientContent({
       sx={{
         flexGrow: 1,
         p: 3,
-        marginTop: "64px", // ✅ Prevents content from being covered by navbar
+        marginTop: "32px", // ✅ Prevents content from being covered by navbar
         marginLeft: isDesktop ? "100px" : "0px", // ✅ Only apply left margin on desktop
         transition: "margin-left 0.3s ease-in-out", // ✅ Smooth transition for sidebar toggle
       }}

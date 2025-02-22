@@ -7,6 +7,7 @@ import { api, ApiResponse, handleApiError } from "./api";
  */
 export async function uploadUserDocuments(data: {
   firstName: string;
+  middleName: string;
   lastName: string;
   phoneNumber?: string;
   email: string;
@@ -22,6 +23,7 @@ export async function uploadUserDocuments(data: {
 
     // ✅ Append user details
     formData.append("firstName", data.firstName);
+    formData.append("middleName", data.middleName);
     formData.append("lastName", data.lastName);
     formData.append("email", data.email);
     if (data.phoneNumber) {

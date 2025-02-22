@@ -29,12 +29,7 @@ export default function Navbar() {
 
         {/* Company Logo */}
         <Link href="/">
-          <Image
-            src="/next.svg"
-            alt="Company Logo"
-            width={120}
-            height={40}
-          />
+          <Image src="/next.svg" alt="Company Logo" width={120} height={40} />
         </Link>
       </div>
 
@@ -48,9 +43,6 @@ export default function Navbar() {
         </li>
         <li>
           <Link href="/routes/register">📝 Register</Link>
-        </li>
-        <li>
-          <Link href="/routes/userDocumentUpload">📤 Upload</Link>
         </li>
       </ul>
     </nav>
