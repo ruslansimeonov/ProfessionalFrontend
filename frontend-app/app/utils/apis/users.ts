@@ -3,47 +3,60 @@ import { User } from "../types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 /**
- * ✅ Upload user documents (before registration)
+ * ✅ Upload user documents
  */
 export async function uploadUserDocuments(data: {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  phoneNumber?: string;
-  email: string;
+  userId: string;
   files: File[];
+  docTypeNames: string[];
 }): Promise<
   ApiResponse<{
     user: User;
     documents: { documentType: string; documentUrl: string }[];
   }>
 > {
+  const token = getAuthToken();
+  if (!token) {
+    return { success: false, error: "No token found" };
+  }
+
   try {
+    console.log("🚀 Data to be uploaded:", data); // Log raw input data
+
     const formData = new FormData();
 
     // ✅ Append user details
-    formData.append("firstName", data.firstName);
-    formData.append("middleName", data.middleName);
-    formData.append("lastName", data.lastName);
-    formData.append("email", data.email);
-    if (data.phoneNumber) {
-      formData.append("phoneNumber", data.phoneNumber);
+    formData.append("userId", data.userId);
+
+    // ✅ Append each file with its document type
+    data.files.forEach((file, index) => {
+      if (!file) {
+        console.warn(`⚠️ Skipping empty file at index ${index}`);
+        return;
+      }
+      formData.append("files", file);
+      formData.append("docTypeNames", data.docTypeNames[index]);
+    });
+
+    // ✅ Debugging FormData - Log all values
+    console.log("📂 FormData Entries:");
+    for (const pair of formData.entries()) {
+      console.log(`🔹 ${pair[0]}:`, pair[1]);
     }
 
-    // ✅ Append each file
-    data.files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    // ✅ Make API request (no authentication required)
+    // ✅ Make API request (multipart form-data)
     const response = await api.post("/api/upload/files", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
 
-    console.log(response);
+    console.log("✅ Upload response:", response);
 
     return { success: true, data: response.data, error: "" };
   } catch (error) {
+    console.error("❌ Error uploading documents:", error);
     return handleApiError(error);
   }
 }
