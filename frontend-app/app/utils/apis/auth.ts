@@ -1,5 +1,5 @@
 import { getAuthToken } from "../helpers";
-import { User } from "../types";
+import { AuthenticatedUserResponse } from "../types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 // ✅ Register a User
@@ -48,14 +48,14 @@ export async function loginUser(data: {
 }
 
 // ✅ Get the authenticated user
-export async function getAuthenticatedUser(): Promise<ApiResponse<User>> {
+export async function getAuthenticatedUser(): Promise<ApiResponse<AuthenticatedUserResponse>> {
   try {
     const token = getAuthToken();
     if (!token) {
       return { success: false, error: "No token found" };
     }
 
-    const { data } = await api.get<User>("/api/auth/me", {
+    const { data } = await api.get<AuthenticatedUserResponse>("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 

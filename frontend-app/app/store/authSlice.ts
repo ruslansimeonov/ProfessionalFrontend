@@ -1,19 +1,6 @@
 import { StateCreator } from "zustand";
 import { loginUser, getAuthenticatedUser } from "../utils/apis/api";
-import { User } from "../utils/types";
-
-export type AuthState = {
-  isAuthenticated: boolean;
-  token: string | null;
-  user: User | null;
-  login: (data: {
-    emailOrUsername: string;
-    password: string;
-  }) => Promise<boolean>;
-  logout: () => void;
-  checkTokenValidity: () => void;
-  fetchUser: () => Promise<void>;
-};
+import { AuthState } from "../utils/types";
 
 export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   set,
@@ -37,14 +24,26 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
 
   logout: () => {
     localStorage.removeItem("token");
-    set({ isAuthenticated: false, token: null, user: null });
+    set({
+      isAuthenticated: false,
+      token: null,
+      user: null,
+    });
   },
 
   fetchUser: async () => {
     try {
       const response = await getAuthenticatedUser();
       if (response.success) {
-        set({ user: response.data });
+        set({
+          user: {
+            details: response.data.user,
+            company: response.data.company,
+            enrolledCourses: response.data.enrolledCourses,
+            documents: response.data.documents,
+            certificates: response.data.certificates,
+          },
+        });
       } else {
         get().logout();
       }

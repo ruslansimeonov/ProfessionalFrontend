@@ -48,6 +48,7 @@ export default function Sidebar() {
         open={isSidebarOpen || !isMobile}
         onClose={isMobile ? toggleSidebar : undefined}
         sx={{
+          zIndex: 1,
           width: isSidebarOpen ? drawerWidth : collapsedWidth,
           "& .MuiDrawer-paper": {
             width: isSidebarOpen ? drawerWidth : collapsedWidth,
@@ -63,7 +64,7 @@ export default function Sidebar() {
             justifyContent: isSidebarOpen ? "space-between" : "center",
             padding: "10px",
             borderBottom: "1px solid #ddd",
-            paddingTop: "20px",
+            paddingTop: isMobile ? "40px" : "0px",
           }}
         >
           {!isMobile && (

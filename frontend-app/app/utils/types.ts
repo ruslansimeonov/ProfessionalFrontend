@@ -1,18 +1,30 @@
-export interface User {
+export interface UserDetails {
   id: number;
   firstName: string;
   middleName?: string;
   lastName: string;
   email: string;
   phoneNumber?: string;
-  company?: Company;
-  roles?: string[]; // User roles (e.g., ["Admin", "Student"])
-  enrolledCourses?: EnrolledCourse[];
-  documents?: Document[];
-  certificates?: Certificate[];
-  groups?: Group[];
+  currentResidencyAddress?: string | null;
+  birthPlaceAddress?: string | null;
+  companyId?: number | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+
+export interface Company {
+  id: number;
+  companyName: string;
+  taxNumber: string;
+  address: string;
+  email: string;
+}
+
+export interface EnrolledCourse {
+  courseId: number;
+  courseName: string;
+  enrolledAt: Date;
 }
 
 export interface Document {
@@ -31,33 +43,20 @@ export interface Certificate {
   isActive: boolean;
 }
 
-export interface EnrolledCourse {
-  courseId: number;
-  courseName: string;
-  enrolledAt: Date;
-}
-
-export interface Company {
-  id: number;
-  companyName: string;
-  taxNumber: string;
-  address: string;
-  email: string;
-}
-
 export interface Group {
   id: number;
   name: string;
   companyId: number;
 }
 
-export type RegisterForm = {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-};
+export interface User {
+  details: UserDetails;
+  company: Company | null;
+  enrolledCourses: EnrolledCourse[];
+  documents: Document[];
+  certificates: Certificate[];
+}
+
 
 export type AuthState = {
   isAuthenticated: boolean;
@@ -72,7 +71,14 @@ export type AuthState = {
   fetchUser: () => Promise<void>;
 };
 
-export type LoginForm = {
-  emailOrUsername: string;
-  password: string;
-};
+/**
+ * API Response Structure
+ */
+export interface AuthenticatedUserResponse {
+  user: UserDetails;  // This is correct as the API returns user details here
+  company: Company | null;
+  enrolledCourses: EnrolledCourse[];
+  documents: Document[];
+  certificates: Certificate[];
+}
+

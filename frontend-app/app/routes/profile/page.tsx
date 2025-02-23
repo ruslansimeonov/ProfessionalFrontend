@@ -12,12 +12,14 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Chip,
 } from "@mui/material";
 import { useStore } from "@/app/store/useStore";
 
 export default function ProfilePage() {
-  const { user } = useStore();
+  const fetchUser = useStore((state) => state.fetchUser);
+  const user = useStore((state) => state.user);
+
+  fetchUser();
 
   if (!user) {
     return (
@@ -39,15 +41,16 @@ export default function ProfilePage() {
           {/* User Avatar */}
           <Box display="flex" justifyContent="center" mb={2}>
             <Avatar sx={{ width: 80, height: 80, bgcolor: "primary.main" }}>
-              {user.firstName.charAt(0)}
+              {user.details.firstName}
             </Avatar>
           </Box>
           {/* User Name */}
           <Typography variant="h5" align="center">
-            {user.firstName} {user.middleName} {user.lastName}
+            {user.details.firstName} {user.details.middleName}{" "}
+            {user.details.lastName}
           </Typography>
           <Typography variant="body1" align="center" color="textSecondary">
-            {user.email}
+            {user.details.email}
           </Typography>
 
           {/* Company Information */}
@@ -57,12 +60,12 @@ export default function ProfilePage() {
             </Typography>
           )}
 
-          {/* Roles */}
+          {/* Roles
           <Box textAlign="center" mt={2}>
             {user.roles?.map((role, index) => (
               <Chip key={index} label={role} sx={{ m: 0.5 }} />
             ))}
-          </Box>
+          </Box> */}
 
           <Divider sx={{ my: 3 }} />
 
