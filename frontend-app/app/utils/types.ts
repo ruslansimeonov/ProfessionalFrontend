@@ -12,7 +12,6 @@ export interface UserDetails {
   updatedAt: Date;
 }
 
-
 export interface Company {
   id: number;
   companyName: string;
@@ -57,28 +56,28 @@ export interface User {
   certificates: Certificate[];
 }
 
-
 export type AuthState = {
   isAuthenticated: boolean;
   token: string | null;
   user: User | null;
-  login: (data: {
-    emailOrUsername: string;
-    password: string;
-  }) => Promise<boolean>;
+  login: (data: LoginForm) => Promise<boolean>;
   logout: () => void;
   checkTokenValidity: () => void;
   fetchUser: () => Promise<void>;
+};
+
+export type LoginForm = {
+  emailOrUsername: string;
+  password: string;
 };
 
 /**
  * API Response Structure
  */
 export interface AuthenticatedUserResponse {
-  user: UserDetails;  // This is correct as the API returns user details here
+  user: UserDetails; // This is correct as the API returns user details here
   company: Company | null;
   enrolledCourses: EnrolledCourse[];
   documents: Document[];
   certificates: Certificate[];
 }
-

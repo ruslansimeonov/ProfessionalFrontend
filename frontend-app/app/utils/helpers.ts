@@ -13,10 +13,7 @@ export function getAuthToken(): string | null {
 
 export const handleUserAuth = async (
   data: LoginForm,
-  login: (data: {
-    emailOrUsername: string;
-    password: string;
-  }) => Promise<boolean>, // Correct type
+  login: (data: LoginForm) => Promise<boolean>,
   router: AppRouterInstance,
   setErrorMessage: (message: string | null) => void
 ) => {

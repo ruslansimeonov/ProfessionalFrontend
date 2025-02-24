@@ -22,6 +22,8 @@ export default function ProfilePage() {
   const fetchUser = useStore((state) => state.fetchUser);
   const user = useStore((state) => state.user);
 
+  console.log(user);
+
   // 1) We fetch the user data on component mount (or each render).
   //    If your store already handles a single fetch, you can remove or condition it.
   React.useEffect(() => {
