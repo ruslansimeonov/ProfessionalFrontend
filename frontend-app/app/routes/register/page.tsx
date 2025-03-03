@@ -93,31 +93,47 @@ export default function RegisterPage() {
     const lastName =
       nameParts.length > 1 ? nameParts[nameParts.length - 1] : ""; // Last word
 
-    // We send only the fields your existing `registerUser()` expects.
-    // If your backend needs separate first/last names, adapt accordingly.
-    const result = await registerUser({
-      firstName,
-      middleName,
-      lastName,
-      phoneNumber: data.phoneNumber,
-      courseId: data.courseId,
-      cityId: data.cityId,
-      username: data.email, // using email as username
-      email: data.email,
-      password: data.password,
-    });
+    try {
+      // Match the structure expected by the updated backend
+      const registerData = {
+        firstName,
+        middleName,
+        lastName,
+        phoneNumber: data.phoneNumber,
+        courseId: data.courseId,
+        cityId: data.cityId,
+        username: data.email, // using email as username
+        email: data.email,
+        password: data.password,
+      };
 
-    if (result.success) {
-      setSuccessMessage("Успешна регистрация! Пренасочваме към вход...");
-      await handleUserAuth(
-        { emailOrUsername: data.email, password: data.password },
-        login,
-        router,
-        setErrorMessage
+      const result = await registerUser(registerData);
+
+      if (result.success) {
+        setSuccessMessage("Успешна регистрация! Влизане в профила...");
+
+        // Use the updated login method with the correct payload
+        const loginResult = await login({
+          emailOrUsername: data.email,
+          password: data.password,
+        });
+
+        if (loginResult) {
+          router.push("/routes/profile");
+        } else {
+          setErrorMessage(
+            "Успешна регистрация, но неуспешно влизане. Моля, опитайте да влезете ръчно."
+          );
+          setTimeout(() => router.push("/routes/login"), 3000);
+        }
+      } else {
+        setErrorMessage(result.error || "Възникна грешка при регистрацията.");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Възникна неочаквана грешка."
       );
-      setTimeout(() => router.push("/routes/profile"), 2000);
-    } else {
-      setErrorMessage(result.error);
     }
   };
 

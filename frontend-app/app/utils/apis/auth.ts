@@ -3,23 +3,20 @@ import { AuthenticatedUserResponse } from "../types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 // ✅ Register a User
-export async function registerUser(data: {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  phoneNumber: string;
-  courseId: number;
-  cityId: number;
-  username: string;
-  email: string;
-  password: string;
-}): Promise<ApiResponse<{ message: string }>> {
+// In your app/utils/apis/api.ts or similar file
+export async function registerUser(
+  data: RegisterForm
+): Promise<ApiResponse<{ message: string; user: any }>> {
   try {
-    const response = await api.post<{ message: string }>(
+    const response = await api.post<{ message: string; user: any }>(
       "/api/auth/register",
       data
     );
-    return { success: true, data: response.data, error: "" };
+
+    return {
+      success: true,
+      data: response.data,
+    };
   } catch (error) {
     return handleApiError(error);
   }
@@ -48,7 +45,9 @@ export async function loginUser(data: {
 }
 
 // ✅ Get the authenticated user
-export async function getAuthenticatedUser(): Promise<ApiResponse<AuthenticatedUserResponse>> {
+export async function getAuthenticatedUser(): Promise<
+  ApiResponse<AuthenticatedUserResponse>
+> {
   try {
     const token = getAuthToken();
     if (!token) {

@@ -11,27 +11,30 @@ export function getAuthToken(): string | null {
   return token ? token : null;
 }
 
-export const handleUserAuth = async (
-  data: LoginForm,
-  login: (data: {
+// Updated helper function in app/utils/helpers.ts
+export async function handleUserAuth(
+  credentials: { emailOrUsername: string; password: string },
+  loginFunction: (credentials: {
     emailOrUsername: string;
     password: string;
-  }) => Promise<boolean>, // Correct type
-  router: AppRouterInstance,
-  setErrorMessage: (message: string | null) => void
-) => {
-  setErrorMessage(null);
+  }) => Promise<boolean>,
+  router: any,
+  setError: (error: string | null) => void
+): Promise<boolean> {
+  try {
+    const success = await loginFunction(credentials);
 
-  console.log("🔑 Auth form data:", data);
-  const result = await loginUser(data);
-  console.log("🔑 Auth result:", result);
-
-  if (result.success && result.data?.token) {
-    const isLoggedIn = await login(data);
-    if (isLoggedIn) {
-      setTimeout(() => router.push("/routes/profile"), 2000);
+    if (success) {
+      return true;
+    } else {
+      setError("Неуспешно влизане. Моля, проверете вашите данни.");
+      return false;
     }
-  } else {
-    setErrorMessage(result.error || "Invalid credentials");
+  } catch (error) {
+    console.error("Authentication error:", error);
+    setError(
+      error instanceof Error ? error.message : "Възникна грешка при влизане."
+    );
+    return false;
   }
-};
+}
