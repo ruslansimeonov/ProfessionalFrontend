@@ -1,5 +1,3 @@
-import { LoginForm } from "./types";
-import { loginUser } from "./apis/api";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export function getAuthToken(): string | null {
@@ -18,13 +16,14 @@ export async function handleUserAuth(
     emailOrUsername: string;
     password: string;
   }) => Promise<boolean>,
-  router: any,
+  router: AppRouterInstance,
   setError: (error: string | null) => void
 ): Promise<boolean> {
   try {
     const success = await loginFunction(credentials);
 
     if (success) {
+      router.push("/routes/profile");
       return true;
     } else {
       setError("Неуспешно влизане. Моля, проверете вашите данни.");

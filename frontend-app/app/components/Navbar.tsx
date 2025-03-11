@@ -14,10 +14,12 @@ import {
   Button,
 } from "@mui/material";
 import { Menu as MenuIcon, AccountCircle } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { isAuthenticated, toggleSidebar, logout } = useStore();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const router = useRouter();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget as HTMLElement);
@@ -25,6 +27,12 @@ export default function Navbar() {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    router.push("/"); // Redirect to homepage
+    logout();
+    handleMenuClose(); // Close the menu if open
   };
 
   return (
@@ -54,7 +62,11 @@ export default function Navbar() {
               <Button color="inherit" component={Link} href="/routes/profile">
                 👤 Profile
               </Button>
-              <Button color="inherit" onClick={logout} sx={{ color: "red" }}>
+              <Button
+                color="inherit"
+                onClick={handleLogout}
+                sx={{ color: "red" }}
+              >
                 🚪 Logout
               </Button>
             </>
