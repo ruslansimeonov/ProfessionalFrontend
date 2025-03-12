@@ -90,7 +90,7 @@ const fetchRegisteredUsers = async (
     if (search) {
       const searchLower = search.toLowerCase();
       filteredUsers = data.filter(
-        (user: any) =>
+        (user: User) =>
           user.firstName?.toLowerCase().includes(searchLower) ||
           user.middleName?.toLowerCase().includes(searchLower) ||
           user.lastName?.toLowerCase().includes(searchLower) ||
@@ -119,7 +119,7 @@ const fetchRegisteredUsers = async (
     );
 
     // Transform the data to match our User interface if needed
-    const transformedUsers: User[] = paginatedUsers.map((user: any) => ({
+    const transformedUsers: User[] = paginatedUsers.map((user: User) => ({
       id: user.id,
       firstName: user.firstName || "",
       middleName: user.middleName || "",
@@ -182,10 +182,10 @@ export default function OfficePortalPage() {
         await fetchRegisteredUsers(pageNum, rowsNum, search);
       setUsers(fetchedUsers);
       setTotal(totalCount);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(
         `Грешка при зареждането на потребителите: ${
-          err.message || "Моля, опитайте отново."
+          err instanceof Error ? err.message : "Моля, опитайте отново."
         }`
       );
       console.error("Failed to fetch users:", err);
@@ -260,7 +260,8 @@ export default function OfficePortalPage() {
         hour: "2-digit",
         minute: "2-digit",
       }).format(date);
-    } catch (e) {
+    } catch (error: unknown) {
+      console.error("Error formatting date:", error);
       return "Невалидна дата";
     }
   };
