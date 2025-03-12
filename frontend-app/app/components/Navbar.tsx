@@ -59,7 +59,7 @@ export default function Navbar() {
           </Button>
           {isAuthenticated ? (
             <>
-              <Button color="inherit" component={Link} href="/routes/profile">
+              <Button color="inherit" component={Link} href="/profile">
                 👤 Profile
               </Button>
               <Button
@@ -72,10 +72,10 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Button color="inherit" component={Link} href="/routes/login">
+              <Button color="inherit" component={Link} href="/login">
                 🔑 Login
               </Button>
-              <Button color="inherit" component={Link} href="/routes/register">
+              <Button color="inherit" component={Link} href="/register">
                 📝 Register
               </Button>
             </>
@@ -97,7 +97,7 @@ export default function Navbar() {
               <MenuItem
                 onClick={handleMenuClose}
                 component={Link}
-                href="/routes/profile"
+                href="/profile"
               >
                 Profile
               </MenuItem>

@@ -23,7 +23,7 @@ export async function handleUserAuth(
     const success = await loginFunction(credentials);
 
     if (success) {
-      router.push("/routes/profile");
+      router.push("/profile");
       return true;
     } else {
       setError("Неуспешно влизане. Моля, проверете вашите данни.");

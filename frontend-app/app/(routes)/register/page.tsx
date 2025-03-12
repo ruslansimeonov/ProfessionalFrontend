@@ -119,12 +119,12 @@ export default function RegisterPage() {
         });
 
         if (loginResult) {
-          router.push("/routes/profile");
+          router.push("/profile");
         } else {
           setErrorMessage(
             "Успешна регистрация, но неуспешно влизане. Моля, опитайте да влезете ръчно."
           );
-          setTimeout(() => router.push("/routes/login"), 3000);
+          setTimeout(() => router.push("/login"), 3000);
         }
       } else {
         setErrorMessage(result.error || "Възникна грешка при регистрацията.");
