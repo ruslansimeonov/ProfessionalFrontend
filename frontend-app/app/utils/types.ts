@@ -10,8 +10,9 @@ export interface UserDetails {
   companyId?: number | null;
   createdAt: Date;
   updatedAt: Date;
+  EGN: string | null;
+  IBAN: string | null;
 }
-
 
 export interface Company {
   id: number;
@@ -57,7 +58,6 @@ export interface User {
   certificates: Certificate[];
 }
 
-
 export type AuthState = {
   isAuthenticated: boolean;
   token: string | null;
@@ -70,15 +70,4 @@ export type AuthState = {
   checkTokenValidity: () => void;
   fetchUser: () => Promise<void>;
 };
-
-/**
- * API Response Structure
- */
-export interface AuthenticatedUserResponse {
-  user: UserDetails;  // This is correct as the API returns user details here
-  company: Company | null;
-  enrolledCourses: EnrolledCourse[];
-  documents: Document[];
-  certificates: Certificate[];
-}
 

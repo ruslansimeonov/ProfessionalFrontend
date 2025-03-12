@@ -1,106 +1,36 @@
 "use client";
 
-import React, { useState, ChangeEvent } from "react";
+import React from "react";
 import {
   Container,
   Typography,
-  Card,
-  CardContent,
-  Avatar,
   CircularProgress,
   Box,
   List,
   ListItem,
   ListItemText,
-  Divider,
   Button,
+  ListItemIcon,
+  Paper,
 } from "@mui/material";
+import {
+  Description as DocumentIcon,
+  Verified as VerifiedIcon,
+} from "@mui/icons-material";
 import { useStore } from "@/app/store/useStore";
-import { uploadUserDocuments } from "@/app/utils/apis/api";
+import DocumentUploader from "@/app/components/DocumentUploader";
+import UserProfileCard from "@/app/components/UserProfileCard";
+import EnrolledCoursesCard from "@/app/components/EnrolledCourses";
+import ProfileUpdateForm from "@/app/components/ProfileUpdateForm";
 
 export default function ProfilePage() {
   const fetchUser = useStore((state) => state.fetchUser);
   const user = useStore((state) => state.user);
 
-  // 1) We fetch the user data on component mount (or each render).
-  //    If your store already handles a single fetch, you can remove or condition it.
+  // Fetch user data on component mount
   React.useEffect(() => {
     fetchUser();
   }, [fetchUser]);
-
-  // 2) Define the document types (could also come from an API if dynamic)
-  const docTypes = [
-    { name: "DiplomaCopy", label: "Copy of diploma (min 10th grade)" },
-    { name: "DriverLicense", label: "Driver's license copy" },
-    { name: "MedicalCertificateGeneral", label: "Medical certificate (GP)" },
-    { name: "PsychiatricCertificate", label: "Psychiatric certificate" },
-    { name: "PassportPhotos", label: "Two passport-sized photos" },
-    { name: "ExistingLicenseCopy", label: "Existing valid license" },
-    {
-      name: "MedicalCertificateRefresher",
-      label: "Medical certificate (refresher)",
-    },
-  ];
-
-  // 3) Track selected files for each document type
-  const [fileInputs, setFileInputs] = useState<{
-    [docType: string]: File | null;
-  }>({});
-
-  // 4) Handle file selection for each docType
-  const handleFileChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    docType: string
-  ) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      setFileInputs((prev) => ({ ...prev, [docType]: selectedFile }));
-    }
-  };
-
-  // 5) Upload selected documents
-  const handleUpload = async () => {
-    if (!user) {
-      alert("No user found. Please log in.");
-      return;
-    }
-
-    // Gather the files + docTypeNames arrays in the order they appear
-    const files: File[] = [];
-    const docTypeNames: string[] = [];
-
-    for (const { name: docTypeName } of docTypes) {
-      const file = fileInputs[docTypeName];
-      if (file) {
-        files.push(file);
-        docTypeNames.push(docTypeName);
-      }
-    }
-
-    if (files.length === 0) {
-      alert("Please select at least one file before uploading!");
-      return;
-    }
-
-    try {
-      // user.details.id is your user ID from the store
-      const response = await uploadUserDocuments({
-        userId: String(user.details.id),
-        files,
-        docTypeNames,
-      });
-      if (response.success) {
-        alert("Documents uploaded successfully!");
-        // Re-fetch user data to see newly uploaded documents
-        fetchUser();
-      } else {
-        alert(`Upload failed: ${response.error}`);
-      }
-    } catch (error) {
-      console.error("Error uploading documents:", error);
-      alert("An error occurred while uploading documents.");
-    }
-  };
 
   // Show loading if user is not yet loaded
   if (!user) {
@@ -116,149 +46,143 @@ export default function ProfilePage() {
     );
   }
 
+  // Handle successful document upload or profile update
+  const handleDataUpdate = () => {
+    // Re-fetch user data to update the UI
+    fetchUser();
+  };
+
   return (
     <Container maxWidth="md">
-      <Card sx={{ mt: 4, p: 3, boxShadow: 3 }}>
-        <CardContent>
-          {/* User Avatar */}
-          <Box display="flex" justifyContent="center" mb={2}>
-            <Avatar sx={{ width: 80, height: 80, bgcolor: "primary.main" }}>
-              {user.details.firstName}
-            </Avatar>
-          </Box>
-          {/* User Name */}
-          <Typography variant="h5" align="center">
-            {user.details.firstName} {user.details.middleName}{" "}
-            {user.details.lastName}
-          </Typography>
-          <Typography variant="body1" align="center" color="textSecondary">
-            {user.details.email}
-          </Typography>
+      {/* User Profile Card */}
+      <UserProfileCard user={user} />
 
-          {/* Company Information */}
-          {user.company && (
-            <Typography variant="body2" align="center" color="textSecondary">
-              Company: {user.company.companyName}
-            </Typography>
-          )}
+      {/* Profile Update Form */}
+      <ProfileUpdateForm user={user.details} onUpdateSuccess={handleDataUpdate} />
 
-          <Divider sx={{ my: 3 }} />
+      {/* Enrolled Courses Card */}
+      <EnrolledCoursesCard courses={user.enrolledCourses} />
 
-          {/* Enrolled Courses */}
-          <Typography variant="h6" gutterBottom>
-            Enrolled Courses
-          </Typography>
+      {/* Documents Section */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          <DocumentIcon sx={{ mr: 1 }} />
+          Your Documents
+        </Typography>
+
+        {user.documents?.length > 0 ? (
           <List>
-            {user.enrolledCourses?.map((course) => (
-              <ListItem key={course.courseId}>
-                <ListItemText
-                  primary={course.courseName}
-                  secondary={`Enrolled on: ${new Date(
-                    course.enrolledAt
-                  ).toLocaleDateString()}`}
-                />
-              </ListItem>
-            ))}
-          </List>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Uploaded Documents */}
-          <Typography variant="h6" gutterBottom>
-            Uploaded Documents
-          </Typography>
-          <List>
-            {user.documents?.map((doc) => (
-              <ListItem key={doc.id}>
+            {user.documents.map((doc) => (
+              <ListItem
+                key={doc.id}
+                sx={{
+                  borderLeft: "4px solid",
+                  borderColor: "primary.main",
+                  pl: 2,
+                  mb: 1,
+                  backgroundColor: "background.default",
+                  borderRadius: "0 4px 4px 0",
+                }}
+              >
+                <ListItemIcon>
+                  <DocumentIcon color="primary" />
+                </ListItemIcon>
                 <ListItemText
                   primary={doc.documentType}
-                  secondary={`Uploaded on: ${new Date(
+                  secondary={`Uploaded: ${new Date(
                     doc.uploadedAt
                   ).toLocaleDateString()}`}
                 />
-                <a
+                <Button
                   href={doc.documentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  variant="outlined"
+                  size="small"
                 >
                   View
-                </a>
+                </Button>
               </ListItem>
             ))}
           </List>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Certificates */}
-          <Typography variant="h6" gutterBottom>
-            Certificates
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            No documents uploaded yet.
           </Typography>
+        )}
+      </Paper>
+
+      {/* Certificates Section */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          <VerifiedIcon sx={{ mr: 1 }} />
+          Your Certificates
+        </Typography>
+
+        {user.certificates?.length > 0 ? (
           <List>
-            {user.certificates?.map((cert) => (
-              <ListItem key={cert.id}>
+            {user.certificates.map((cert) => (
+              <ListItem
+                key={cert.id}
+                sx={{
+                  borderLeft: "4px solid",
+                  borderColor: "success.main",
+                  pl: 2,
+                  mb: 1,
+                  backgroundColor: "background.default",
+                  borderRadius: "0 4px 4px 0",
+                }}
+              >
+                <ListItemIcon>
+                  <VerifiedIcon color="success" />
+                </ListItemIcon>
                 <ListItemText
-                  primary="Certificate"
-                  secondary={`Issued: ${new Date(
-                    cert.issuedAt
-                  ).toLocaleDateString()} | Expiry: ${new Date(
-                    cert.expirationDate
-                  ).toLocaleDateString()}`}
+                  primary={`Certificate ${cert.id}`}
+                  secondary={
+                    <>
+                      <Typography variant="body2" component="span">
+                        Issued: {new Date(cert.issuedAt).toLocaleDateString()}
+                      </Typography>
+                      <br />
+                      <Typography variant="body2" component="span">
+                        Expires:{" "}
+                        {new Date(cert.expirationDate).toLocaleDateString()}
+                      </Typography>
+                    </>
+                  }
                 />
-                <a
+                <Button
                   href={cert.certificateUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  variant="outlined"
+                  size="small"
                 >
                   View
-                </a>
+                </Button>
               </ListItem>
             ))}
           </List>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* -- NEW SECTION: UPLOAD DOCUMENTS BY TYPE -- */}
-          <Typography variant="h6" gutterBottom>
-            Upload Documents
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            No certificates available yet.
           </Typography>
-          <Typography variant="body2" gutterBottom color="textSecondary">
-            Select the files for the document types you want to upload:
-          </Typography>
+        )}
+      </Paper>
 
-          {docTypes.map(({ name, label }) => (
-            <Box
-              key={name}
-              display="flex"
-              alignItems="center"
-              mt={1}
-              mb={1}
-              gap={2}
-            >
-              <Typography sx={{ minWidth: 200 }}>{label}</Typography>
-              <Button variant="contained" component="label">
-                Select File
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) => handleFileChange(e, name)}
-                />
-              </Button>
-              {/* Optionally show the selected file name */}
-              {fileInputs[name] && (
-                <Typography variant="body2" color="textSecondary">
-                  {fileInputs[name]?.name}
-                </Typography>
-              )}
-            </Box>
-          ))}
-
-          <Box textAlign="center" mt={2}>
-            <Button variant="contained" color="primary" onClick={handleUpload}>
-              Upload Selected Files
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
+      {/* Document Uploader */}
+      <DocumentUploader
+        userId={user.details.id}
+        onUploadSuccess={handleDataUpdate}
+      />
     </Container>
   );
 }
