@@ -6,22 +6,20 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Paper,
   List,
   ListItem,
   ListItemText,
   Button,
   ListItemIcon,
-  Paper,
 } from "@mui/material";
-import {
-  Description as DocumentIcon,
-  Verified as VerifiedIcon,
-} from "@mui/icons-material";
+import { Verified as VerifiedIcon } from "@mui/icons-material";
 import { useStore } from "@/app/store/useStore";
 import DocumentUploader from "@/app/components/DocumentUploader";
 import UserProfileCard from "@/app/components/UserProfileCard";
 import EnrolledCoursesCard from "@/app/components/EnrolledCourses";
 import ProfileUpdateForm from "@/app/components/ProfileUpdateForm";
+import DocumentsSection from "@/app/components/DocumentsSection";
 
 export default function ProfilePage() {
   const fetchUser = useStore((state) => state.fetchUser);
@@ -58,63 +56,16 @@ export default function ProfilePage() {
       <UserProfileCard user={user} />
 
       {/* Profile Update Form */}
-      <ProfileUpdateForm user={user.details} onUpdateSuccess={handleDataUpdate} />
+      <ProfileUpdateForm
+        user={user.details}
+        onUpdateSuccess={handleDataUpdate}
+      />
 
       {/* Enrolled Courses Card */}
       <EnrolledCoursesCard courses={user.enrolledCourses} />
 
-      {/* Documents Section */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{ display: "flex", alignItems: "center" }}
-        >
-          <DocumentIcon sx={{ mr: 1 }} />
-          Your Documents
-        </Typography>
-
-        {user.documents?.length > 0 ? (
-          <List>
-            {user.documents.map((doc) => (
-              <ListItem
-                key={doc.id}
-                sx={{
-                  borderLeft: "4px solid",
-                  borderColor: "primary.main",
-                  pl: 2,
-                  mb: 1,
-                  backgroundColor: "background.default",
-                  borderRadius: "0 4px 4px 0",
-                }}
-              >
-                <ListItemIcon>
-                  <DocumentIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={doc.documentType}
-                  secondary={`Uploaded: ${new Date(
-                    doc.uploadedAt
-                  ).toLocaleDateString()}`}
-                />
-                <Button
-                  href={doc.documentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="outlined"
-                  size="small"
-                >
-                  View
-                </Button>
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <Typography variant="body2" color="textSecondary">
-            No documents uploaded yet.
-          </Typography>
-        )}
-      </Paper>
+      {/* Documents Section - Now using the new component */}
+      <DocumentsSection documents={user.documents} />
 
       {/* Certificates Section */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
