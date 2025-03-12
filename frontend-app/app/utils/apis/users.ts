@@ -9,8 +9,6 @@ import {
   Roles,
 } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
-import { roles } from '../../../../../ProfesionalBackend/src/db/schema';
-
 /**
  * ✅ Upload user documents
  */

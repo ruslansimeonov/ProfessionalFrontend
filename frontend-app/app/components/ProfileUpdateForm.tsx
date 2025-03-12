@@ -45,9 +45,11 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     phoneNumber: user.phoneNumber || "",
     currentResidencyAddress: user.currentResidencyAddress || "",
     birthPlaceAddress: user.birthPlaceAddress || "",
-    EGN: user.EGN || "",
-    IBAN: user.IBAN || "",
+    egn: user.egn || "",
+    iban: user.iban || "",
   });
+
+  console.log("userProfileUpdate", user);
 
   // Update expansion state if the required info status changes
   useEffect(() => {
@@ -78,8 +80,8 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
         phoneNumber: user.phoneNumber || "",
         currentResidencyAddress: user.currentResidencyAddress || "",
         birthPlaceAddress: user.birthPlaceAddress || "",
-        EGN: user.EGN || "",
-        IBAN: user.IBAN || "",
+        egn: user.egn || "",
+        iban: user.iban || "",
       });
       setError(null);
     } else {
@@ -106,7 +108,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     // Validate required fields
     if (isMissingRequiredInfo) {
       if (
-        !formData.EGN ||
+        !formData.egn ||
         !formData.birthPlaceAddress ||
         !formData.currentResidencyAddress
       ) {
@@ -160,7 +162,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     ).length;
 
     const missingRequiredCount =
-      (!user.EGN ? 1 : 0) +
+      (!user.egn ? 1 : 0) +
       (!user.birthPlaceAddress ? 1 : 0) +
       (!user.currentResidencyAddress ? 1 : 0);
 
@@ -340,7 +342,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 fullWidth
                 label="ЕГН *"
                 name="EGN"
-                value={formData.EGN}
+                value={formData.egn}
                 onChange={handleChange}
                 disabled={!isEditing}
                 margin="normal"
@@ -354,7 +356,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                   isFieldRequired("EGN") && !isEditing
                     ? {
                         "& .MuiInputBase-input": {
-                          bgcolor: !formData.EGN ? "warning.50" : "inherit",
+                          bgcolor: !formData.egn ? "warning.50" : "inherit",
                         },
                       }
                     : {}
@@ -429,7 +431,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 fullWidth
                 label="IBAN"
                 name="IBAN"
-                value={formData.IBAN}
+                value={formData.iban}
                 onChange={handleChange}
                 disabled={!isEditing}
                 margin="normal"

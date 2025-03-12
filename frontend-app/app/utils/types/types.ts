@@ -10,8 +10,8 @@ export interface UserDetails {
   companyId?: number | null;
   createdAt: Date;
   updatedAt: Date;
-  EGN: string | null;
-  IBAN: string | null;
+  egn: string | null;
+  iban: string | null;
 }
 
 export interface Company {
