@@ -6,8 +6,10 @@ import {
   User,
   Document,
   UserDetails,
+  Roles,
 } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
+import { roles } from '../../../../../ProfesionalBackend/src/db/schema';
 
 /**
  * ✅ Upload user documents
@@ -159,6 +161,7 @@ export interface AuthenticatedUserResponse {
   enrolledCourses: EnrolledCourse[];
   documents: Document[];
   certificates: Certificate[];
+  role: Roles;
 }
 
 // ✅ Get the authenticated user

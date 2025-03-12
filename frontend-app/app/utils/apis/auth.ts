@@ -47,6 +47,7 @@ export interface LoginRequest {
 // Define the LoginResponse interface
 export interface LoginResponse {
   token: string;
+  roles: string[];
 }
 
 // ✅ Login a User
@@ -58,6 +59,7 @@ export async function loginUser(
 
     if (response.data.token) {
       localStorage.setItem("token", response.data.token);
+       
     } else {
       console.error("🚨 Login successful but no token received!");
     }

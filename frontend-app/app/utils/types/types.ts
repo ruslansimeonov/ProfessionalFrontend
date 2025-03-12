@@ -63,7 +63,15 @@ export interface User {
   enrolledCourses: EnrolledCourse[];
   documents: Document[];
   certificates: Certificate[];
+  role: Roles;
 }
+
+export type Roles =
+  | "Admin"
+  | "Instructor"
+  | "Student"
+  | "OfficeWorker"
+  | "Company";
 
 export type AuthState = {
   isAuthenticated: boolean;

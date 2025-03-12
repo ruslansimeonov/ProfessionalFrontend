@@ -9,6 +9,7 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   isAuthenticated: false,
   token: null,
   user: null,
+  roles: null,
 
   login: async (data) => {
     const response = await loginUser(data);
@@ -42,6 +43,11 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
             enrolledCourses: response.data.enrolledCourses,
             documents: response.data.documents,
             certificates: response.data.certificates,
+            // Fixed: Add proper check for role array and default value
+            role:
+              Array.isArray(response.data.role) && response.data.role.length > 0
+                ? response.data.role[0]
+                : "Student", // Default role if none is provided
           },
         });
       } else {
