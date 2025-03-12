@@ -1,5 +1,5 @@
 import { getAuthToken } from "../helpers";
-import { Group } from "../types";
+import { Group } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 // ✅ Fetch all groups (requires authentication)

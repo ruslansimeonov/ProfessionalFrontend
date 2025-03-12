@@ -15,7 +15,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { registerUser } from "../../utils/apis/api"; // Import API function
-import { RegisterForm } from "@/app/utils/types";
+import { RegisterForm } from "@/app/utils/types/types";
 import { handleUserAuth } from "@/app/utils/helpers";
 import { useStore } from "@/app/store/useStore";
 

@@ -1,5 +1,5 @@
 import { getAuthToken } from "../helpers";
-import { Company } from "../types";
+import { Company } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 // ✅ Fetch all companies (requires authentication)

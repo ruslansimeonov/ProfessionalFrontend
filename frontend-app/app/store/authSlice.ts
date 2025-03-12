@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { loginUser, getAuthenticatedUser } from "../utils/apis/api";
-import { AuthState } from "../utils/types";
+import { AuthState } from "../utils/types/types";
 
 export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   set,

@@ -12,7 +12,7 @@ import {
   Alert,
 } from "@mui/material";
 import { useStore } from "@/app/store/useStore";
-import { LoginForm } from "@/app/utils/types";
+import { LoginForm } from "@/app/utils/types/types";
 import { handleUserAuth } from "@/app/utils/helpers";
 
 export default function LoginPage() {

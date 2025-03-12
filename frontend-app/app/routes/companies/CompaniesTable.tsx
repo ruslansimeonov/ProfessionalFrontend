@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCompanies } from "@/app/utils/apis/api";
-import { Company } from "@/app/utils/types";
+import { Company } from "@/app/utils/types/types";
 
 export default function CompaniesTable() {
   const [companies, setCompanies] = useState<Company[]>([]);

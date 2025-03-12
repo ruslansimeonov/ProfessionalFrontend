@@ -6,7 +6,7 @@ import {
   User,
   Document,
   UserDetails,
-} from "../types";
+} from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 /**

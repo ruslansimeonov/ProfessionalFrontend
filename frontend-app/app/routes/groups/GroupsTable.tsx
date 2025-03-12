@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getGroups } from "@/app/utils/apis/api";
-import { Group } from "@/app/utils/types";
+import { Group } from "@/app/utils/types/types";
 
 export default function GroupsTable() {
   const [groups, setGroups] = useState<Group[]>([]);

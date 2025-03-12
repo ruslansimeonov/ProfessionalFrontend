@@ -21,7 +21,7 @@ import {
   ExpandLess as ExpandLessIcon,
 } from "@mui/icons-material";
 import { ProfileUpdateData, updateUserProfile } from "@/app/utils/apis/users";
-import { UserDetails } from "../utils/types";
+import { UserDetails } from "../utils/types/types";
 
 interface ProfileUpdateFormProps {
   user: UserDetails;

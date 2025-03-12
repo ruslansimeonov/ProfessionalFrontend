@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getUsers } from "@/app/utils/apis/api";
-import { User } from "@/app/utils/types";
+import { User } from "@/app/utils/types/types";
 
 export default function UsersTable() {
   const [users, setUsers] = useState<User[]>([]);

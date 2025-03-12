@@ -25,7 +25,14 @@ export interface Company {
 export interface EnrolledCourse {
   courseId: number;
   courseName: string;
+  courseType: string;
   enrolledAt: Date;
+  courseHours: number;
+  courseDetails: string;
+  coursePrice: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: null | string;
 }
 
 export interface Document {
@@ -70,4 +77,3 @@ export type AuthState = {
   checkTokenValidity: () => void;
   fetchUser: () => Promise<void>;
 };
-

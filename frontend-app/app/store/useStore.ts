@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { createAuthSlice } from "./authSlice";
 import { UIState, createUISlice } from "./uiSlice";
-import { AuthState } from "../utils/types";
+import { AuthState } from "../utils/types/types";
 
 type StoreState = AuthState & UIState;
 
