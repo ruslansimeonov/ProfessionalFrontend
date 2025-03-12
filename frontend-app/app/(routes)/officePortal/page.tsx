@@ -95,10 +95,8 @@ const fetchRegisteredUsers = async (
           user.middleName?.toLowerCase().includes(searchLower) ||
           user.lastName?.toLowerCase().includes(searchLower) ||
           user.EGN?.toLowerCase().includes(searchLower) ||
-          user.company?.name?.toLowerCase().includes(searchLower) ||
-          user.enrolledCourses?.[0]?.name
-            ?.toLowerCase()
-            .includes(searchLower) ||
+          user.companyName?.toLowerCase().includes(searchLower) ||
+          user.enrolledCourseName?.toLowerCase().includes(searchLower) ||
           user.email?.toLowerCase().includes(searchLower)
       );
     }
@@ -125,9 +123,12 @@ const fetchRegisteredUsers = async (
       middleName: user.middleName || "",
       lastName: user.lastName || "",
       EGN: user.EGN || "",
-      enrolledCourseId: user.enrolledCourses?.[0]?.id,
-      enrolledCourseName: user.enrolledCourses?.[0]?.name,
-      companyName: user.company?.name || "",
+      enrolledCourseId:
+        typeof user.enrolledCourseId === "number"
+          ? user.enrolledCourseId
+          : undefined,
+      enrolledCourseName: user.enrolledCourseName || "",
+      companyName: user.companyName || "",
       createdAt: user.createdAt || new Date().toISOString(),
       email: user.email || "",
     }));
