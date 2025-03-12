@@ -36,12 +36,12 @@ export default function UsersTable() {
       </thead>
       <tbody>
         {users.map((user) => (
-          <tr key={user.id} className="text-center">
-            <td className="border p-2">{user.id}</td>
+          <tr key={user.details.id} className="text-center">
+            <td className="border p-2">{user.details.id}</td>
             <td className="border p-2">
-              {user.firstName} {user.lastName}
+              {user.details.firstName} {user.details.lastName}
             </td>
-            <td className="border p-2">{user.email}</td>
+            <td className="border p-2">{user.details.email}</td>
           </tr>
         ))}
       </tbody>

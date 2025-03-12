@@ -76,10 +76,10 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                     }}
                   >
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                      {enrollment.course?.courseName || enrollment.courseName}
+                      {enrollment.courseName || enrollment.courseName}
                     </Typography>
                     <Chip
-                      label={enrollment.course?.courseType || "Training"}
+                      label={enrollment.courseType || "Training"}
                       size="small"
                       color="primary"
                       sx={{ ml: 1 }}
@@ -99,7 +99,7 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                   </Box>
                 </Grid>
 
-                {enrollment.course && (
+                {enrollment && (
                   <Grid item xs={12}>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
                       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -108,7 +108,7 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                           sx={{ mr: 0.5, color: "text.secondary" }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {enrollment.course.courseHours} hours
+                          {enrollment.courseHours} hours
                         </Typography>
                       </Box>
 
@@ -118,26 +118,26 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                           sx={{ mr: 0.5, color: "text.secondary" }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {formatPrice(enrollment.course.coursePrice)}
+                          {formatPrice(enrollment.coursePrice)}
                         </Typography>
                       </Box>
                     </Box>
                   </Grid>
                 )}
 
-                {enrollment.course?.courseDetails && (
+                {enrollment.courseDetails && (
                   <Grid item xs={12}>
                     <Typography
                       variant="body2"
                       color="text.secondary"
                       sx={{ mt: 0.5 }}
                     >
-                      {enrollment.course.courseDetails.length > 80
-                        ? `${enrollment.course.courseDetails.substring(
+                      {enrollment.courseDetails.length > 80
+                        ? `${enrollment.courseDetails.substring(
                             0,
                             80
                           )}...`
-                        : enrollment.course.courseDetails}
+                        : enrollment.courseDetails}
                     </Typography>
                   </Grid>
                 )}
