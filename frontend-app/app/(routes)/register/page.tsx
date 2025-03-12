@@ -14,9 +14,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { registerUser } from "../../utils/apis/api"; // Import API function
-import { RegisterForm } from "@/app/utils/types/types";
-import { handleUserAuth } from "@/app/utils/helpers";
+import { RegisterForm, registerUser } from "../../utils/apis/api"; // Import API function
 import { useStore } from "@/app/store/useStore";
 
 // For demonstration, define a Course type
@@ -34,9 +32,6 @@ interface City {
 // Extend your form type with our new fields
 interface ExtendedRegisterForm extends RegisterForm {
   fullName: string;
-  phoneNumber: string;
-  courseId: number;
-  cityId: number; // Nearest city
 }
 
 export default function RegisterPage() {
