@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -10,6 +10,7 @@ import {
   Divider,
   Collapse,
   Grid2,
+  AlertTitle,
 } from "@mui/material";
 
 import {
@@ -19,6 +20,7 @@ import {
   PersonOutline as PersonIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 import { ProfileUpdateData, updateUserProfile } from "@/app/utils/apis/users";
 import { UserDetails } from "../utils/types/types";
@@ -26,14 +28,16 @@ import { UserDetails } from "../utils/types/types";
 interface ProfileUpdateFormProps {
   user: UserDetails;
   onUpdateSuccess: () => void;
+  isMissingRequiredInfo?: boolean;
 }
 
 const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
   user,
   onUpdateSuccess,
+  isMissingRequiredInfo = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(isMissingRequiredInfo);
   const [formData, setFormData] = useState({
     firstName: user.firstName || "",
     middleName: user.middleName || "",
@@ -44,6 +48,13 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     EGN: user.EGN || "",
     IBAN: user.IBAN || "",
   });
+
+  // Update expansion state if the required info status changes
+  useEffect(() => {
+    if (isMissingRequiredInfo) {
+      setIsExpanded(true);
+    }
+  }, [isMissingRequiredInfo]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +103,19 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     setError(null);
     setSuccess(null);
 
+    // Validate required fields
+    if (isMissingRequiredInfo) {
+      if (
+        !formData.EGN ||
+        !formData.birthPlaceAddress ||
+        !formData.currentResidencyAddress
+      ) {
+        setError("Моля, попълнете всички задължителни полета");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     try {
       // Only include fields that have changed
       const changedFields: ProfileUpdateData = {};
@@ -103,7 +127,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
       });
 
       if (Object.keys(changedFields).length === 0) {
-        setError("No changes were made");
+        setError("Не са направени промени");
         setIsSubmitting(false);
         return;
       }
@@ -111,19 +135,20 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
       const response = await updateUserProfile(changedFields);
 
       if (response.success) {
-        setSuccess("Profile updated successfully");
+        setSuccess("Профилът е обновен успешно");
         setIsEditing(false);
         onUpdateSuccess();
       } else {
-        setError(response.error || "Failed to update profile");
+        setError(response.error || "Неуспешно обновяване на профила");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError("Възникна неочаквана грешка");
       console.error(err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   const renderSummary = () => {
     const filledFields = Object.entries(user).filter(
       ([key, value]) =>
@@ -134,16 +159,33 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
         key !== "email"
     ).length;
 
+    const missingRequiredCount =
+      (!user.EGN ? 1 : 0) +
+      (!user.birthPlaceAddress ? 1 : 0) +
+      (!user.currentResidencyAddress ? 1 : 0);
+
     return (
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-          {filledFields > 0 ? (
-            <>
-              {filledFields} additional field{filledFields !== 1 && "s"}{" "}
-              completed
-            </>
+          {isMissingRequiredInfo ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                color: "warning.main",
+              }}
+            >
+              <WarningIcon fontSize="small" sx={{ mr: 1 }} />
+              <span>Липсват {missingRequiredCount} задължителни полета</span>
+            </Box>
           ) : (
-            <>No additional information provided</>
+            <>
+              {filledFields > 0 ? (
+                <>{filledFields} допълнителни полета попълнени</>
+              ) : (
+                <>Няма добавена допълнителна информация</>
+              )}
+            </>
           )}
         </Typography>
         <Button
@@ -152,17 +194,39 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
           onClick={handleExpandToggle}
           endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         >
-          {isExpanded ? "Hide Details" : "View Details"}
+          {isExpanded ? "Скрий детайли" : "Покажи детайли"}
         </Button>
       </Box>
     );
   };
 
+  const isFieldRequired = (fieldName: string) => {
+    return ["EGN", "birthPlaceAddress", "currentResidencyAddress"].includes(
+      fieldName
+    );
+  };
+
+  const isMissingField = (fieldName: string) => {
+    return (
+      isFieldRequired(fieldName) &&
+      !formData[fieldName as keyof typeof formData]
+    );
+  };
+
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+    <Paper
+      elevation={3}
+      sx={{
+        p: 3,
+        mb: 4,
+        border: isMissingRequiredInfo ? "1px solid" : "none",
+        borderColor: "warning.main",
+        position: "relative",
+      }}
+    >
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <PersonIcon sx={{ mr: 1 }} />
-        <Typography variant="h6">Personal Information</Typography>
+        <Typography variant="h6">Лична информация</Typography>
         <Box sx={{ flexGrow: 1 }} />
         <Button
           variant={isEditing ? "outlined" : "contained"}
@@ -172,7 +236,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
           disabled={isSubmitting}
           size="small"
         >
-          {isEditing ? "Cancel" : "Edit Profile"}
+          {isEditing ? "Отказ" : "Редактирай"}
         </Button>
       </Box>
 
@@ -185,6 +249,25 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
 
       <Collapse in={isExpanded || isEditing}>
         <Divider sx={{ mb: 3, mt: 1 }} />
+
+        {isMissingRequiredInfo && !isEditing && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <AlertTitle>
+              Необходимо е да попълните задължителните полета
+            </AlertTitle>
+            За да завършите своята регистрация, моля попълнете ЕГН, Местораждане
+            и Постоянно местожителство.
+            <Button
+              variant="contained"
+              color="warning"
+              size="small"
+              sx={{ mt: 1 }}
+              onClick={handleEditToggle}
+            >
+              Попълни сега
+            </Button>
+          </Alert>
+        )}
 
         {success && (
           <Alert severity="success" sx={{ mb: 3 }}>
@@ -203,7 +286,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
             <Grid2 size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
-                label="First Name"
+                label="Име"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -216,7 +299,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
             <Grid2 size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
-                label="Middle Name"
+                label="Презиме"
                 name="middleName"
                 value={formData.middleName}
                 onChange={handleChange}
@@ -228,7 +311,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
             <Grid2 size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
-                label="Last Name"
+                label="Фамилия"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -242,7 +325,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
             <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
-                label="Phone Number"
+                label="Телефон"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
@@ -251,42 +334,93 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 variant={isEditing ? "outlined" : "filled"}
               />
             </Grid2>
+
             <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
-                label="EGN"
+                label="ЕГН *"
                 name="EGN"
                 value={formData.EGN}
                 onChange={handleChange}
                 disabled={!isEditing}
                 margin="normal"
+                required
                 variant={isEditing ? "outlined" : "filled"}
+                error={isEditing && isMissingField("EGN")}
+                helperText={
+                  isEditing && isMissingField("EGN") ? "Задължително поле" : ""
+                }
+                sx={
+                  isFieldRequired("EGN") && !isEditing
+                    ? {
+                        "& .MuiInputBase-input": {
+                          bgcolor: !formData.EGN ? "warning.50" : "inherit",
+                        },
+                      }
+                    : {}
+                }
               />
             </Grid2>
 
             <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
-                label="Current Address"
+                label="Постоянно местожителство (град/село) *"
                 name="currentResidencyAddress"
                 value={formData.currentResidencyAddress}
                 onChange={handleChange}
                 disabled={!isEditing}
                 margin="normal"
+                required
+                error={isEditing && isMissingField("currentResidencyAddress")}
+                helperText={
+                  isEditing && isMissingField("currentResidencyAddress")
+                    ? "Задължително поле"
+                    : ""
+                }
                 variant={isEditing ? "outlined" : "filled"}
+                sx={
+                  isFieldRequired("currentResidencyAddress") && !isEditing
+                    ? {
+                        "& .MuiInputBase-input": {
+                          bgcolor: !formData.currentResidencyAddress
+                            ? "warning.50"
+                            : "inherit",
+                        },
+                      }
+                    : {}
+                }
               />
             </Grid2>
 
             <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
-                label="Birth Place"
+                label="Месторождение (град/село) *"
                 name="birthPlaceAddress"
                 value={formData.birthPlaceAddress}
                 onChange={handleChange}
                 disabled={!isEditing}
                 margin="normal"
+                required
+                error={isEditing && isMissingField("birthPlaceAddress")}
+                helperText={
+                  isEditing && isMissingField("birthPlaceAddress")
+                    ? "Задължително поле"
+                    : ""
+                }
                 variant={isEditing ? "outlined" : "filled"}
+                sx={
+                  isFieldRequired("birthPlaceAddress") && !isEditing
+                    ? {
+                        "& .MuiInputBase-input": {
+                          bgcolor: !formData.birthPlaceAddress
+                            ? "warning.50"
+                            : "inherit",
+                        },
+                      }
+                    : {}
+                }
               />
             </Grid2>
 
@@ -315,19 +449,19 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 }
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? "Запазване..." : "Запази промените"}
               </Button>
             </Box>
           )}
 
-          {!isEditing && isExpanded && (
+          {!isEditing && isExpanded && !isMissingRequiredInfo && (
             <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
               <Button
                 onClick={handleExpandToggle}
                 variant="text"
                 endIcon={<ExpandLessIcon />}
               >
-                Hide Details
+                Скрий детайли
               </Button>
             </Box>
           )}
