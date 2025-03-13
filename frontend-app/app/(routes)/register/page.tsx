@@ -13,20 +13,26 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { RegisterForm, registerUser } from "../../utils/apis/api"; // Import API function
 import { useStore } from "@/app/store/useStore";
+import { api } from "@/app/utils/apis/api"; // Make sure this import is correct for your project
 
-// For demonstration, define a Course type
+// Update the Course interface to match backend response
 interface Course {
   id: number;
   courseName: string;
+  courseType: string;
+  courseHours: number;
+  coursePrice: string | null;
+  // Add other fields as needed
 }
 
-// New city type (for the nearest city dropdown)
+// City interface to match backend
 interface City {
   id: number;
-  name: string;
+  cityName: string; // Update this to match the backend field name
 }
 
 // Extend your form type with our new fields
@@ -45,26 +51,39 @@ export default function RegisterPage() {
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [cities, setCities] = useState<City[]>([]);
+  const [loading, setLoading] = useState({
+    courses: true,
+    cities: true,
+  });
   const { login } = useStore(); // Zustand function
 
   const router = useRouter();
 
-  // Mock fetching courses and cities from the backend
+  // Fetch courses and cities from our backend API
   useEffect(() => {
-    // Example: fetch("/api/courses").then(...)
-    setCourses([
-      { id: 1, courseName: "Курс за мотокар" },
-      { id: 2, courseName: "Курс за багер" },
-      { id: 3, courseName: "Курс за заваряване" },
-    ]);
+    const fetchData = async () => {
+      try {
+        // Fetch courses
+        setLoading((prev) => ({ ...prev, courses: true }));
+        const coursesResponse = await api.get("/api/public/courses");
+        setCourses(coursesResponse.data);
+        setLoading((prev) => ({ ...prev, courses: false }));
 
-    // Example: fetch("/api/cities").then(...)
-    setCities([
-      { id: 1, name: "София" },
-      { id: 2, name: "Пловдив" },
-      { id: 3, name: "Варна" },
-      { id: 4, name: "Бургас" },
-    ]);
+        // Fetch cities
+        setLoading((prev) => ({ ...prev, cities: true }));
+        const citiesResponse = await api.get("/api/public/cities");
+        setCities(citiesResponse.data);
+        setLoading((prev) => ({ ...prev, cities: false }));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setErrorMessage(
+          "Failed to load courses or cities. Please try again later."
+        );
+        setLoading({ courses: false, cities: false });
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Custom validator to ensure user typed exactly three parts (First Middle Last).
@@ -181,7 +200,12 @@ export default function RegisterPage() {
           />
 
           {/* Course Select */}
-          <FormControl fullWidth margin="normal" error={!!errors.courseId}>
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!errors.courseId}
+            disabled={loading.courses}
+          >
             <InputLabel id="course-label">Изберете курс</InputLabel>
             <Select
               labelId="course-label"
@@ -189,11 +213,18 @@ export default function RegisterPage() {
               defaultValue=""
               {...register("courseId", { required: "Изберете курс" })}
             >
-              {courses.map((course) => (
-                <MenuItem key={course.id} value={course.id}>
-                  {course.courseName}
+              {loading.courses ? (
+                <MenuItem disabled>
+                  <CircularProgress size={20} sx={{ mr: 2 }} />
+                  Зареждане...
                 </MenuItem>
-              ))}
+              ) : (
+                courses.map((course) => (
+                  <MenuItem key={course.id} value={course.id}>
+                    {course.courseName} ({course.courseType})
+                  </MenuItem>
+                ))
+              )}
             </Select>
             {errors.courseId && (
               <Typography color="error" variant="caption">
@@ -203,7 +234,12 @@ export default function RegisterPage() {
           </FormControl>
 
           {/* Nearest City Select */}
-          <FormControl fullWidth margin="normal" error={!!errors.cityId}>
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!errors.cityId}
+            disabled={loading.cities}
+          >
             <InputLabel id="city-label">Най-близък град</InputLabel>
             <Select
               labelId="city-label"
@@ -211,11 +247,18 @@ export default function RegisterPage() {
               defaultValue=""
               {...register("cityId", { required: "Моля, изберете град" })}
             >
-              {cities.map((city) => (
-                <MenuItem key={city.id} value={city.id}>
-                  {city.name}
+              {loading.cities ? (
+                <MenuItem disabled>
+                  <CircularProgress size={20} sx={{ mr: 2 }} />
+                  Зареждане...
                 </MenuItem>
-              ))}
+              ) : (
+                cities.map((city) => (
+                  <MenuItem key={city.id} value={city.id}>
+                    {city.cityName} {/* Update to match backend field name */}
+                  </MenuItem>
+                ))
+              )}
             </Select>
             {errors.cityId && (
               <Typography color="error" variant="caption">
@@ -262,8 +305,21 @@ export default function RegisterPage() {
             />
           </Box>
 
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-            Записване
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+            disabled={loading.courses || loading.cities}
+          >
+            {loading.courses || loading.cities ? (
+              <>
+                <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                Зареждане...
+              </>
+            ) : (
+              "Записване"
+            )}
           </Button>
         </form>
       </Box>

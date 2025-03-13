@@ -39,8 +39,6 @@ export default function ProfilePage() {
     fetchUser();
   };
 
-  console.log("userProfile", user);
-
   // Check if required information is missing
   const isMissingPersonalInfo =
     !user.details.egn ||
@@ -54,6 +52,9 @@ export default function ProfilePage() {
     "MedicalCertificate",
     "PassportPhotos",
   ];
+
+  
+
   const uploadedDocTypes = user.documents.map(
     (doc) => doc.documentType?.toLowerCase() || ""
   );
