@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { uploadUserDocuments } from "../utils/apis/api";
+import { uploadUserDocuments } from "../utils/apis/documents";
 
 export interface DocType {
   name: string;

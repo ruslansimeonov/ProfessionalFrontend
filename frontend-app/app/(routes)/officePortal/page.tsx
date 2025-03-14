@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Paper,
@@ -170,37 +170,37 @@ export default function OfficePortalPage() {
   }, [isAuthenticated, isAdmin, router]);
 
   // Function to load users
-  const loadUsers = async (
-    pageNum: number = page,
-    rowsNum: number = rowsPerPage,
-    search: string = searchTerm
-  ) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { users: fetchedUsers, total: totalCount } =
-        await fetchRegisteredUsers(pageNum, rowsNum, search);
-      setUsers(fetchedUsers);
-      setTotal(totalCount);
-    } catch (err: unknown) {
-      setError(
-        `Грешка при зареждането на потребителите: ${
-          err instanceof Error ? err.message : "Моля, опитайте отново."
-        }`
-      );
-      console.error("Failed to fetch users:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadUsers = useCallback(async (
+      pageNum: number = page,
+      rowsNum: number = rowsPerPage,
+      search: string = searchTerm
+    ) => {
+      setLoading(true);
+      setError(null);
+  
+      try {
+        const { users: fetchedUsers, total: totalCount } =
+          await fetchRegisteredUsers(pageNum, rowsNum, search);
+        setUsers(fetchedUsers);
+        setTotal(totalCount);
+      } catch (err: unknown) {
+        setError(
+          `Грешка при зареждането на потребителите: ${
+            err instanceof Error ? err.message : "Моля, опитайте отново."
+          }`
+        );
+        console.error("Failed to fetch users:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, [page, rowsPerPage, searchTerm]);
 
   // Load users on initial render and when pagination/search changes
   useEffect(() => {
     if (isAuthenticated && isAdmin) {
       loadUsers();
     }
-  }, [page, rowsPerPage, isAuthenticated, isAdmin]);
+  }, [page, rowsPerPage, isAuthenticated, isAdmin, loadUsers]);
 
   // Handle page change
   const handleChangePage = (

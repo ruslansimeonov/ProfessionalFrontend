@@ -1,77 +1,83 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Container,
+  Box,
   Paper,
   Typography,
-  Box,
-  CircularProgress,
   Button,
+  Divider,
   Grid,
   Chip,
-  Divider,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {
-  Person as PersonIcon,
   ArrowBack as ArrowBackIcon,
-  School as SchoolIcon,
-  Business as BusinessIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
+  Work as WorkIcon,
+  CalendarToday as CalendarIcon,
 } from "@mui/icons-material";
 import { useStore } from "@/app/store/useStore";
+import { useDocumentRequirements } from "@/app/hooks/useDocumentRequirements";
+import AdminUserProfileEditor from "@/app/components/admin/AdminUserProfileEditor";
+import { formatDate } from "@/app/utils/documentUtils";
+import AdminUserActions from "@/app/components/admin/AdminUserActions";
+import {
+  Certificate,
+  Document,
+  EnrolledCourse,
+  User,
+} from "@/app/utils/types/types";
+import { getUser } from "@/app/utils/apis/users";
+import { Roles } from "../../../../utils/types/types";
 
-interface User {
-  id: string | number;
-  firstName: string;
+interface UserApiResponse {
+  id?: number;
+  firstName?: string;
   middleName?: string;
-  lastName: string;
-  EGN?: string;
-  email: string;
+  lastName?: string;
+  email?: string;
   phoneNumber?: string;
-  enrolledCourses?: Array<{
+  currentResidencyAddress?: string | null;
+  birthPlaceAddress?: string | null;
+  companyId?: number | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  egn?: string | null;
+  iban?: string | null;
+  user?: {
     id: number;
-    name: string;
-  }>;
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+    email: string;
+    phoneNumber?: string;
+    currentResidencyAddress?: string | null;
+    birthPlaceAddress?: string | null;
+    companyId?: number | null;
+    createdAt: string | Date;
+    updatedAt: string | Date;
+    egn?: string | null;
+    iban?: string | null;
+  };
   company?: {
     id: number;
-    name: string;
-  };
-  createdAt: string;
+    companyName: string;
+    bulstat?: string;
+    address?: string;
+    email?: string;
+  } | null;
+  enrolledCourses?: EnrolledCourse[];
+  documents?: Document[];
+  certificates?: Certificate[];
+  role?: Roles;
 }
 
-const fetchUserProfile = async (userId: string): Promise<User> => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("Authentication token not found");
-    }
-
-    const apiUrl = `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
-    }/api/users/${userId}`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
-  }
-};
-
+// Refactor this
 export default function UserProfilePage() {
   const params = useParams();
   const router = useRouter();
@@ -79,9 +85,70 @@ export default function UserProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updateMessage, setUpdateMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Check if user is admin
   const isAdmin = currentUser?.role === "Admin";
+
+  // Helper function to parse the user ID from params
+  const getUserId = useCallback((): number => {
+    if (!params.id || typeof params.id !== "string") {
+      return 0;
+    }
+
+    const parsedId = parseInt(params.id, 10);
+    return isNaN(parsedId) ? 0 : parsedId;
+  }, [params.id]);
+
+  // Transform API response to match User interface structure
+  const transformApiResponse = useCallback((data: UserApiResponse): User => {
+    // Convert string dates to Date objects
+    const toDate = (dateValue: string | Date | undefined): Date => {
+      if (!dateValue) return new Date();
+      return typeof dateValue === "string" ? new Date(dateValue) : dateValue;
+    };
+
+    return {
+      details: data.user
+        ? {
+            ...data.user,
+            createdAt: toDate(data.user.createdAt),
+            updatedAt: toDate(data.user.updatedAt),
+            egn: data.user.egn || null,
+            iban: data.user.iban || null,
+          }
+        : {
+            id: data.id!, // Add non-null assertion since this should exist
+            firstName: data.firstName || "",
+            middleName: data.middleName || "",
+            lastName: data.lastName || "",
+            email: data.email || "",
+            phoneNumber: data.phoneNumber || "",
+            currentResidencyAddress: data.currentResidencyAddress || null,
+            birthPlaceAddress: data.birthPlaceAddress || null,
+            companyId: data.companyId || null,
+            createdAt: toDate(data.createdAt),
+            updatedAt: toDate(data.updatedAt),
+            egn: data.egn || null,
+            iban: data.iban || null,
+          },
+      company: data.company
+        ? {
+            ...data.company,
+            taxNumber: data.company.bulstat || "",
+            address: data.company.address || "",
+            email: data.company.email || "",
+          }
+        : null,
+      role: data.role || "Student",
+      documents: data.documents || [],
+      certificates: data.certificates || [],
+      enrolledCourses: data.enrolledCourses || [],
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -97,8 +164,14 @@ export default function UserProfilePage() {
     const loadUserProfile = async () => {
       try {
         setLoading(true);
-        const userData = await fetchUserProfile(params.id as string);
-        setUser(userData);
+        const response = await getUser(getUserId());
+        if ("data" in response) {
+          // Transform API response to match User interface
+          const transformedUser = transformApiResponse(response.data);
+          setUser(transformedUser);
+        } else {
+          setError(response.error || "Failed to load user profile");
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load user profile"
@@ -109,7 +182,59 @@ export default function UserProfilePage() {
     };
 
     loadUserProfile();
-  }, [isAuthenticated, isAdmin, params.id, router]);
+  }, [
+    isAuthenticated,
+    isAdmin,
+    params.id,
+    router,
+    getUserId,
+    transformApiResponse,
+  ]);
+
+  // Handle profile update success
+  const handleProfileUpdate = async () => {
+    try {
+      setLoading(true);
+      const response = await getUser(getUserId());
+      if ("data" in response) {
+        // Transform API response to match User interface on refresh
+        const transformedUser = transformApiResponse(response.data);
+        setUser(transformedUser);
+
+        setUpdateMessage({
+          type: "success",
+          text: "Профилът беше успешно актуализиран",
+        });
+      } else {
+        setUpdateMessage({
+          type: "error",
+          text: response.error || "Грешка при зареждане на профила",
+        });
+      }
+
+      // Auto-dismiss message after 5 seconds
+      setTimeout(() => {
+        setUpdateMessage(null);
+      }, 5000);
+    } catch (err) {
+      setUpdateMessage({
+        type: "error",
+        text:
+          err instanceof Error
+            ? err.message
+            : "Грешка при актуализиране на профила",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Use the document requirements hook for this specific user
+  const {
+    loading: loadingDocRequirements,
+    missingDocumentNames,
+    hasAllRequiredDocuments,
+  } = useDocumentRequirements(user?.details?.id, user?.documents || []);
 
   const handleBack = () => {
     router.push("/officePortal");
@@ -123,7 +248,7 @@ export default function UserProfilePage() {
     );
   }
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <CircularProgress />
@@ -152,9 +277,9 @@ export default function UserProfilePage() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        {/* Header with back button */}
-        <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
+      {/* Header with back button and actions */}
+      <Paper elevation={3} sx={{ p: 3, mb: 2 }}>
+        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={handleBack}
@@ -163,121 +288,124 @@ export default function UserProfilePage() {
             Назад
           </Button>
           <Typography variant="h5" component="h1">
-            Потребителски профил
+            Управление на потребител
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+
+          {/* Admin actions like suspend user, reset password, etc. */}
+          <AdminUserActions
+            userId={user.details.id}
+            userEmail={user.details.email}
+            onActionComplete={handleProfileUpdate}
+          />
         </Box>
 
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ mb: 2 }} />
 
-        {/* User Information */}
-        <Grid container spacing={3}>
-          {/* Basic Information */}
-          <Grid item xs={12} md={6}>
-            <Box>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <PersonIcon sx={{ mr: 1 }} />
-                Основна информация
-              </Typography>
-              <Box sx={{ ml: 4 }}>
-                <Typography gutterBottom>
-                  <strong>Име:</strong>{" "}
-                  {[user.firstName, user.middleName, user.lastName]
-                    .filter(Boolean)
-                    .join(" ")}
-                </Typography>
-                {user.EGN && (
-                  <Typography gutterBottom>
-                    <strong>ЕГН:</strong> {user.EGN}
-                  </Typography>
-                )}
-                <Typography gutterBottom>
-                  <strong>Email:</strong>{" "}
-                  <Box
-                    component="span"
-                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                  >
-                    <EmailIcon fontSize="small" />
-                    {user.email}
-                  </Box>
-                </Typography>
-                {user.phoneNumber && (
-                  <Typography gutterBottom>
-                    <strong>Телефон:</strong>{" "}
-                    <Box
-                      component="span"
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
-                      <PhoneIcon fontSize="small" />
-                      {user.phoneNumber}
-                    </Box>
-                  </Typography>
-                )}
+        {/* User basic info summary */}
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <Typography variant="subtitle1" component="div">
+              <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
+                Име:
               </Box>
-            </Box>
+              {[
+                user.details.firstName,
+                user.details.middleName,
+                user.details.lastName,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            </Typography>
           </Grid>
 
-          {/* Enrollment Information */}
-          <Grid item xs={12} md={6}>
-            <Box>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <SchoolIcon sx={{ mr: 1 }} />
-                Записани курсове
-              </Typography>
-              <Box sx={{ ml: 4 }}>
-                {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    {user.enrolledCourses.map((course) => (
-                      <Chip
-                        key={course.id}
-                        label={course.name}
-                        color="primary"
-                        variant="outlined"
-                      />
-                    ))}
-                  </Box>
-                ) : (
-                  <Typography color="text.secondary">
-                    Няма записани курсове
-                  </Typography>
-                )}
+          <Grid item xs={12} md={4}>
+            <Typography
+              variant="subtitle1"
+              component="div"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <EmailIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
+              <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
+                Email:
               </Box>
-            </Box>
+              {user.details.email}
+            </Typography>
           </Grid>
 
-          {/* Company Information */}
-          <Grid item xs={12}>
-            <Box>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <BusinessIcon sx={{ mr: 1 }} />
-                Компания
-              </Typography>
-              <Box sx={{ ml: 4 }}>
-                {user.company ? (
-                  <Typography>
-                    <strong>Име на компанията:</strong> {user.company.name}
-                  </Typography>
-                ) : (
-                  <Typography color="text.secondary">
-                    Няма асоциирана компания
-                  </Typography>
-                )}
+          <Grid item xs={12} md={4}>
+            <Typography
+              variant="subtitle1"
+              component="div"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <PhoneIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
+              <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
+                Телефон:
               </Box>
+              {user.details.phoneNumber || "Не е посочен"}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Typography
+              variant="subtitle1"
+              component="div"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <WorkIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
+              <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
+                Фирма:
+              </Box>
+              {user.company ? user.company.companyName : "Не е посочена"}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Typography
+              variant="subtitle1"
+              component="div"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <CalendarIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
+              <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
+                Регистриран на:
+              </Box>
+              {formatDate(user.details.createdAt)}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
+                Статус:
+              </Box>
+              <Chip label="Активен" color="success" size="small" />
             </Box>
           </Grid>
         </Grid>
+
+        {updateMessage && (
+          <Alert
+            severity={updateMessage.type}
+            sx={{ mt: 2 }}
+            onClose={() => setUpdateMessage(null)}
+          >
+            {updateMessage.text}
+          </Alert>
+        )}
       </Paper>
+
+      {/* Main user profile editor with all sections */}
+      {user && (
+        <AdminUserProfileEditor
+          user={user}
+          missingDocumentNames={missingDocumentNames}
+          hasAllRequiredDocuments={hasAllRequiredDocuments}
+          loadingDocRequirements={loadingDocRequirements}
+          onUserUpdate={handleProfileUpdate}
+        />
+      )}
     </Container>
   );
 }

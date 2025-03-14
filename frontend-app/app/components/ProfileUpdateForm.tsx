@@ -24,17 +24,23 @@ import {
 } from "@mui/icons-material";
 import { ProfileUpdateData, updateUserProfile } from "@/app/utils/apis/users";
 import { UserDetails } from "../utils/types/types";
+import { updateUserProfileAsAdmin } from "@/app/utils/apis/admin";
 
+// Update the interface
 interface ProfileUpdateFormProps {
   user: UserDetails;
   onUpdateSuccess: () => void;
   isMissingRequiredInfo?: boolean;
+  isAdmin?: boolean;
+  userId?: number;
 }
 
 const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
   user,
   onUpdateSuccess,
   isMissingRequiredInfo = false,
+  isAdmin = false,
+  userId,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(isMissingRequiredInfo);
@@ -97,13 +103,14 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     }
   };
 
+  console.log("Form data:", formData);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     setSuccess(null);
 
-    // Validate required fields
     if (isMissingRequiredInfo) {
       if (
         !formData.egn ||
@@ -132,7 +139,14 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
         return;
       }
 
-      const response = await updateUserProfile(changedFields);
+      let response;
+
+      // Use different API method based on whether admin is editing or not
+      if (isAdmin && userId) {
+        response = await updateUserProfileAsAdmin(userId, changedFields);
+      } else {
+        response = await updateUserProfile(changedFields);
+      }
 
       if (response.success) {
         setSuccess("Профилът е обновен успешно");
@@ -339,19 +353,19 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
               <TextField
                 fullWidth
                 label="ЕГН *"
-                name="EGN"
+                name="egn" // Changed from "EGN" to "egn" to match your state property
                 value={formData.egn}
                 onChange={handleChange}
                 disabled={!isEditing}
                 margin="normal"
                 required
                 variant={isEditing ? "outlined" : "filled"}
-                error={isEditing && isMissingField("EGN")}
+                error={isEditing && isMissingField("egn")} // Changed from "EGN" to "egn"
                 helperText={
-                  isEditing && isMissingField("EGN") ? "Задължително поле" : ""
+                  isEditing && isMissingField("egn") ? "Задължително поле" : "" // Changed from "EGN" to "egn"
                 }
                 sx={
-                  isFieldRequired("EGN") && !isEditing
+                  isFieldRequired("egn") && !isEditing // Changed from "EGN" to "egn"
                     ? {
                         "& .MuiInputBase-input": {
                           bgcolor: !formData.egn ? "warning.50" : "inherit",

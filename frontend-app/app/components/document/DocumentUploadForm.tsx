@@ -19,8 +19,9 @@ import {
   Error as ErrorIcon,
   Check as CheckIcon,
   Delete as DeleteIcon,
+  AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
-import { DocType } from "../../hooks/useDocumentUpload";
+import { DocType } from "../../hooks/useDocumentTypes";
 import { isDocTypeMissing } from "../../utils/documentUtils";
 
 interface DocumentUploadFormProps {
@@ -37,6 +38,7 @@ interface DocumentUploadFormProps {
   ) => void;
   onRemoveFile: (docType: string) => void;
   onUpload: () => void;
+  isAdminMode?: boolean;
 }
 
 const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
@@ -50,16 +52,28 @@ const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
   onFileChange,
   onRemoveFile,
   onUpload,
+  isAdminMode = false,
 }) => {
   return (
     <>
+      {isAdminMode && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <AdminIcon sx={{ mr: 1 }} />
+            Админ режим: Документите ще бъдат качени от името на потребителя
+          </Box>
+        </Alert>
+      )}
+
       <Typography
         variant="body2"
         gutterBottom
         color="text.secondary"
         sx={{ mb: 2 }}
       >
-        Изберете файлове за качване за следните типове документи:
+        {isAdminMode
+          ? "Изберете файлове за качване за потребителя:"
+          : "Изберете файлове за качване за следните типове документи:"}
       </Typography>
 
       <Grid container spacing={2}>
@@ -78,45 +92,53 @@ const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
                     : isMissing
                     ? "warning.main"
                     : "divider",
-                  bgcolor: isMissing ? "warning.50" : "background.paper",
+                  bgcolor: isMissing
+                    ? "warning.50"
+                    : isAdminMode
+                    ? "background.default"
+                    : "background.paper",
                   transition: "all 0.2s",
                   "&:hover": {
-                    borderColor: "primary.main",
+                    borderColor: isAdminMode
+                      ? "secondary.main"
+                      : "primary.main",
                     boxShadow: 1,
                   },
                 }}
               >
                 <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                  <Typography
-                    variant="body2"
-                    component="div"
-                    sx={{
-                      fontWeight: isMissing ? "bold" : "medium",
-                      mb: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      color: isMissing ? "warning.dark" : "text.primary",
-                    }}
-                  >
-                    {isMissing ? (
-                      <ErrorIcon
-                        sx={{ mr: 1, fontSize: 18, color: "warning.main" }}
-                      />
-                    ) : (
-                      <AttachIcon sx={{ mr: 1, fontSize: 18 }} />
-                    )}
-                    {label}
-                    {required && (
-                      <Typography
-                        component="span"
-                        variant="caption"
-                        color={isMissing ? "warning.dark" : "text.secondary"}
-                        sx={{ ml: 1 }}
-                      >
-                        *
-                      </Typography>
-                    )}
-                  </Typography>
+                  <Tooltip title={label} placement="top">
+                    <Typography
+                      variant="body2"
+                      component="div"
+                      sx={{
+                        fontWeight: isMissing ? "bold" : "medium",
+                        mb: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        color: isMissing ? "warning.dark" : "text.primary",
+                      }}
+                    >
+                      {isMissing ? (
+                        <ErrorIcon
+                          sx={{ mr: 1, fontSize: 18, color: "warning.main" }}
+                        />
+                      ) : (
+                        <AttachIcon sx={{ mr: 1, fontSize: 18 }} />
+                      )}
+                      {label}
+                      {required && !isAdminMode && (
+                        <Typography
+                          component="span"
+                          variant="caption"
+                          color={isMissing ? "warning.dark" : "text.secondary"}
+                          sx={{ ml: 1 }}
+                        >
+                          *
+                        </Typography>
+                      )}
+                    </Typography>
+                  </Tooltip>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Button
@@ -136,6 +158,8 @@ const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
                           ? "success"
                           : isMissing
                           ? "warning"
+                          : isAdminMode
+                          ? "secondary"
                           : "primary"
                       }
                     >
@@ -198,20 +222,30 @@ const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
           label={`${selectedFilesCount} файл${
             selectedFilesCount !== 1 ? "а" : ""
           } избран${selectedFilesCount !== 1 ? "и" : ""}`}
-          color={selectedFilesCount > 0 ? "primary" : "default"}
+          color={
+            selectedFilesCount > 0
+              ? isAdminMode
+                ? "secondary"
+                : "primary"
+              : "default"
+          }
           variant={selectedFilesCount > 0 ? "filled" : "outlined"}
         />
 
         <Button
           variant="contained"
-          color="primary"
+          color={isAdminMode ? "secondary" : "primary"}
           onClick={onUpload}
           disabled={selectedFilesCount === 0 || uploading}
           startIcon={
             uploading ? <CircularProgress size={20} /> : <UploadIcon />
           }
         >
-          {uploading ? "Качване..." : "Качи избраните файлове"}
+          {uploading
+            ? "Качване..."
+            : isAdminMode
+            ? "Качи от името на потребителя"
+            : "Качи избраните файлове"}
         </Button>
       </Box>
 
