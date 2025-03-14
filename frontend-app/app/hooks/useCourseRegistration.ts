@@ -147,11 +147,30 @@ export function useCourseRegistration() {
 
   // Custom validator for full name
   const validateFullName = (value: string) => {
+    // Check if the name is empty
+    if (!value.trim()) {
+      return "Моля, въведете вашите имена.";
+    }
+
+    // Check for three name parts
     const parts = value.trim().split(/\s+/);
-    return (
-      parts.length === 3 ||
-      "Моля, въведете три имена (пример: Иван Петров Иванов)."
-    );
+    if (parts.length < 3) {
+      return "Моля, въведете три имена (пример: Иван Петров Иванов).";
+    }
+
+    // Check for Cyrillic characters
+    const cyrillicPattern = /^[\u0410-\u044F\s-]+$/; // Cyrillic Unicode range plus spaces and hyphens
+    if (!cyrillicPattern.test(value)) {
+      return "Моля, използвайте само букви от кирилицата за вашите имена.";
+    }
+
+    // Check minimum length for each name part
+    const hasShortParts = parts.some((part) => part.length < 2);
+    if (hasShortParts) {
+      return "Всяко име трябва да съдържа поне 2 символа.";
+    }
+
+    return true;
   };
 
   return {

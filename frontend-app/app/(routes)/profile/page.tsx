@@ -27,9 +27,6 @@ export default function ProfilePage() {
     hasAllRequiredDocuments,
   } = useDocumentRequirements(user?.details?.id, user?.documents);
 
-  console.log("missingDocumentNames", missingDocumentNames);
-  console.log("courseType", user.enrolledCourses[0]?.course.courseType);
-
   // Show loading if user is not yet loaded
   if (!user) {
     return (
