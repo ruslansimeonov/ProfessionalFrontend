@@ -68,9 +68,6 @@ export default function ProfilePage() {
 
   const hasMissingDocuments = missingDocTypes.length > 0;
 
-  console.log("missingDocTypes", missingDocTypes);
-  console.log("isMissingPersonalInfo", isMissingPersonalInfo);
-
   // Calculate profile completion steps
   const completedSteps =
     (isMissingPersonalInfo ? 0 : 1) + (hasMissingDocuments ? 0 : 1);

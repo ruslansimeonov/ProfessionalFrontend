@@ -22,17 +22,25 @@ export interface Company {
   email: string;
 }
 
-export interface EnrolledCourse {
-  courseId: number;
+export interface Course {
+  id: number;
   courseName: string;
   courseType: string;
-  enrolledAt: Date;
   courseHours: number;
-  courseDetails: string;
-  coursePrice: string;
+  courseDetails: string | null;
+  coursePrice: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: null | string;
+}
+
+export interface EnrolledCourse {
+  id: number;
+  userId: number;
+  courseId: number;
+  enrolledAt: string | Date;
+  closestCityId: number;
+  course: Course;
 }
 
 export interface Document {

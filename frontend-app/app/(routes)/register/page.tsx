@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import FormCard from "@/app/components/FormCardComponent";
+import FormCard from "@/app/components/common/FormCard";
 import PersonalInfoFields from "@/app/components/registration/PersonalInfoFields";
 import CourseSelectionFields from "@/app/components/registration/CourseSelectionFields";
 import AuthFields from "@/app/components/registration/AuthFields";

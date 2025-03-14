@@ -49,8 +49,6 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     iban: user.iban || "",
   });
 
-  console.log("userProfileUpdate", user);
-
   // Update expansion state if the required info status changes
   useEffect(() => {
     if (isMissingRequiredInfo) {
