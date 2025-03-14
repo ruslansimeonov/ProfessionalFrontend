@@ -9,6 +9,7 @@ import ProfileUpdateForm from "@/app/components/ProfileUpdateForm";
 import DocumentsSection from "@/app/components/DocumentsSection";
 import CertificatesSection from "@/app/components/CertificateSection";
 import ProfileCompletionStatus from "@/app/components/ProfileCompletionStatus";
+import { useDocumentRequirements } from "@/app/hooks/useDocumentRequirements";
 
 export default function ProfilePage() {
   const fetchUser = useStore((state) => state.fetchUser);
@@ -18,6 +19,16 @@ export default function ProfilePage() {
   React.useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  // Use the new hook to handle document requirements
+  const {
+    loading: loadingDocRequirements,
+    missingDocumentNames,
+    hasAllRequiredDocuments,
+  } = useDocumentRequirements(user?.details?.id, user?.documents);
+
+  console.log("missingDocumentNames", missingDocumentNames);
+  console.log("courseType", user.enrolledCourses[0]?.course.courseType);
 
   // Show loading if user is not yet loaded
   if (!user) {
@@ -45,41 +56,19 @@ export default function ProfilePage() {
     !user.details.birthPlaceAddress ||
     !user.details.currentResidencyAddress;
 
-  // Check if required documents are missing (adapt this based on your document types)
-  const requiredDocTypes = [
-    "Diploma",
-    "DriverLicense",
-    "MedicalCertificate",
-    "PassportPhotos",
-  ];
-
-  
-
-  const uploadedDocTypes = user.documents.map(
-    (doc) => doc.documentType?.toLowerCase() || ""
-  );
-
-  const missingDocTypes = requiredDocTypes.filter(
-    (reqType) =>
-      !uploadedDocTypes.some((uploadedType) =>
-        uploadedType.toLowerCase().includes(reqType.toLowerCase())
-      )
-  );
-
-  const hasMissingDocuments = missingDocTypes.length > 0;
-
   // Calculate profile completion steps
   const completedSteps =
-    (isMissingPersonalInfo ? 0 : 1) + (hasMissingDocuments ? 0 : 1);
+    (isMissingPersonalInfo ? 0 : 1) + (hasAllRequiredDocuments ? 1 : 0);
 
   return (
     <Container maxWidth="md">
       {/* Profile Completion Alert for new users */}
       <ProfileCompletionStatus
         isMissingPersonalInfo={isMissingPersonalInfo}
-        hasMissingDocuments={hasMissingDocuments}
-        missingDocTypes={missingDocTypes}
+        hasMissingDocuments={!hasAllRequiredDocuments}
+        missingDocTypes={missingDocumentNames}
         completedSteps={completedSteps}
+        isLoading={loadingDocRequirements}
       />
 
       {/* User Profile Card */}
@@ -97,8 +86,10 @@ export default function ProfilePage() {
         documents={user.documents}
         userId={user.details.id}
         onUploadSuccess={handleDataUpdate}
-        hasMissingDocuments={hasMissingDocuments}
-        missingDocTypes={missingDocTypes}
+        hasMissingDocuments={!hasAllRequiredDocuments}
+        missingDocTypes={missingDocumentNames}
+        isLoading={loadingDocRequirements}
+        courseType={user.enrolledCourses[0]?.course.courseType} // when we have multiple courses give the latest one
       />
 
       {/* Enrolled Courses Card */}
