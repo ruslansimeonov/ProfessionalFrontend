@@ -32,113 +32,8 @@ import {
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/app/store/useStore";
-
-// Types
-interface User {
-  id: string | number;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  EGN?: string;
-  enrolledCourseId?: number;
-  enrolledCourseName?: string;
-  companyName?: string;
-  createdAt: string;
-  email: string;
-}
-
-// API function to fetch users
-const fetchRegisteredUsers = async (
-  page: number,
-  rowsPerPage: number,
-  search?: string
-): Promise<{ users: User[]; total: number }> => {
-  try {
-    // Get token from localStorage
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      throw new Error("Authentication token not found");
-    }
-
-    // Base URL for your API
-    const apiUrl = `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
-    }/api/users`;
-
-    // Fetch data from the API
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-
-    // Parse the response
-    const data = await response.json();
-
-    // Apply search filter in the frontend
-    // In a real production app, you'd want to send the search term to the backend
-    // and have the backend handle the filtering for better performance
-    let filteredUsers = data;
-
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredUsers = data.filter(
-        (user: User) =>
-          user.firstName?.toLowerCase().includes(searchLower) ||
-          user.middleName?.toLowerCase().includes(searchLower) ||
-          user.lastName?.toLowerCase().includes(searchLower) ||
-          user.EGN?.toLowerCase().includes(searchLower) ||
-          user.companyName?.toLowerCase().includes(searchLower) ||
-          user.enrolledCourseName?.toLowerCase().includes(searchLower) ||
-          user.email?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Get total count before pagination
-    const total = filteredUsers.length;
-
-    // Apply pagination in the frontend
-    // Again, in production you'd want the backend to handle pagination
-    const sortedUsers = [...filteredUsers].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    const paginatedUsers = sortedUsers.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage
-    );
-
-    // Transform the data to match our User interface if needed
-    const transformedUsers: User[] = paginatedUsers.map((user: User) => ({
-      id: user.id,
-      firstName: user.firstName || "",
-      middleName: user.middleName || "",
-      lastName: user.lastName || "",
-      EGN: user.EGN || "",
-      enrolledCourseId:
-        typeof user.enrolledCourseId === "number"
-          ? user.enrolledCourseId
-          : undefined,
-      enrolledCourseName: user.enrolledCourseName || "",
-      companyName: user.companyName || "",
-      createdAt: user.createdAt || new Date().toISOString(),
-      email: user.email || "",
-    }));
-
-    return { users: transformedUsers, total };
-  } catch (error) {
-    console.error("Error fetching registered users:", error);
-    throw error;
-  }
-};
+import { User } from "@/app/utils/types/types";
+import { fetchRegisteredUsers } from "@/app/utils/apis/users";
 
 export default function OfficePortalPage() {
   const router = useRouter();
@@ -170,14 +65,15 @@ export default function OfficePortalPage() {
   }, [isAuthenticated, isAdmin, router]);
 
   // Function to load users
-    const loadUsers = useCallback(async (
+  const loadUsers = useCallback(
+    async (
       pageNum: number = page,
       rowsNum: number = rowsPerPage,
       search: string = searchTerm
     ) => {
       setLoading(true);
       setError(null);
-  
+
       try {
         const { users: fetchedUsers, total: totalCount } =
           await fetchRegisteredUsers(pageNum, rowsNum, search);
@@ -193,14 +89,29 @@ export default function OfficePortalPage() {
       } finally {
         setLoading(false);
       }
-    }, [page, rowsPerPage, searchTerm]);
+    },
+    [page, rowsPerPage, searchTerm]
+  );
 
-  // Load users on initial render and when pagination/search changes
+  // Fix 2: Split effects - one for authentication check, one for data loading
+  // Authentication effect
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login?redirect=/officePortal");
+      return;
+    }
+
+    if (!isAdmin) {
+      router.push("/");
+    }
+  }, [isAuthenticated, isAdmin, router]);
+
+  // Fix 3: Separate data loading effect with proper dependencies
   useEffect(() => {
     if (isAuthenticated && isAdmin) {
-      loadUsers();
+      loadUsers(page, rowsPerPage, searchTerm);
     }
-  }, [page, rowsPerPage, isAuthenticated, isAdmin, loadUsers]);
+  }, [isAuthenticated, isAdmin, page, rowsPerPage, searchTerm, loadUsers]);
 
   // Handle page change
   const handleChangePage = (
@@ -245,15 +156,20 @@ export default function OfficePortalPage() {
 
   // Get the full name of a user
   const getFullName = (user: User): string => {
-    return [user.firstName, user.middleName, user.lastName]
+    return [
+      user.details.firstName,
+      user.details.middleName,
+      user.details.lastName,
+    ]
       .filter(Boolean)
       .join(" ");
   };
 
   // Format date for display
-  const formatDate = (dateString: string): string => {
+  const formatDate = (dateInput: string | Date): string => {
     try {
-      const date = new Date(dateString);
+      const date =
+        typeof dateInput === "string" ? new Date(dateInput) : dateInput;
       return new Intl.DateTimeFormat("bg-BG", {
         year: "numeric",
         month: "short",
@@ -394,7 +310,7 @@ export default function OfficePortalPage() {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow
-                      key={user.id}
+                      key={user.details.id}
                       hover
                       sx={{
                         "&:hover": {
@@ -406,7 +322,7 @@ export default function OfficePortalPage() {
                       <TableCell
                         component="th"
                         scope="row"
-                        onClick={() => handleViewUser(user.id)}
+                        onClick={() => handleViewUser(user.details.id)}
                       >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <PersonIcon
@@ -415,7 +331,9 @@ export default function OfficePortalPage() {
                           {getFullName(user)}
                         </Box>
                       </TableCell>
-                      <TableCell onClick={() => handleViewUser(user.id)}>
+                      <TableCell
+                        onClick={() => handleViewUser(user.details.id)}
+                      >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <BadgeIcon
                             sx={{
@@ -424,27 +342,38 @@ export default function OfficePortalPage() {
                               fontSize: 20,
                             }}
                           />
-                          {user.EGN || "-"}
+                          {user.details.EGN || "-"}
                         </Box>
                       </TableCell>
-                      <TableCell onClick={() => handleViewUser(user.id)}>
+                      <TableCell
+                        onClick={() => handleViewUser(user.details.id)}
+                      >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <SchoolIcon
                             sx={{ mr: 1, color: "info.main", fontSize: 20 }}
                           />
                           <Chip
-                            label={user.enrolledCourseName || "Не е записан"}
+                            label={
+                              user.enrolledCourses?.[0]?.course?.courseName ||
+                              "Не е записан"
+                            } // fix when multiple courses
                             size="small"
                             color={
-                              user.enrolledCourseName ? "primary" : "default"
+                              user.enrolledCourses?.[0]?.course?.courseName
+                                ? "primary"
+                                : "default"
                             }
                             variant={
-                              user.enrolledCourseName ? "filled" : "outlined"
+                              user.enrolledCourses?.[0]?.course?.courseName
+                                ? "filled"
+                                : "outlined"
                             }
                           />
                         </Box>
                       </TableCell>
-                      <TableCell onClick={() => handleViewUser(user.id)}>
+                      <TableCell
+                        onClick={() => handleViewUser(user.details.id)}
+                      >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <BusinessIcon
                             sx={{
@@ -453,11 +382,13 @@ export default function OfficePortalPage() {
                               fontSize: 20,
                             }}
                           />
-                          {user.companyName || "-"}
+                          {user.company?.companyName || "-"}
                         </Box>
                       </TableCell>
-                      <TableCell onClick={() => handleViewUser(user.id)}>
-                        {formatDate(user.createdAt)}
+                      <TableCell
+                        onClick={() => handleViewUser(user.details.id)}
+                      >
+                        {formatDate(user.details.createdAt)}
                       </TableCell>
                       <TableCell align="center">
                         <Tooltip title="Преглед на потребителя">
@@ -465,7 +396,7 @@ export default function OfficePortalPage() {
                             variant="outlined"
                             size="small"
                             startIcon={<ViewIcon />}
-                            onClick={() => handleViewUser(user.id)}
+                            onClick={() => handleViewUser(user.details.id)}
                           >
                             Преглед
                           </Button>

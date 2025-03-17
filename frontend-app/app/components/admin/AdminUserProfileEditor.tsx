@@ -119,7 +119,7 @@ export default function AdminUserProfileEditor({
                 isAdmin={true}
                 userId={user.details.id}
                 isMissingRequiredInfo={
-                  !user.details.egn ||
+                  !user.details.EGN ||
                   !user.details.birthPlaceAddress ||
                   !user.details.currentResidencyAddress
                 }

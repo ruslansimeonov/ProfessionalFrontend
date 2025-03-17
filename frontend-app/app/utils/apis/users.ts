@@ -1,13 +1,5 @@
 import { getAuthToken } from "../helpers";
-import {
-  Certificate,
-  Company,
-  EnrolledCourse,
-  User,
-  Document,
-  UserDetails,
-  Roles,
-} from "../types/types";
+import { User, UserDetails } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 // ✅ Fetch a single user
@@ -84,48 +76,77 @@ export async function updateUserProfile(
   }
 }
 
-/**
- * Get user profile information
- */
-export async function getUserProfile(): Promise<ApiResponse<UserDetails>> {
-  try {
-    const response = await api.get("/api/profile");
-
-    return {
-      success: true,
-      data: response.data.user,
-      error: "",
-    };
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
-
-export interface AuthenticatedUserResponse {
-  user: UserDetails; // This is correct as the API returns user details here
-  company: Company | null;
-  enrolledCourses: EnrolledCourse[];
-  documents: Document[];
-  certificates: Certificate[];
-  role: Roles;
-}
-
 // ✅ Get the authenticated user
-export async function getAuthenticatedUser(): Promise<
-  ApiResponse<AuthenticatedUserResponse>
-> {
+export async function getAuthenticatedUser(): Promise<ApiResponse<User>> {
   try {
     const token = getAuthToken();
     if (!token) {
       return { success: false, error: "No token found" };
     }
 
-    const { data } = await api.get<AuthenticatedUserResponse>("/api/users/me", {
+    const { data } = await api.get<User>("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     return { success: true, data, error: "" };
   } catch (error) {
     return handleApiError(error);
+  }
+}
+
+// Update API function to use backend pagination and search
+export async function fetchRegisteredUsers(
+  page: number,
+  rowsPerPage: number,
+  search?: string
+): Promise<{ users: User[]; total: number }> {
+  try {
+    // Get token from localStorage
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    // Base URL for your API with query parameters
+    const apiUrl = `${
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+    }/api/users`;
+
+    // Add query parameters
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: rowsPerPage.toString(),
+    });
+
+    if (search && search.trim() !== "") {
+      queryParams.append("search", search);
+    }
+
+    // Fetch data from the API with query parameters
+    const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    // Parse the response
+    const data = await response.json();
+
+    console.log("Fetched users:", data.users);
+
+    return {
+      users: data.users,
+      total: data.pagination.total,
+    };
+  } catch (error) {
+    console.error("Error fetching registered users:", error);
+    throw error;
   }
 }

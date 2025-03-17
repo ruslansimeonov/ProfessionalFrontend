@@ -10,7 +10,7 @@ export interface UserDetails {
   companyId?: number | null;
   createdAt: Date;
   updatedAt: Date;
-  egn: string | null;
+  EGN: string | null;
   iban: string | null;
 }
 
@@ -67,11 +67,11 @@ export interface Group {
 
 export interface User {
   details: UserDetails;
-  company: Company | null;
-  enrolledCourses: EnrolledCourse[];
-  documents: Document[];
-  certificates: Certificate[];
-  role: Roles;
+  company?: Company | null;
+  enrolledCourses?: EnrolledCourse[];
+  documents?: Document[];
+  certificates?: Document[];
+  role: Roles | Roles[]; // Accept both single role and array of roles
 }
 
 export type Roles =

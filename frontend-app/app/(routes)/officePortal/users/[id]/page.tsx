@@ -26,56 +26,8 @@ import { useDocumentRequirements } from "@/app/hooks/useDocumentRequirements";
 import AdminUserProfileEditor from "@/app/components/admin/AdminUserProfileEditor";
 import { formatDate } from "@/app/utils/documentUtils";
 import AdminUserActions from "@/app/components/admin/AdminUserActions";
-import {
-  Certificate,
-  Document,
-  EnrolledCourse,
-  User,
-} from "@/app/utils/types/types";
+import { User } from "@/app/utils/types/types";
 import { getUser } from "@/app/utils/apis/users";
-import { Roles } from "../../../../utils/types/types";
-
-interface UserApiResponse {
-  id?: number;
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: string;
-  currentResidencyAddress?: string | null;
-  birthPlaceAddress?: string | null;
-  companyId?: number | null;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  egn?: string | null;
-  iban?: string | null;
-  user?: {
-    id: number;
-    firstName: string;
-    middleName?: string;
-    lastName: string;
-    email: string;
-    phoneNumber?: string;
-    currentResidencyAddress?: string | null;
-    birthPlaceAddress?: string | null;
-    companyId?: number | null;
-    createdAt: string | Date;
-    updatedAt: string | Date;
-    egn?: string | null;
-    iban?: string | null;
-  };
-  company?: {
-    id: number;
-    companyName: string;
-    bulstat?: string;
-    address?: string;
-    email?: string;
-  } | null;
-  enrolledCourses?: EnrolledCourse[];
-  documents?: Document[];
-  certificates?: Certificate[];
-  role?: Roles;
-}
 
 // Refactor this
 export default function UserProfilePage() {
@@ -103,52 +55,7 @@ export default function UserProfilePage() {
     return isNaN(parsedId) ? 0 : parsedId;
   }, [params.id]);
 
-  // Transform API response to match User interface structure
-  const transformApiResponse = useCallback((data: UserApiResponse): User => {
-    // Convert string dates to Date objects
-    const toDate = (dateValue: string | Date | undefined): Date => {
-      if (!dateValue) return new Date();
-      return typeof dateValue === "string" ? new Date(dateValue) : dateValue;
-    };
-
-    return {
-      details: data.user
-        ? {
-            ...data.user,
-            createdAt: toDate(data.user.createdAt),
-            updatedAt: toDate(data.user.updatedAt),
-            egn: data.user.egn || null,
-            iban: data.user.iban || null,
-          }
-        : {
-            id: data.id!, // Add non-null assertion since this should exist
-            firstName: data.firstName || "",
-            middleName: data.middleName || "",
-            lastName: data.lastName || "",
-            email: data.email || "",
-            phoneNumber: data.phoneNumber || "",
-            currentResidencyAddress: data.currentResidencyAddress || null,
-            birthPlaceAddress: data.birthPlaceAddress || null,
-            companyId: data.companyId || null,
-            createdAt: toDate(data.createdAt),
-            updatedAt: toDate(data.updatedAt),
-            egn: data.egn || null,
-            iban: data.iban || null,
-          },
-      company: data.company
-        ? {
-            ...data.company,
-            taxNumber: data.company.bulstat || "",
-            address: data.company.address || "",
-            email: data.company.email || "",
-          }
-        : null,
-      role: data.role || "Student",
-      documents: data.documents || [],
-      certificates: data.certificates || [],
-      enrolledCourses: data.enrolledCourses || [],
-    };
-  }, []);
+  console.log("AdminEditProfile", isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -166,9 +73,7 @@ export default function UserProfilePage() {
         setLoading(true);
         const response = await getUser(getUserId());
         if ("data" in response) {
-          // Transform API response to match User interface
-          const transformedUser = transformApiResponse(response.data);
-          setUser(transformedUser);
+          setUser(response.data);
         } else {
           setError(response.error || "Failed to load user profile");
         }
@@ -182,14 +87,7 @@ export default function UserProfilePage() {
     };
 
     loadUserProfile();
-  }, [
-    isAuthenticated,
-    isAdmin,
-    params.id,
-    router,
-    getUserId,
-    transformApiResponse,
-  ]);
+  }, [isAuthenticated, isAdmin, getUserId, router]);
 
   // Handle profile update success
   const handleProfileUpdate = async () => {
@@ -197,9 +95,7 @@ export default function UserProfilePage() {
       setLoading(true);
       const response = await getUser(getUserId());
       if ("data" in response) {
-        // Transform API response to match User interface on refresh
-        const transformedUser = transformApiResponse(response.data);
-        setUser(transformedUser);
+        setUser(response.data);
 
         setUpdateMessage({
           type: "success",

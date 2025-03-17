@@ -38,12 +38,11 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
       if (response.success) {
         set({
           user: {
-            details: response.data.user,
+            details: response.data.details,
             company: response.data.company,
             enrolledCourses: response.data.enrolledCourses,
-            documents: response.data.documents,
-            certificates: response.data.certificates,
-            // Fixed: Add proper check for role array and default value
+            documents: response.data.documents || [],
+            certificates: response.data.certificates || [],
             role:
               Array.isArray(response.data.role) && response.data.role.length > 0
                 ? response.data.role[0]
