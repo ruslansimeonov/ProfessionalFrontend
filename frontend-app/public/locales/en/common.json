@@ -1,0 +1,47 @@
+{
+  "personalInfo": {
+    "title": "Personal Information",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "missingFields": "{{count}} required fields missing",
+    "noAdditionalInfo": "No additional information added",
+    "fieldsCompleted": "{{count}} additional fields completed",
+    "requiredFieldsAlert": {
+      "title": "Required fields need to be completed",
+      "message": "To complete your registration, please fill in your ID number, birth place, and permanent residence.",
+      "action": "Complete Now"
+    },
+    "formFields": {
+      "firstName": "First Name",
+      "middleName": "Middle Name",
+      "lastName": "Last Name",
+      "phoneNumber": "Phone",
+      "egn": "ID Number",
+      "residencyAddress": "Permanent Residence (city/village)",
+      "birthPlaceAddress": "Birth Place (city/village)",
+      "iban": "IBAN",
+      "required": "Required field"
+    }
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "courses": "Courses",
+    "archives": "Archives",
+    "settings": "Settings",
+    "profile": "My Profile",
+    "adminPanel": "Admin Panel",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "officePortal": "Office Portal",
+    "home": "Home"
+  },
+  "languages": {
+    "english": "English",
+    "bulgarian": "Bulgarian"
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useStore } from "../store/useStore";
+import { useTranslation } from "react-i18next"; // Add this import
 import {
   Drawer,
   List,
@@ -37,8 +38,17 @@ const StyledDrawer = styled(Drawer)({
 });
 
 export default function Sidebar() {
+  const { t } = useTranslation(); // Add this hook
   const { isSidebarOpen, toggleSidebar } = useStore();
-  const isMobile = useMediaQuery("(max-width: 900px)"); // 📌 Fixed media query (no theme needed)
+  const isMobile = useMediaQuery("(max-width: 900px)");
+
+  // Define menu items with translation keys
+  const menuItems = [
+    { text: t("navigation.dashboard"), icon: <HomeIcon /> },
+    { text: t("navigation.courses"), icon: <SchoolIcon /> },
+    { text: t("navigation.archives"), icon: <ArchiveIcon /> },
+    { text: t("navigation.settings"), icon: <SettingsIcon /> },
+  ];
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -78,12 +88,7 @@ export default function Sidebar() {
 
         {/* Sidebar Menu */}
         <List>
-          {[
-            { text: "Dashboard", icon: <HomeIcon /> },
-            { text: "Courses", icon: <SchoolIcon /> },
-            { text: "Archives", icon: <ArchiveIcon /> },
-            { text: "Settings", icon: <SettingsIcon /> },
-          ].map((item, index) => (
+          {menuItems.map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <Tooltip
                 title={!isSidebarOpen ? item.text : ""}
@@ -92,16 +97,16 @@ export default function Sidebar() {
                 <ListItemButton
                   sx={{
                     display: "flex",
-                    justifyContent: isSidebarOpen ? "flex-start" : "center", // ✅ Aligns text properly
+                    justifyContent: isSidebarOpen ? "flex-start" : "center",
                     alignItems: "center",
-                    px: isSidebarOpen ? 2 : 0, // ✅ Adds padding only when open
+                    px: isSidebarOpen ? 2 : 0,
                     minHeight: 56,
-                    width: "100%", // ✅ Ensures full clickable area
+                    width: "100%",
                   }}
                 >
                   <ListItemIcon
                     sx={{
-                      minWidth: 40, // ✅ Ensures icon does not stretch
+                      minWidth: 40,
                       justifyContent: "center",
                       alignItems: "center",
                       display: "flex",
@@ -110,13 +115,12 @@ export default function Sidebar() {
                     {item.icon}
                   </ListItemIcon>
 
-                  {/* ✅ Properly hides text when sidebar is collapsed */}
                   <ListItemText
                     primary={item.text}
                     sx={{
-                      display: isSidebarOpen ? "block" : "none", // ✅ Fully hides when collapsed
-                      ml: isSidebarOpen ? 1 : 0, // ✅ Small margin when expanded
-                      whiteSpace: "nowrap", // ✅ Prevents text from wrapping
+                      display: isSidebarOpen ? "block" : "none",
+                      ml: isSidebarOpen ? 1 : 0,
+                      whiteSpace: "nowrap",
                     }}
                   />
                 </ListItemButton>

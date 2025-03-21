@@ -20,7 +20,6 @@ import {
   Alert,
 } from "@mui/material";
 import {
-  AttachFile as AttachIcon,
   Delete as DeleteIcon,
   OpenInNew as OpenIcon,
   AdminPanelSettings as AdminIcon,
@@ -77,9 +76,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
         }
         handleCloseDeleteDialog();
       } else {
-        setDeleteError(
-          response.message || "Грешка при изтриването на документа"
-        );
+        setDeleteError(response.error || "Грешка при изтриването на документа");
       }
     } catch (error) {
       console.error("Error deleting document:", error);
@@ -119,7 +116,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
                         <IconButton
                           edge="end"
                           size="small"
-                          onClick={() => window.open(doc.url, "_blank")}
+                          onClick={() => window.open(doc.documentUrl, "_blank")}
                         >
                           <OpenIcon fontSize="small" />
                         </IconButton>
@@ -141,7 +138,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
                   }
                 >
                   <ListItemIcon sx={{ minWidth: 40 }}>
-                    {getDocumentIcon(doc.documentType, doc.url)}
+                    {getDocumentIcon(doc.documentType, doc.documentUrl)}
                   </ListItemIcon>
                   <ListItemText
                     primary={
@@ -172,7 +169,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
                     }
                     secondary={
                       <Typography variant="caption" component="span">
-                        Качен на: {formatDate(doc.createdAt)}
+                        Качен на: {formatDate(doc.uploadedAt)}
                       </Typography>
                     }
                   />

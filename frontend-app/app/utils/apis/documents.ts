@@ -66,7 +66,7 @@ export async function uploadUserDocuments(data: {
  */
 export async function deleteUserDocument(
   userId: string,
-  documentId: string
+  documentId: number
 ): Promise<ApiResponse<{ success: boolean; message?: string }>> {
   const token = getAuthToken();
   if (!token) {

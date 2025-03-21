@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
   // Check if required information is missing - memoize this calculation
   const isMissingPersonalInfo =
-    !user.details.egn ||
+    !user.details.EGN ||
     !user.details.birthPlaceAddress ||
     !user.details.currentResidencyAddress;
 
@@ -90,20 +90,20 @@ export default function ProfilePage() {
 
       {/* Documents Section with integrated uploader - using memoized handler */}
       <DocumentsSection
-        documents={user.documents}
+        documents={user.documents || []}
         userId={user.details.id}
         onUploadSuccess={handleDataUpdate}
         hasMissingDocuments={!hasAllRequiredDocuments}
         missingDocTypes={missingDocumentNames}
         isLoading={loadingDocRequirements}
-        courseType={user.enrolledCourses[0]?.course.courseType}
+        courseType={user?.enrolledCourses?.[0]?.course.courseType}
       />
 
       {/* Enrolled Courses Card */}
-      <EnrolledCoursesCard courses={user.enrolledCourses} />
+      <EnrolledCoursesCard courses={user.enrolledCourses || []} />
 
       {/* Certificates Section */}
-      <CertificatesSection certificates={user.certificates} />
+      <CertificatesSection certificates={user.certificates || []} />
     </Container>
   );
 }

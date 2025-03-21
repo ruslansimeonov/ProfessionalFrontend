@@ -20,7 +20,7 @@ import {
   Delete as DeleteIcon,
   Upload as UploadIcon,
 } from "@mui/icons-material";
-import { uploadUserDocuments } from "@/app/utils/apis/api";
+import { uploadUserDocuments } from "@/app/utils/apis/documents";
 
 interface DocumentUploaderProps {
   userId: string | number;

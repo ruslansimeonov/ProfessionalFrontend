@@ -70,7 +70,7 @@ export interface User {
   company?: Company | null;
   enrolledCourses?: EnrolledCourse[];
   documents?: Document[];
-  certificates?: Document[];
+  certificates?: Certificate[];
   role: Roles | Roles[]; // Accept both single role and array of roles
 }
 

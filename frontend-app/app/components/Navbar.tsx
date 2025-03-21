@@ -25,9 +25,13 @@ import {
   Login as LoginIcon,
   HowToReg as RegisterIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+
 import { useRouter } from "next/navigation";
+import LanguageSwitcher from "../components/language/languageSwitcher";
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const { isAuthenticated, toggleSidebar, logout, user } = useStore();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const router = useRouter();
@@ -78,6 +82,7 @@ export default function Navbar() {
         </Link>
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
+        <LanguageSwitcher />
         {/* Navigation Links */}
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
           <Button
@@ -86,7 +91,7 @@ export default function Navbar() {
             href="/"
             startIcon={<HomeIcon />}
           >
-            Home
+            {t("navigation.home")}
           </Button>
           {isAuthenticated ? (
             <>
@@ -96,7 +101,7 @@ export default function Navbar() {
                 href="/profile"
                 startIcon={<PersonIcon />}
               >
-                Profile
+                {t("navigation.profile")}
               </Button>
               {/* Show Office Portal link for admins */}
               {isAdmin && (
@@ -113,7 +118,7 @@ export default function Navbar() {
                     },
                   }}
                 >
-                  Office Portal
+                  {t("navigation.officePortal")}
                 </Button>
               )}
               <Button
@@ -122,7 +127,7 @@ export default function Navbar() {
                 sx={{ color: "error.light" }}
                 startIcon={<LogoutIcon />}
               >
-                Logout
+                {t("navigation.logout")}
               </Button>
             </>
           ) : (
@@ -133,7 +138,7 @@ export default function Navbar() {
                 href="/login"
                 startIcon={<LoginIcon />}
               >
-                Login
+                {t("navigation.login")}
               </Button>
               <Button
                 color="inherit"
@@ -142,7 +147,7 @@ export default function Navbar() {
                 variant="outlined"
                 startIcon={<RegisterIcon />}
               >
-                Register
+                {t("navigation.register")}
               </Button>
             </>
           )}
@@ -198,7 +203,7 @@ export default function Navbar() {
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
                 <PersonIcon fontSize="small" />
-                Моят профил
+                {t("navigation.profile")}
               </MenuItem>
 
               {/* Office Portal menu item for admins */}
@@ -208,7 +213,7 @@ export default function Navbar() {
                   sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
                   <AdminIcon fontSize="small" />
-                  Офис портал
+                  {t("navigation.officePortal")}
                 </MenuItem>
               )}
 
@@ -223,7 +228,7 @@ export default function Navbar() {
                 }}
               >
                 <LogoutIcon fontSize="small" />
-                Изход
+                {t("navigation.logout")}
               </MenuItem>
             </Menu>
           </Box>

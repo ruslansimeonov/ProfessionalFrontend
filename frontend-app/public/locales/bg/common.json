@@ -1,0 +1,47 @@
+{
+  "personalInfo": {
+    "title": "Лична информация",
+    "edit": "Редактирай",
+    "cancel": "Отказ",
+    "save": "Запази промените",
+    "saving": "Запазване...",
+    "showDetails": "Покажи детайли",
+    "hideDetails": "Скрий детайли",
+    "missingFields": "Липсват {{count}} задължителни полета",
+    "noAdditionalInfo": "Няма добавена допълнителна информация",
+    "fieldsCompleted": "{{count}} допълнителни полета попълнени",
+    "requiredFieldsAlert": {
+      "title": "Необходимо е да попълните задължителните полета",
+      "message": "За да завършите своята регистрация, моля попълнете ЕГН, Местораждане и Постоянно местожителство.",
+      "action": "Попълни сега"
+    },
+    "formFields": {
+      "firstName": "Име",
+      "middleName": "Презиме",
+      "lastName": "Фамилия",
+      "phoneNumber": "Телефон",
+      "egn": "ЕГН",
+      "residencyAddress": "Постоянно местожителство (град/село)",
+      "birthPlaceAddress": "Месторождение (град/село)",
+      "iban": "IBAN",
+      "required": "Задължително поле"
+    }
+  },
+  "navigation": {
+    "dashboard": "Табло",
+    "courses": "Курсове",
+    "archives": "Архиви",
+    "settings": "Настройки",
+    "profile": "Моят профил",
+    "adminPanel": "Административен панел",
+    "logout": "Изход",
+    "login": "Вход",
+    "register": "Регистрация",
+    "officePortal": "Офис портал",
+    "home": "Начало"
+  },
+  "languages": {
+    "english": "Английски",
+    "bulgarian": "Български"
+  }
+}

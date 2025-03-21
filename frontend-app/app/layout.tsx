@@ -3,9 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import ClientWrapper from "./components/ClientWrapper"; // ✅ Import ClientWrapper
-import ClientProvider from "./components/ClientProvider"; // ✅ Import ClientProvider
-import ClientContent from "./components/ClientContent"; // ✅ Import ClientContent
+import ClientWrapper from "./components/ClientWrapper";
+import ClientProvider from "./components/ClientProvider";
+import ClientContent from "./components/ClientContent";
+import I18nProvider from "./i18n"; // Import the I18nProvider component
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,19 +29,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="bg">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientWrapper>
-          {" "}
-          {/* ✅ This ensures `useDeviceContext()` works */}
-          <ClientProvider /> {/* ✅ Updates `isDesktop` in Zustand */}
-          <Navbar />
-          <Sidebar />
-          {/* ✅ Now ClientContent is inside the correct wrapper */}
-          <ClientContent>{children}</ClientContent>
-        </ClientWrapper>
+        {/* Wrap everything in the I18nProvider */}
+        <I18nProvider>
+          <ClientWrapper>
+            <ClientProvider />
+            <Navbar />
+            <Sidebar />
+            <ClientContent>{children}</ClientContent>
+          </ClientWrapper>
+        </I18nProvider>
       </body>
     </html>
   );
