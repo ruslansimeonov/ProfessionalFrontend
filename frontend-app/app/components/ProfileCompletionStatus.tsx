@@ -1,21 +1,17 @@
-import React from "react";
+"use client";
 import {
   Alert,
   AlertTitle,
   Box,
-  LinearProgress,
+  Chip,
+  Stepper,
+  Step,
+  StepLabel,
   Typography,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   CircularProgress,
 } from "@mui/material";
-import {
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-} from "@mui/icons-material";
+import { ErrorOutline} from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface ProfileCompletionStatusProps {
   isMissingPersonalInfo: boolean;
@@ -25,114 +21,88 @@ interface ProfileCompletionStatusProps {
   isLoading?: boolean;
 }
 
-const ProfileCompletionStatus: React.FC<ProfileCompletionStatusProps> = ({
+export default function ProfileCompletionStatus({
   isMissingPersonalInfo,
   hasMissingDocuments,
-  missingDocTypes,
   completedSteps,
   isLoading = false,
-}) => {
-  // Calculate completion percentage (0, 50%, or 100%)
-  const completionPercentage = (completedSteps / 2) * 100;
+}: ProfileCompletionStatusProps) {
+  const { t } = useTranslation(); 
 
-  // If everything is complete, don't show the alert
-  if (!isMissingPersonalInfo && !hasMissingDocuments && !isLoading) {
-    return null;
+  // If everything is completed, don't show anything
+  if (!isMissingPersonalInfo && !hasMissingDocuments) return null;
+
+  // If still loading document requirements, show spinner
+  if (isLoading) {
+    return (
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "center" }}>
+        <CircularProgress size={30} />
+      </Box>
+    );
   }
 
   return (
-    <Alert
-      severity={completedSteps === 0 ? "error" : "warning"}
-      sx={{ mb: 3, mt: 2 }}
-    >
-      <AlertTitle>Profile Completion</AlertTitle>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" gutterBottom>
-          {completedSteps === 0
-            ? "Your profile is incomplete. Please complete the following steps:"
-            : "You're almost there! Please complete the remaining steps:"}
-        </Typography>
-        <LinearProgress
-          variant="determinate"
-          value={completionPercentage}
-          color={completedSteps === 0 ? "error" : "warning"}
-          sx={{ mt: 1, mb: 2 }}
-        />
-      </Box>
+    <Box sx={{ mb: 3 }}>
+      <Alert
+        severity="warning"
+        icon={<ErrorOutline fontSize="large" />}
+        sx={{
+          borderRadius: 2,
+          "& .MuiAlert-message": { width: "100%" },
+        }}
+      >
+        <AlertTitle sx={{ fontWeight: "bold" }}>
+          {t("profile.completion.title")}
+        </AlertTitle>
 
-      <List dense disablePadding>
-        {/* Personal Information Status */}
-        <ListItem disableGutters>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {isMissingPersonalInfo ? (
-              <ErrorIcon color="error" fontSize="small" />
-            ) : (
-              <CheckCircleIcon color="success" fontSize="small" />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              isMissingPersonalInfo
-                ? "Complete your personal information"
-                : "Personal information completed ✓"
-            }
-            primaryTypographyProps={{
-              variant: "body2",
-              fontWeight: isMissingPersonalInfo ? "bold" : "normal",
-            }}
-          />
-        </ListItem>
-
-        {/* Document Status */}
-        <ListItem disableGutters>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {isLoading ? (
-              <CircularProgress size={20} />
-            ) : hasMissingDocuments ? (
-              <ErrorIcon color="error" fontSize="small" />
-            ) : (
-              <CheckCircleIcon color="success" fontSize="small" />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              isLoading
-                ? "Checking required documents..."
-                : hasMissingDocuments
-                ? "Upload required documents"
-                : "All required documents uploaded ✓"
-            }
-            primaryTypographyProps={{
-              variant: "body2",
-              fontWeight: hasMissingDocuments ? "bold" : "normal",
-            }}
-          />
-        </ListItem>
-
-        {/* Show missing document types if any */}
-        {!isLoading && hasMissingDocuments && missingDocTypes.length > 0 && (
-          <Box sx={{ pl: 4, mt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              Missing documents:
-            </Typography>
-            <List dense disablePadding>
-              {missingDocTypes.map((docType, index) => (
-                <ListItem key={index} disableGutters sx={{ pl: 1 }}>
-                  <ListItemIcon sx={{ minWidth: 20 }}>
-                    <WarningIcon fontSize="inherit" color="warning" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={docType}
-                    primaryTypographyProps={{ variant: "caption" }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        )}
-      </List>
-    </Alert>
+        <Box sx={{ mt: 2 }}>
+          {/* Progress Stepper */}
+          <Stepper activeStep={completedSteps} alternativeLabel sx={{ mb: 3 }}>
+            <Step>
+              <StepLabel
+                StepIconProps={{
+                  completed: !isMissingPersonalInfo,
+                }}
+              >
+                <Typography variant="body2">
+                  {t("profile.completion.personalInfo")}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={
+                    !isMissingPersonalInfo
+                      ? t("profile.completion.completed")
+                      : t("profile.completion.pending")
+                  }
+                  color={!isMissingPersonalInfo ? "success" : "default"}
+                  sx={{ mt: 1 }}
+                />
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel
+                StepIconProps={{
+                  completed: !hasMissingDocuments,
+                }}
+              >
+                <Typography variant="body2">
+                  {t("profile.completion.documents")}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={
+                    !hasMissingDocuments
+                      ? t("profile.completion.completed")
+                      : t("profile.completion.pending")
+                  }
+                  color={!hasMissingDocuments ? "success" : "default"}
+                  sx={{ mt: 1 }}
+                />
+              </StepLabel>
+            </Step>
+          </Stepper>
+        </Box>
+      </Alert>
+    </Box>
   );
-};
-
-export default ProfileCompletionStatus;
+}

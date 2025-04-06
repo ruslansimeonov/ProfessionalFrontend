@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback } from "react";
-import { Container, CircularProgress, Box } from "@mui/material";
+import { Container, CircularProgress, Box, Typography } from "@mui/material";
 import { useStore } from "@/app/store/useStore";
 import UserProfileCard from "@/app/components/UserProfileCard";
 import EnrolledCoursesCard from "@/app/components/EnrolledCourses";
@@ -10,8 +10,10 @@ import DocumentsSection from "@/app/components/DocumentsSection";
 import CertificatesSection from "@/app/components/CertificateSection";
 import ProfileCompletionStatus from "@/app/components/ProfileCompletionStatus";
 import { useDocumentRequirements } from "@/app/hooks/useDocumentRequirements";
+import { useTranslation } from "react-i18next"; // Import translation hook
 
 export default function ProfilePage() {
+  const { t } = useTranslation(); // Add translation hook
   const fetchUser = useStore((state) => state.fetchUser);
   const user = useStore((state) => state.user);
 
@@ -48,11 +50,15 @@ export default function ProfilePage() {
     return (
       <Box
         display="flex"
+        flexDirection="column"
         justifyContent="center"
         alignItems="center"
         minHeight="80vh"
       >
-        <CircularProgress />
+        <CircularProgress sx={{ mb: 2 }} />
+        <Typography variant="body1" color="text.secondary">
+          {t("profile.loading")}
+        </Typography>
       </Box>
     );
   }
@@ -69,6 +75,8 @@ export default function ProfilePage() {
 
   return (
     <Container maxWidth="md">
+      {/* Page Title - Add this */}
+      <Box sx={{ mt: 2, mb: 1 }} />
       {/* Profile Completion Alert for new users */}
       <ProfileCompletionStatus
         isMissingPersonalInfo={isMissingPersonalInfo}

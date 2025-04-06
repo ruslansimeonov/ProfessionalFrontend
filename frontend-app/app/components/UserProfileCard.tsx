@@ -1,140 +1,132 @@
-import React from "react";
-import {
-  Card,
-  CardContent,
-  Avatar,
-  Typography,
-  Box,
-  Chip,
-  Divider,
-  Grid2,
-} from "@mui/material";
-import {
-  Business as BusinessIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  Badge as BadgeIcon,
-} from "@mui/icons-material";
+"use client";
+import { Card, CardContent, Typography, Box, Chip, Avatar, Divider } from "@mui/material";
+import { Person as PersonIcon, Email as EmailIcon, Phone as PhoneIcon } from "@mui/icons-material";
+import { User } from "@/app/utils/types/types"; 
+import { useTranslation } from "react-i18next"; // Import translation hook
 
 interface UserProfileCardProps {
-  user: {
-    details: {
-      id: number;
-      firstName: string;
-      middleName?: string;
-      lastName: string;
-      email: string;
-      phoneNumber?: string;
-      username?: string;
-      roles?: string[];
-      isAdmin?: boolean;
-    };
-    company?: {
-      companyName: string;
-      id: number;
-    } | null;
-  };
+  user: User;
 }
 
-const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
-  const { details, company } = user;
-  const fullName = `${details.firstName} ${details.middleName || ""} ${
-    details.lastName
-  }`.trim();
-
+export default function UserProfileCard({ user }: UserProfileCardProps) {
+  const { t } = useTranslation(); // Add translation hook
+  
+  if (!user || !user.details) return null;
+  
+  // Get user role(s)
+  const role = Array.isArray(user.role) 
+    ? user.role.join(', ') 
+    : user.role;
+    
+  // Format phone number if available
+  const phone = user.details.phoneNumber || "-";
+  
+  // Count document, course, and certificate counts
+  const documentCount = user.documents?.length || 0;
+  const courseCount = user.enrolledCourses?.length || 0;
+  const certCount = user.certificates?.length || 0;
+  
   return (
-    <Card sx={{ mt: 4, p: 3, boxShadow: 3, mb: 4 }}>
-      <CardContent>
-        <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+    <Card elevation={2} sx={{ mb: 4, borderRadius: 2, overflow: "hidden" }}>
+      {/* Card Header - Blue Background */}
+      <Box sx={{ bgcolor: "primary.main", py: 3, px: 3, color: "white" }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <Avatar
-            sx={{
-              width: 100,
-              height: 100,
-              bgcolor: "primary.main",
-              mb: 2,
-              fontSize: "2rem",
+            sx={{ 
+              width: 80, 
+              height: 80, 
+              bgcolor: "primary.light",
+              border: "3px solid white"
             }}
           >
-            {details.firstName?.charAt(0)}
-            {details.lastName?.charAt(0)}
+            {user.details.firstName.charAt(0)}{user.details.lastName.charAt(0)}
           </Avatar>
-
-          <Typography variant="h5" gutterBottom>
-            {fullName}
-          </Typography>
-
-          {details.username && (
-            <Typography
-              variant="subtitle1"
-              color="textSecondary"
-              sx={{ mb: 1 }}
-            >
-              @{details.username}
+          
+          <Box sx={{ ml: 2 }}>
+            <Typography variant="h5" fontWeight="bold">
+              {user.details.firstName} {user.details.middleName || ''} {user.details.lastName}
             </Typography>
-          )}
-
-          {details.roles && details.roles.length > 0 && (
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                mb: 2,
-                flexWrap: "wrap",
-                justifyContent: "center",
-              }}
-            >
-              {details.roles.map((role) => (
-                <Chip
-                  key={role}
-                  label={role}
-                  color={
-                    role === "Admin"
-                      ? "error"
-                      : role === "Instructor"
-                      ? "primary"
-                      : "default"
-                  }
-                  size="small"
-                  icon={<BadgeIcon />}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-
-        <Divider sx={{ mb: 3 }} />
-
-        <Grid2 container spacing={2}>
-          <Grid2 size={{ xs: 12, md: details.phoneNumber ? 6 : 12 }}>
-            <Box display="flex" alignItems="center">
-              <EmailIcon sx={{ mr: 1, color: "text.secondary" }} />
-              <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
-                {details.email}
+            
+            <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
+              <Chip 
+                label={role} 
+                size="small"
+                sx={{ 
+                  bgcolor: "rgba(255,255,255,0.2)", 
+                  color: "white",
+                  fontWeight: "medium",
+                  "& .MuiChip-label": { px: 2 } 
+                }} 
+              />
+              <Typography variant="caption" sx={{ ml: 1 }}>
+                {t("profile.userCard.role")}
               </Typography>
             </Box>
-          </Grid2>
-
-          {details.phoneNumber && (
-            <Grid2 size={{ xs: 12, md: 6 }}>
-              <Box display="flex" alignItems="center">
-                <PhoneIcon sx={{ mr: 1, color: "text.secondary" }} />
-                <Typography variant="body2">{details.phoneNumber}</Typography>
-              </Box>
-            </Grid2>
-          )}
-
-          {company && (
-            <Grid2 size={{ xs: 12 }}>
-              <Box display="flex" alignItems="center" mt={1}>
-                <BusinessIcon sx={{ mr: 1, color: "text.secondary" }} />
-                <Typography variant="body2">{company.companyName}</Typography>
-              </Box>
-            </Grid2>
-          )}
-        </Grid2>
+          </Box>
+        </Box>
+      </Box>
+      
+      {/* Contact Information */}
+      <CardContent sx={{ py: 3 }}>
+        <Box>
+          {/* Email */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <EmailIcon sx={{ color: "primary.main", mr: 2 }} />
+            <Box>
+              <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
+                {t("profile.userCard.email")}
+              </Typography>
+              <Typography variant="body1">
+                {user.details.email}
+              </Typography>
+            </Box>
+          </Box>
+          
+          {/* Phone */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <PhoneIcon sx={{ color: "primary.main", mr: 2 }} />
+            <Box>
+              <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
+                {t("profile.userCard.phone")}
+              </Typography>
+              <Typography variant="body1">
+                {phone}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        
+        {/* Stats Row */}
+        <Divider sx={{ my: 3 }} />
+        <Box sx={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
+          <Box>
+            <Typography variant="h6" color="primary">
+              {courseCount}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t("profile.userCard.courses")}
+            </Typography>
+          </Box>
+          
+          <Box>
+            <Typography variant="h6" color="primary">
+              {documentCount}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t("profile.userCard.documents")}
+            </Typography>
+          </Box>
+          
+          <Box>
+            <Typography variant="h6" color="primary">
+              {certCount}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t("profile.userCard.certificates")}
+            </Typography>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );
-};
-
-export default UserProfileCard;
+}

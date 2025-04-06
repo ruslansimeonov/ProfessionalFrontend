@@ -33,7 +33,6 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Wrap everything in the I18nProvider */}
         <I18nProvider>
           <ClientWrapper>
             <ClientProvider />

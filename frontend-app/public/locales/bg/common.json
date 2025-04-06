@@ -43,5 +43,70 @@
   "languages": {
     "english": "Английски",
     "bulgarian": "Български"
+  },
+  "profile": {
+    "title": "Профил",
+    "loading": "Зареждане на профилни данни...",
+    "userCard": {
+      "role": "Роля",
+      "email": "Имейл",
+      "phone": "Телефон",
+      "courses": "Записани курсове",
+      "documents": "Качени документи",
+      "certificates": "Сертификати"
+    },
+    "completion": {
+      "title": "Завършеност на профила",
+      "step": "Стъпка {{step}} от {{total}}",
+      "personalInfo": "Лична информация",
+      "documents": "Необходими документи",
+      "completed": "Завършено",
+      "pending": "В процес",
+      "viewDetails": "Преглед на детайли"
+    },
+    "documents": {
+      "title": "Документи",
+      "uploadNew": "Качи нови документи",
+      "hideUploader": "Скрий качването",
+      "noDocuments": "Няма качени документи",
+      "uploadedOn": "Качено на",
+      "documentTypes": {
+        "DiplomaCopy": "Копие на диплома (мин. 10 клас)",
+        "DriverLicense": "Копие на шофьорска книжка",
+        "MedicalCertificateGeneral": "Медицинско свидетелство (личен лекар)",
+        "PsychiatricCertificate": "Психиатрично свидетелство",
+        "PassportPhotos": "Две паспортни снимки",
+        "ExistingLicenseCopy": "Копие на валидна лицензия",
+        "MedicalCertificateRefresher": "Медицинско свидетелство (опресняващо)"
+      },
+      "selectFile": "Избери файл",
+      "selected": "Избран"
+    },
+    "courses": {
+      "title": "Записани курсове",
+      "noCourses": "Не сте записани в курсове",
+      "enrolledOn": "Записан на",
+      "courseType": "Тип курс",
+      "courseHours": "Часове",
+      "viewDetails": "Виж детайли за курса"
+    },
+    "certificates": {
+      "title": "Сертификати",
+      "noCertificates": "Няма налични сертификати",
+      "issuedOn": "Издаден на",
+      "expiresOn": "Валиден до",
+      "viewCertificate": "Виж сертификат",
+      "active": "Активен",
+      "expired": "Изтекъл"
+    }
+  },
+  "errorMessages": {
+    "unexpectedError": "Възникна неочаквана грешка",
+    "fillInRequired": "Моля, попълнете всички задължителни полета",
+    "changesNotMade": "Не са направени промени",
+    "unableToUpdateProfile": "Неуспешно обновяване на профила"
+  },
+  "successMessages": {
+    "profileUpdated": "Профилът е обновен успешно"
   }
 }

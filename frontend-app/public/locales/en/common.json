@@ -43,5 +43,70 @@
   "languages": {
     "english": "English",
     "bulgarian": "Bulgarian"
+  },
+  "profile": {
+    "title": "Profile",
+    "loading": "Loading profile data...",
+    "userCard": {
+      "role": "Role",
+      "email": "Email",
+      "phone": "Phone",
+      "courses": "Enrolled Courses",
+      "documents": "Uploaded Documents",
+      "certificates": "Certificates"
+    },
+    "completion": {
+      "title": "Profile Completion",
+      "step": "Step {{step}} of {{total}}",
+      "personalInfo": "Personal Information",
+      "documents": "Required Documents",
+      "completed": "Completed",
+      "pending": "Pending",
+      "viewDetails": "View Details"
+    },
+    "documents": {
+      "title": "Documents",
+      "uploadNew": "Upload New Documents",
+      "hideUploader": "Hide Uploader",
+      "noDocuments": "No documents uploaded yet",
+      "uploadedOn": "Uploaded on",
+      "documentTypes": {
+        "DiplomaCopy": "Copy of diploma (min 10th grade)",
+        "DriverLicense": "Driver's license copy",
+        "MedicalCertificateGeneral": "Medical certificate (GP)",
+        "PsychiatricCertificate": "Psychiatric certificate",
+        "PassportPhotos": "Two passport-sized photos",
+        "ExistingLicenseCopy": "Existing valid license",
+        "MedicalCertificateRefresher": "Medical certificate (refresher)"
+      },
+      "selectFile": "Select File",
+      "selected": "Selected"
+    },
+    "courses": {
+      "title": "Enrolled Courses",
+      "noCourses": "Not enrolled in any courses",
+      "enrolledOn": "Enrolled on",
+      "courseType": "Course Type",
+      "courseHours": "Hours",
+      "viewDetails": "View Course Details"
+    },
+    "certificates": {
+      "title": "Certificates",
+      "noCertificates": "No certificates available",
+      "issuedOn": "Issued on",
+      "expiresOn": "Expires on",
+      "viewCertificate": "View Certificate",
+      "active": "Active",
+      "expired": "Expired"
+    }
+  },
+  "errorMessages": {
+    "unexpectedError": "An unexpected error occurred",
+    "fillInRequired": "Please fill in all required fields",
+    "changesNotMade": "No changes made",
+    "unableToUpdateProfile": "Unable to update profile"
+  },
+  "successMessages": {
+    "profileUpdated": "Profile updated successfully"
   }
 }
