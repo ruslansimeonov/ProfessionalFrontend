@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useStore } from "../store/useStore";
@@ -31,13 +31,20 @@ import { useRouter } from "next/navigation";
 import LanguageSwitcher from "../components/language/languageSwitcher";
 
 export default function Navbar() {
+  const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
   const { isAuthenticated, toggleSidebar, logout, user } = useStore();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const router = useRouter();
-
-  // Check if user is admin
   const isAdmin = user?.role === "Admin";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget as HTMLElement);

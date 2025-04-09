@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useStore } from "../store/useStore";
+import { useStore } from "../../store/useStore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -27,7 +27,7 @@ import {
   AccountCircle,
   AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
-import LanguageSwitcher from "./LanguageSwitcher";
+import LanguageSwitcher from "../../components/language/languageSwitcher";
 
 export default function Navbar() {
   // Use this to prevent hydration mismatch
