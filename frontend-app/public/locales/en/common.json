@@ -108,5 +108,8 @@
   },
   "successMessages": {
     "profileUpdated": "Profile updated successfully"
+  },
+  "modes":{
+    "adminMode": "Admin Mode"
   }
 }

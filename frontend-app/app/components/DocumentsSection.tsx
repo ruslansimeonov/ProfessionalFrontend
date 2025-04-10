@@ -21,6 +21,7 @@ import DocumentUploadForm from "./document/DocumentUploadForm";
 import DocumentList from "./document/DocumentList";
 import MissingDocumentsAlert from "./document/MissingDocumentsAlert";
 import EmptyDocumentsMessage from "./document/EmptyDocumentsMessage";
+import { useTranslation } from 'react-i18next';
 
 interface DocumentsSectionProps {
   documents: Document[];
@@ -47,6 +48,8 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({
   const [uploaderOpen, setUploaderOpen] = useState(
     isAdminMode || hasMissingDocuments
   );
+    const { t } = useTranslation();
+  
 
   // Get document types filtered by course type
   const docTypes = useDocumentTypes(missingDocTypes, courseType);
@@ -121,7 +124,7 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({
           }}
         >
           <AdminIcon sx={{ fontSize: 16, mr: 0.5 }} />
-          Админ режим
+          {t("modes.admin")}
         </Box>
       )}
 

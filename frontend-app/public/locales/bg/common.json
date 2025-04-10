@@ -108,5 +108,8 @@
   },
   "successMessages": {
     "profileUpdated": "Профилът е обновен успешно"
+  },
+  "modes": {
+    "adminMode": "Админ режим"
   }
 }

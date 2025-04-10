@@ -10,17 +10,15 @@ import DocumentsSection from "@/app/components/DocumentsSection";
 import CertificatesSection from "@/app/components/CertificateSection";
 import ProfileCompletionStatus from "@/app/components/ProfileCompletionStatus";
 import { useDocumentRequirements } from "@/app/hooks/useDocumentRequirements";
-import { useTranslation } from "react-i18next"; // Import translation hook
+import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
-  const { t } = useTranslation(); // Add translation hook
+  const { t } = useTranslation();
   const fetchUser = useStore((state) => state.fetchUser);
   const user = useStore((state) => state.user);
 
-  // Add a ref to track if we've already fetched data
   const hasInitiallyFetched = React.useRef(false);
 
-  // Fetch user data only on component mount
   useEffect(() => {
     // Only fetch if not already fetched
     if (!hasInitiallyFetched.current) {
@@ -89,14 +87,14 @@ export default function ProfilePage() {
       {/* User Profile Card */}
       <UserProfileCard user={user} />
 
-      {/* Profile Update Form - using memoized handler */}
+      {/* Profile Update Form */}
       <ProfileUpdateForm
         user={user.details}
         onUpdateSuccess={handleDataUpdate}
         isMissingRequiredInfo={isMissingPersonalInfo}
       />
 
-      {/* Documents Section with integrated uploader - using memoized handler */}
+      {/* Documents Section */}
       <DocumentsSection
         documents={user.documents || []}
         userId={user.details.id}
