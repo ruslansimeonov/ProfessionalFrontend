@@ -21,7 +21,7 @@ import DocumentUploadForm from "./document/DocumentUploadForm";
 import DocumentList from "./document/DocumentList";
 import MissingDocumentsAlert from "./document/MissingDocumentsAlert";
 import EmptyDocumentsMessage from "./document/EmptyDocumentsMessage";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 interface DocumentsSectionProps {
   documents: Document[];
@@ -31,7 +31,8 @@ interface DocumentsSectionProps {
   missingDocTypes?: string[];
   isLoading?: boolean;
   courseType?: string | null;
-  isAdminMode?: boolean; // Add admin mode flag
+  courseName?: string | null;
+  isAdminMode?: boolean;
 }
 
 const DocumentsSection: React.FC<DocumentsSectionProps> = ({
@@ -42,14 +43,14 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({
   missingDocTypes = [],
   isLoading = false,
   courseType = null,
+  courseName = null,
   isAdminMode = false, // Default to user mode
 }) => {
   // State for collapsible uploader
   const [uploaderOpen, setUploaderOpen] = useState(
     isAdminMode || hasMissingDocuments
   );
-    const { t } = useTranslation();
-  
+  const { t } = useTranslation();
 
   // Get document types filtered by course type
   const docTypes = useDocumentTypes(missingDocTypes, courseType);
@@ -142,8 +143,9 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({
           component="div"
           sx={{ display: "flex", alignItems: "center" }}
         >
+          {/* Fix this later, currently a bit tricky to translate the incoming course types */}
           <DocumentIcon sx={{ mr: 1 }} />
-          Документи{courseType ? ` за ${courseType}` : ""}
+          {t("profile.requiredDocuments.title")} - {courseName}
         </Typography>
 
         <Button
@@ -153,7 +155,9 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({
           endIcon={uploaderOpen ? <ArrowUpIcon /> : <ArrowDownIcon />}
           onClick={toggleUploader}
         >
-          {uploaderOpen ? "Скрий формата" : "Качи документи"}
+          {uploaderOpen
+            ? t("profile.requiredDocuments.hideForm")
+            : t("profile.requiredDocuments.showForm")}
         </Button>
       </Box>
 
@@ -161,7 +165,9 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({
       {isLoading && (
         <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
           <CircularProgress size={24} sx={{ mr: 1 }} />
-          <Typography>Проверка на необходимите документи...</Typography>
+          <Typography>
+            {t("profile.requiredDocuments.checkRequiredDocuments")}
+          </Typography>
         </Box>
       )}
 

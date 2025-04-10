@@ -103,6 +103,7 @@ export default function ProfilePage() {
         missingDocTypes={missingDocumentNames}
         isLoading={loadingDocRequirements}
         courseType={user?.enrolledCourses?.[0]?.course.courseType}
+        courseName={user?.enrolledCourses?.[0]?.course.courseName}
       />
 
       {/* Enrolled Courses Card */}

@@ -98,6 +98,12 @@
       "viewCertificate": "Виж сертификат",
       "active": "Активен",
       "expired": "Изтекъл"
+    },
+    "requiredDocuments": {
+      "title": "Необходими документи за",
+      "hideForm": "Скрий формата",
+      "showForm": "Покажи формата",
+      "checkRequiredDocuments": "Проверка на необходими документи"
     }
   },
   "errorMessages": {

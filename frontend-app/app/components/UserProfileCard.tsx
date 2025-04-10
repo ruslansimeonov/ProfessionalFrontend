@@ -10,14 +10,14 @@ import {
 } from "@mui/material";
 import { Email as EmailIcon, Phone as PhoneIcon } from "@mui/icons-material";
 import { User } from "@/app/utils/types/types";
-import { useTranslation } from "react-i18next"; // Import translation hook
+import { useTranslation } from "react-i18next";
 
 interface UserProfileCardProps {
   user: User;
 }
 
 export default function UserProfileCard({ user }: UserProfileCardProps) {
-  const { t } = useTranslation(); // Add translation hook
+  const { t } = useTranslation();
 
   if (!user || !user.details) return null;
 

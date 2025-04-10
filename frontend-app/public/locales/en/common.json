@@ -98,6 +98,12 @@
       "viewCertificate": "View Certificate",
       "active": "Active",
       "expired": "Expired"
+    },
+    "requiredDocuments": {
+      "title": "Required Documents for",
+      "hideForm": "Hide Form",
+      "showForm": "Show Form",
+      "checkRequiredDocuments": "Checking Required Documents..."
     }
   },
   "errorMessages": {
@@ -109,7 +115,7 @@
   "successMessages": {
     "profileUpdated": "Profile updated successfully"
   },
-  "modes":{
+  "modes": {
     "adminMode": "Admin Mode"
   }
 }
