@@ -1,4 +1,4 @@
-import { getAuthToken } from "../helpers";
+import { getAuthToken } from "../tokenHelpers";
 import { User, UserDetails } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
@@ -124,6 +124,8 @@ export async function fetchRegisteredUsers(
     }
 
     // Fetch data from the API with query parameters
+    console.log("Fetching registered users with params:");
+
     const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
       method: "GET",
       headers: {
@@ -147,6 +149,55 @@ export async function fetchRegisteredUsers(
     };
   } catch (error) {
     console.error("Error fetching registered users:", error);
+    throw error;
+  }
+}
+
+export async function fetchCompanyUsers(
+  companyId: number,
+  page: number,
+  rowsPerPage: number,
+  search?: string
+): Promise<{ users: User[]; total: number }> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiUrl = `${baseUrl}/api/companies/${companyId}/users`;
+
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: rowsPerPage.toString(),
+    });
+
+    if (search && search.trim() !== "") {
+      queryParams.append("search", search);
+    }
+
+    const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Fetched company users:", data.users);
+    console.log("Total users:", data.pagination.total);
+    return {
+      users: data.users,
+      total: data.pagination.total,
+    };
+  } catch (error) {
+    console.error("Error fetching company users:", error);
     throw error;
   }
 }

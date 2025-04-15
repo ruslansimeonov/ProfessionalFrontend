@@ -12,6 +12,7 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   roles: null,
 
   login: async (data) => {
+    console.log("Login");
     const response = await loginUser(data);
     if (response.success && response.data?.token) {
       localStorage.setItem("token", response.data.token);
@@ -24,6 +25,7 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   },
 
   logout: () => {
+    console.log("Logout");
     localStorage.removeItem("token");
     set({
       isAuthenticated: false,
@@ -34,6 +36,7 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
 
   fetchUser: async () => {
     try {
+      console.log("Fetch User");
       const response = await getAuthenticatedUser();
       if (response.success) {
         set({
@@ -50,6 +53,7 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
           },
         });
       } else {
+        console.error("Failed to fetch user:", response.error);
         get().logout();
       }
     } catch (error) {

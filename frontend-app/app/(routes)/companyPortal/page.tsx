@@ -9,10 +9,10 @@ import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
 
-export default function OfficePortalPage() {
+export default function CompanyPortalPage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useStore();
-  const isAdmin = user?.role === "Admin";
+  const { isAuthenticated, user: currentUser } = useStore();
+  const isCompany = currentUser?.role === "Company";
 
   const {
     users,
@@ -28,25 +28,40 @@ export default function OfficePortalPage() {
     handleRefresh,
     handleChangePage,
     handleChangeRowsPerPage,
-  } = useLoadUsers();
+  } = useLoadUsers({
+    isCompanyView: true,
+    companyId: currentUser?.details?.companyId,
+  });
 
-  // Redirect if not authenticated
+  // Authentication and role check
   useEffect(() => {
-    if (!isAuthenticated || !isAdmin) {
+    if (!isAuthenticated) {
+      router.push("/companyPortal");
+      return;
+    }
+
+    if (!isCompany && currentUser?.role !== "Admin") {
       router.push("/");
       return;
     }
-  }, [isAuthenticated, isAdmin, router]);
+  }, [isAuthenticated, isCompany, router, currentUser?.role]);
 
+  // Load data when authenticated and have companyId
   useEffect(() => {
-    if (isAuthenticated && isAdmin) {
+    if (isAuthenticated && currentUser?.details?.companyId) {
       loadUsers(page, rowsPerPage, searchTerm);
     }
-  }, [isAuthenticated, isAdmin, page, rowsPerPage, searchTerm, loadUsers]);
+  }, [
+    isAuthenticated,
+    currentUser?.details?.companyId,
+    page,
+    rowsPerPage,
+    searchTerm,
+    loadUsers,
+  ]);
 
-  // Navigate to user's details page
   const handleViewUser = (userId: string | number) => {
-    router.push(`/officePortal/users/${userId}`);
+    router.push(`/companyPortal/users/${userId}`);
   };
 
   return (
@@ -60,7 +75,7 @@ export default function OfficePortalPage() {
           onSearch={handleSearch}
           onRefresh={handleRefresh}
           onClear={() => setSearchTerm("")}
-          placeholder="Search by name or ID"
+          placeholder="Search by name, ID, course..."
           labels={{
             search: "Search",
             refresh: "Refresh",
@@ -92,7 +107,7 @@ export default function OfficePortalPage() {
             total={total}
             page={page}
             rowsPerPage={rowsPerPage}
-            showCompany={true}
+            showCompany={false}
             loading={loading}
             onViewUser={handleViewUser}
             onPageChange={handleChangePage}
@@ -100,11 +115,10 @@ export default function OfficePortalPage() {
             labels={{
               columns: {
                 name: "Name",
-                idNumber: "ID Number",
+                idNumber: "EGN",
                 course: "Course",
                 registrationDate: "Registration Date",
                 actions: "Actions",
-                company: "Company",
               },
               pagination: {
                 rowsPerPage: "Rows per page:",

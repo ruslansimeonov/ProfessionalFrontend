@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { User } from "@/app/utils/types/types";
-import { getAuthToken } from "@/app/utils/helpers";
+import { getAuthToken } from "@/app/utils/tokenHelpers";
 
 export function useAdminUserManagement(userId: string | number) {
   const [loading, setLoading] = useState<boolean>(false);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../utils/apis/api";
 import { Document } from "../utils/types/types";
-import { getAuthToken } from "../utils/helpers";
+import { getAuthToken } from "../utils/tokenHelpers";
 
 interface DocumentRequirement {
   id: number;

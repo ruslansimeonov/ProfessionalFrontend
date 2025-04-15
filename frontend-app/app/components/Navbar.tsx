@@ -128,6 +128,23 @@ export default function Navbar() {
                   {t("navigation.officePortal")}
                 </Button>
               )}
+              {isAdmin && (
+                <Button
+                  color="inherit"
+                  component={Link}
+                  href="/companyPortal"
+                  startIcon={<DashboardIcon />}
+                  sx={{
+                    backgroundColor: "primary.dark",
+                    "&:hover": {
+                      backgroundColor: "primary.dark",
+                      opacity: 0.9,
+                    },
+                  }}
+                >
+                  {t("navigation.companyPortal")}
+                </Button>
+              )}
               <Button
                 color="inherit"
                 onClick={handleLogout}

@@ -7,7 +7,7 @@ export interface UserDetails {
   phoneNumber?: string;
   currentResidencyAddress?: string | null;
   birthPlaceAddress?: string | null;
-  companyId?: number | null;
+  companyId?: number | undefined;
   createdAt: Date;
   updatedAt: Date;
   EGN: string | null;

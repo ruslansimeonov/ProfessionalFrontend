@@ -30,7 +30,7 @@ import { User } from "@/app/utils/types/types";
 import { getUser } from "@/app/utils/apis/users";
 
 // Refactor this
-export default function UserProfilePage() {
+export default function OfficePortalUserProfilePage() {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated, user: currentUser } = useStore();
@@ -58,6 +58,8 @@ export default function UserProfilePage() {
   console.log("AdminEditProfile", isAuthenticated);
 
   useEffect(() => {
+    console.log("AdminEditProfile", isAuthenticated);
+
     if (!isAuthenticated) {
       router.push("/login?redirect=/officePortal");
       return;

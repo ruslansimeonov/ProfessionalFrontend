@@ -1,4 +1,4 @@
-import { getAuthToken } from "../helpers";
+import { getAuthToken } from "../tokenHelpers";
 import { Company } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 

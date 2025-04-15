@@ -1,4 +1,4 @@
-import { getAuthToken } from "../helpers";
+import { getAuthToken } from "../tokenHelpers";
 import { UserDetails } from "../types/types";
 import { ApiResponse, api, handleApiError } from "./api";
 import { ProfileUpdateData } from "./users";
