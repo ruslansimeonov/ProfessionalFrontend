@@ -39,7 +39,8 @@
     "register": "Register",
     "officePortal": "Office Portal",
     "companyPortal": "Company Portal",
-    "home": "Home"
+    "home": "Home",
+    "groups": "Groups"
   },
   "languages": {
     "english": "English",

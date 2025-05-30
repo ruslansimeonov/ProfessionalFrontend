@@ -21,7 +21,6 @@ export const api = axios.create({
 export interface ApiSuccessResponse<T> {
   success: true;
   data: T;
-  error: "";
 }
 
 export interface ApiErrorResponse {

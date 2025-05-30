@@ -56,6 +56,10 @@ export function UsersTable({
   onRowsPerPageChange,
   labels,
 }: UsersTableProps) {
+  {
+    console.log(users);
+  }
+
   return (
     <>
       <TableContainer>
@@ -85,14 +89,19 @@ export function UsersTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user) => (
-              <UserTableRow
-                key={user.details.id}
-                user={user}
-                onViewUser={onViewUser}
-                showCompany={showCompany}
-              />
-            ))}
+            {users.map(
+              (user) => (
+                console.log(user),
+                (
+                  <UserTableRow
+                    key={user.details.id}
+                    user={user}
+                    onViewUser={onViewUser}
+                    showCompany={showCompany}
+                  />
+                )
+              )
+            )}
           </TableBody>
         </Table>
       </TableContainer>

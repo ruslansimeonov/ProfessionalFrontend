@@ -84,14 +84,14 @@ export default function Navbar() {
           <Box
             sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
           >
-            <Image src="/next.svg" alt="Company Logo" width={120} height={40} />
+            <Image src="/logo.png" alt="Company Logo" width={120} height={40} />
           </Box>
         </Link>
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
         <LanguageSwitcher />
         {/* Navigation Links */}
-        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3, padding: 2 }}>
           <Button
             color="inherit"
             component={Link}
@@ -143,6 +143,23 @@ export default function Navbar() {
                   }}
                 >
                   {t("navigation.companyPortal")}
+                </Button>
+              )}
+              {isAdmin && (
+                <Button
+                  color="inherit"
+                  component={Link}
+                  href="/groups"
+                  startIcon={<DashboardIcon />}
+                  sx={{
+                    backgroundColor: "primary.dark",
+                    "&:hover": {
+                      backgroundColor: "primary.dark",
+                      opacity: 0.9,
+                    },
+                  }}
+                >
+                  {t("navigation.groups")}
                 </Button>
               )}
               <Button

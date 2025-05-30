@@ -28,6 +28,7 @@ export function UserTableRow({
     notEnrolled: "Not enrolled",
   },
 }: UserTableRowProps) {
+  console.log(user, "UserTableRow");
   return (
     <TableRow
       hover

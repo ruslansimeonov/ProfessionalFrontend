@@ -30,19 +30,34 @@ export default function OfficePortalPage() {
     handleChangeRowsPerPage,
   } = useLoadUsers();
 
-  // Redirect if not authenticated
+  // // Redirect if not authenticated
+  // useEffect(() => {
+  //   console.log("inside useEffect 1", isAuthenticated, isAdmin);
+  //   if (!isAuthenticated || !isAdmin) {
+  //     router.push("/");
+  //     return;
+  //   }
+  // }, [isAuthenticated, isAdmin, router]);
+
   useEffect(() => {
+    console.log("inside useEffect 2", isAuthenticated, isAdmin);
+
     if (!isAuthenticated || !isAdmin) {
       router.push("/");
       return;
     }
-  }, [isAuthenticated, isAdmin, router]);
-
-  useEffect(() => {
     if (isAuthenticated && isAdmin) {
       loadUsers(page, rowsPerPage, searchTerm);
     }
-  }, [isAuthenticated, isAdmin, page, rowsPerPage, searchTerm, loadUsers]);
+  }, [
+    isAuthenticated,
+    isAdmin,
+    page,
+    rowsPerPage,
+    searchTerm,
+    loadUsers,
+    router,
+  ]);
 
   // Navigate to user's details page
   const handleViewUser = (userId: string | number) => {
@@ -53,7 +68,7 @@ export default function OfficePortalPage() {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
         <SearchHeader
-          title="Company Users"
+          title="Office Portal Users"
           searchTerm={searchTerm}
           loading={loading}
           onSearchChange={setSearchTerm}

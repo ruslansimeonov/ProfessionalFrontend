@@ -68,7 +68,6 @@ export async function updateUserProfile(
     return {
       success: true,
       data: response.data.user,
-      error: "",
     };
   } catch (error) {
     console.error("Failed to update profile:", error);
@@ -88,7 +87,7 @@ export async function getAuthenticatedUser(): Promise<ApiResponse<User>> {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return { success: true, data, error: "" };
+    return { success: true, data };
   } catch (error) {
     return handleApiError(error);
   }
@@ -199,5 +198,27 @@ export async function fetchCompanyUsers(
   } catch (error) {
     console.error("Error fetching company users:", error);
     throw error;
+  }
+}
+
+export async function getAvailableUsers(
+  groupId: number
+): Promise<ApiResponse<User[]>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No token found" };
+    }
+
+    const { data } = await api.get<User[]>(
+      `/api/groups/${groupId}/available-users`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
   }
 }

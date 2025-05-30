@@ -11,11 +11,13 @@ import CertificatesSection from "@/app/components/CertificateSection";
 import ProfileCompletionStatus from "@/app/components/ProfileCompletionStatus";
 import { useDocumentRequirements } from "@/app/hooks/useDocumentRequirements";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
   const fetchUser = useStore((state) => state.fetchUser);
   const user = useStore((state) => state.user);
+  
 
   const hasInitiallyFetched = React.useRef(false);
 
@@ -41,7 +43,9 @@ export default function ProfilePage() {
     hasAllRequiredDocuments,
   } = useDocumentRequirements(user?.details?.id, user?.documents);
 
-  console.log("User data:", user);
+  if (!user) {
+    router.push("/login");
+  }
 
   // Show loading if user is not yet loaded
   if (!user) {

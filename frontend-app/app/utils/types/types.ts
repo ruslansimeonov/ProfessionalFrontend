@@ -63,6 +63,15 @@ export interface Group {
   id: number;
   name: string;
   companyId: number;
+  companyName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  users?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+  }[];
 }
 
 export interface User {

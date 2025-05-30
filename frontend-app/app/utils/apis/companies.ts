@@ -14,7 +14,7 @@ export async function getCompanies(): Promise<ApiResponse<Company[]>> {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return { success: true, data, error: "" };
+    return { success: true, data };
   } catch (error) {
     return handleApiError(error);
   }
