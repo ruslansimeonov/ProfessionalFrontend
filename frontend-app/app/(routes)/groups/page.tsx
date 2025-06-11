@@ -63,6 +63,20 @@ export default function GroupsPage() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  const handlePageChangeWrapper = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    handlePageChange(newPage);
+  };
+
+  const handlePageSizeChangeWrapper = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newPageSize = parseInt(event.target.value, 10);
+    handlePageSizeChange(newPageSize);
+  };
+
   useEffect(() => {
     if (openDialog) {
       // Fetch companies when the dialog opens
@@ -121,8 +135,11 @@ export default function GroupsPage() {
       } else {
         setCreateError(response.error || "Failed to create group");
       }
-    } catch (err) {
-      setCreateError("Failed to create group");
+    } catch (error) {
+      console.error("Failed to create group:", error);
+      setCreateError(
+        error instanceof Error ? error.message : "Failed to create group"
+      );
     } finally {
       setCreateLoading(false);
     }
@@ -217,8 +234,8 @@ export default function GroupsPage() {
               loading={loadingUsers}
               showCompany={true}
               onViewUser={(id) => router.push(`/officePortal/users/${id}`)}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handlePageSizeChange}
+              onPageChange={handlePageChangeWrapper} // Fixed handler
+              onRowsPerPageChange={handlePageSizeChangeWrapper} // Fixed handler
               labels={{
                 columns: {
                   name: "Name",
@@ -231,7 +248,6 @@ export default function GroupsPage() {
                 pagination: {
                   rowsPerPage: "Rows per page:",
                 },
-                showCompanyColumn: true,
               }}
             />
           </Box>

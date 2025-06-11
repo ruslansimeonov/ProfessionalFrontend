@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Container,
   Box,
@@ -29,11 +29,14 @@ import AdminUserActions from "@/app/components/admin/AdminUserActions";
 import { User } from "@/app/utils/types/types";
 import { getUser } from "@/app/utils/apis/users";
 
-// Refactor this
-export default function OfficePortalUserProfilePage() {
-  const params = useParams();
+interface PageProps {
+  params: Promise<{ id: string }>; // Updated for Next.js 15
+}
+
+export default function OfficePortalUserProfilePage({ params }: PageProps) {
   const router = useRouter();
   const { isAuthenticated, user: currentUser } = useStore();
+  const [userId, setUserId] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,19 +48,32 @@ export default function OfficePortalUserProfilePage() {
   // Check if user is admin
   const isAdmin = currentUser?.role === "Admin";
 
-  // Helper function to parse the user ID from params
+  // Resolve the async params
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setUserId(resolvedParams.id);
+    };
+
+    resolveParams();
+  }, [params]);
+
+  // Helper function to parse the user ID
   const getUserId = useCallback((): number => {
-    if (!params.id || typeof params.id !== "string") {
+    if (!userId || typeof userId !== "string") {
       return 0;
     }
 
-    const parsedId = parseInt(params.id, 10);
+    const parsedId = parseInt(userId, 10);
     return isNaN(parsedId) ? 0 : parsedId;
-  }, [params.id]);
+  }, [userId]);
 
   console.log("AdminEditProfile", isAuthenticated);
 
   useEffect(() => {
+    // Don't run if userId is not resolved yet
+    if (!userId) return;
+
     console.log("AdminEditProfile", isAuthenticated);
 
     if (!isAuthenticated) {
@@ -89,7 +105,7 @@ export default function OfficePortalUserProfilePage() {
     };
 
     loadUserProfile();
-  }, [isAuthenticated, isAdmin, getUserId, router]);
+  }, [isAuthenticated, isAdmin, getUserId, router, userId]); // Added userId dependency
 
   // Handle profile update success
   const handleProfileUpdate = async () => {
@@ -137,6 +153,15 @@ export default function OfficePortalUserProfilePage() {
   const handleBack = () => {
     router.push("/officePortal");
   };
+
+  // Don't render anything until userId is resolved
+  if (!userId) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (!isAuthenticated || !isAdmin) {
     return (

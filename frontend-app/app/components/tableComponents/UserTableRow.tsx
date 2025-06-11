@@ -1,4 +1,12 @@
-import { TableRow, TableCell, Box, Chip, Button, Tooltip } from "@mui/material";
+import {
+  TableRow,
+  TableCell,
+  Box,
+  Chip,
+  Button,
+  Tooltip,
+  Checkbox,
+} from "@mui/material";
 import {
   Person as PersonIcon,
   School as SchoolIcon,
@@ -13,6 +21,9 @@ interface UserTableRowProps {
   user: User;
   onViewUser: (id: number) => void;
   showCompany?: boolean;
+  selectable?: boolean; // Add selectable prop
+  isSelected?: boolean; // Add isSelected prop
+  onUserSelect?: (userId: number) => void; // Add onUserSelect prop
   labels?: {
     view?: string;
     notEnrolled?: string;
@@ -23,12 +34,31 @@ export function UserTableRow({
   user,
   onViewUser,
   showCompany = false,
+  selectable = false,
+  isSelected = false,
+  onUserSelect,
   labels = {
     view: "View",
     notEnrolled: "Not enrolled",
   },
 }: UserTableRowProps) {
   console.log(user, "UserTableRow");
+
+  // Get the latest enrolled course
+  const latestEnrolledCourse =
+    user.enrolledCourses && user.enrolledCourses.length > 0
+      ? user.enrolledCourses.sort(
+          (a, b) =>
+            new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime()
+        )[0]
+      : null;
+
+  const handleSelectChange = () => {
+    if (onUserSelect) {
+      onUserSelect(user.details.id);
+    }
+  };
+
   return (
     <TableRow
       hover
@@ -37,8 +67,22 @@ export function UserTableRow({
           cursor: "pointer",
           backgroundColor: "action.hover",
         },
+        ...(isSelected && {
+          backgroundColor: "action.selected",
+        }),
       }}
     >
+      {/* Selection Checkbox */}
+      {selectable && (
+        <TableCell padding="checkbox">
+          <Checkbox
+            checked={isSelected}
+            onChange={handleSelectChange}
+            color="primary"
+          />
+        </TableCell>
+      )}
+
       {/* Name Cell */}
       <TableCell
         component="th"
@@ -65,21 +109,21 @@ export function UserTableRow({
           <SchoolIcon sx={{ mr: 1, color: "info.main", fontSize: 20 }} />
           <Chip
             label={
-              user.enrolledCourses?.[0]?.course?.courseName ||
-              labels.notEnrolled
+              latestEnrolledCourse?.course.courseName || labels.notEnrolled
             }
             size="small"
-            color={
-              user.enrolledCourses?.[0]?.course?.courseName
-                ? "primary"
-                : "default"
-            }
-            variant={
-              user.enrolledCourses?.[0]?.course?.courseName
-                ? "filled"
-                : "outlined"
-            }
+            color={latestEnrolledCourse ? "primary" : "default"}
+            variant={latestEnrolledCourse ? "filled" : "outlined"}
           />
+          {/* Optional: Show count if multiple courses */}
+          {user.enrolledCourses && user.enrolledCourses.length > 1 && (
+            <Chip
+              label={`+${user.enrolledCourses.length - 1}`}
+              size="small"
+              variant="outlined"
+              sx={{ ml: 1, fontSize: "0.7rem" }}
+            />
+          )}
         </Box>
       </TableCell>
 

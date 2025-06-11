@@ -31,7 +31,6 @@ export async function registerUser(
     return {
       success: true,
       data: response.data,
-      error: "", // Add the missing error field
     };
   } catch (error) {
     return handleApiError(error);
@@ -59,12 +58,11 @@ export async function loginUser(
 
     if (response.data.token) {
       localStorage.setItem("token", response.data.token);
-       
     } else {
       console.error("🚨 Login successful but no token received!");
     }
 
-    return { success: true, data: response.data, error: "" };
+    return { success: true, data: response.data };
   } catch (error) {
     return handleApiError(error);
   }

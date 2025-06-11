@@ -27,7 +27,6 @@ export async function updateUserProfileAsAdmin(
     return {
       success: true,
       data: response.data.user,
-      error: "",
     };
   } catch (error) {
     console.error("Failed to update profile:", error);
@@ -55,7 +54,7 @@ export async function adminResetUserPassword(
       },
     });
 
-    return { success: true, data: "", error: "" };
+    return { success: true, data: "" };
   } catch (error) {
     console.error("Failed to reset password:", error);
     return handleApiError(error);
@@ -78,7 +77,7 @@ export async function suspendUser(
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return { success: true, data: "", error: "" };
+    return { success: true, data: "" };
   } catch (error) {
     console.error("Failed to suspend user:", error);
     return handleApiError(error);

@@ -54,7 +54,7 @@ export async function uploadUserDocuments(data: {
 
     console.log("✅ Upload response:", response);
 
-    return { success: true, data: response.data, error: "" };
+    return { success: true, data: response.data };
   } catch (error) {
     console.error("❌ Error uploading documents:", error);
     return handleApiError(error);
@@ -81,7 +81,7 @@ export async function deleteUserDocument(
       }
     );
 
-    return { success: true, data: response.data, error: "" };
+    return { success: true, data: response.data };
   } catch (error) {
     console.error("❌ Error deleting document:", error);
     return handleApiError(error);

@@ -1,6 +1,6 @@
-import CompaniesTable from "./CompaniesTable"; // Import the Client Component
+import CompaniesTable from "./CompaniesTable";
 
-export const dynamic = "force-dynamic"; // Ensures fresh data
+export const dynamic = "force-dynamic";
 
 export default async function CompaniesPage() {
   return (

@@ -6,6 +6,7 @@ import {
   TableHead,
   TableRow,
   TablePagination,
+  Checkbox,
 } from "@mui/material";
 import { User } from "@/app/utils/types/types";
 import { UserTableRow } from "./UserTableRow";
@@ -15,9 +16,12 @@ interface UsersTableProps {
   total: number;
   page: number;
   rowsPerPage: number;
-  loading: boolean;
+  loading?: boolean;
   showCompany?: boolean;
-  onViewUser: (id: number) => void;
+  selectable?: boolean;
+  selectedUsers?: number[];
+  onUserSelect?: (userId: number) => void;
+  onViewUser?: (id: number) => void;
   onPageChange: (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
@@ -40,8 +44,6 @@ interface UsersTableProps {
         count: number;
       }) => string;
     };
-
-    showCompanyColumn: boolean;
   };
 }
 
@@ -51,14 +53,40 @@ export function UsersTable({
   page,
   rowsPerPage,
   showCompany = false,
+  selectable = false,
+  selectedUsers = [],
+  onUserSelect,
   onViewUser,
   onPageChange,
   onRowsPerPageChange,
   labels,
 }: UsersTableProps) {
-  {
-    console.log(users);
-  }
+  console.log(users);
+
+  // Handle select all functionality
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!onUserSelect) return;
+
+    if (event.target.checked) {
+      // Select all users on current page
+      users.forEach((user) => onUserSelect(user.details.id));
+    } else {
+      // Deselect all users on current page
+      users.forEach((user) => {
+        if (selectedUsers.includes(user.details.id)) {
+          onUserSelect(user.details.id);
+        }
+      });
+    }
+  };
+
+  const allCurrentPageSelected =
+    users.length > 0 &&
+    users.every((user) => selectedUsers.includes(user.details.id));
+
+  const someCurrentPageSelected = users.some((user) =>
+    selectedUsers.includes(user.details.id)
+  );
 
   return (
     <>
@@ -66,6 +94,20 @@ export function UsersTable({
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
+              {/* Select All Checkbox */}
+              {selectable && (
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={
+                      someCurrentPageSelected && !allCurrentPageSelected
+                    }
+                    checked={allCurrentPageSelected}
+                    onChange={handleSelectAll}
+                    color="primary"
+                  />
+                </TableCell>
+              )}
+
               <TableCell sx={{ fontWeight: "bold" }}>
                 {labels?.columns?.name}
               </TableCell>
@@ -89,19 +131,21 @@ export function UsersTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map(
-              (user) => (
-                console.log(user),
-                (
-                  <UserTableRow
-                    key={user.details.id}
-                    user={user}
-                    onViewUser={onViewUser}
-                    showCompany={showCompany}
-                  />
-                )
-              )
-            )}
+            {users.map((user) => (
+              <UserTableRow
+                key={user.details.id}
+                user={user}
+                onViewUser={onViewUser || (() => {})}
+                showCompany={showCompany}
+                selectable={selectable} // Pass selectable prop
+                isSelected={selectedUsers.includes(user.details.id)} // Pass isSelected prop
+                onUserSelect={onUserSelect} // Pass onUserSelect prop
+                labels={{
+                  view: "View",
+                  notEnrolled: "Not enrolled",
+                }}
+              />
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

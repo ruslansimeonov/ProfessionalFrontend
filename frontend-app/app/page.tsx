@@ -39,9 +39,7 @@ import {
   Groups as GroupsIcon,
   Work as WorkIcon,
 } from "@mui/icons-material";
-import { useTranslation } from "react-i18next";
 import { useStore } from "./store/useStore";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getServerMessage } from "./utils/apis/api";
 
@@ -75,9 +73,9 @@ interface QuickAction {
 }
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { isAuthenticated, user } = useStore();
-  const router = useRouter();
+  // const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [serverMessage, setServerMessage] = useState<string>("");
   const [loading, setLoading] = useState(true);

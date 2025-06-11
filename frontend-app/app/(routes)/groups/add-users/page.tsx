@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import {
   Container,
   Paper,
@@ -15,22 +15,36 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/app/store/useStore";
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
-import { getUsers } from "@/app/utils/apis/users";
+import { fetchRegisteredUsers } from "@/app/utils/apis/users";
 import { addUsersToGroup } from "@/app/utils/apis/groups";
 import { User } from "@/app/utils/types/types";
 
-export default function AddUsersToGroupPage() {
+// Loading component for Suspense fallback
+function LoadingFallback() {
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+          <CircularProgress />
+        </Box>
+      </Paper>
+    </Container>
+  );
+}
+
+// Component that uses useSearchParams
+function AddUsersToGroupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, user: currentUser } = useStore();
-  const groupId = searchParams.get('groupId');
+  const groupId = searchParams.get("groupId");
 
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -39,27 +53,29 @@ export default function AddUsersToGroupPage() {
   const isAdmin = currentUser?.role === "Admin";
 
   // Load users with search and pagination
-  const loadUsers = useCallback(async (currentPage: number, searchTerm: string = "") => {
-    try {
-      setLoading(true);
-      const response = await getUsers({
-        page: currentPage,
-        pageSize,
-        search: searchTerm
-      });
+  const loadUsers = useCallback(
+    async (currentPage: number, searchTerm: string = "") => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      if (response.success) {
-        setUsers(response.data.users);
-        setTotal(response.data.total);
-      } else {
-        setError(response.error);
+        const response = await fetchRegisteredUsers(
+          currentPage + 1,
+          pageSize,
+          searchTerm
+        );
+
+        setUsers(response.users);
+        setTotal(response.total);
+      } catch (error) {
+        console.error("Failed to load users:", error);
+        setError("Failed to load users");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError("Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize]);
+    },
+    [pageSize]
+  );
 
   useEffect(() => {
     if (!isAuthenticated || !isAdmin) {
@@ -77,29 +93,33 @@ export default function AddUsersToGroupPage() {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setPage(1);
-    loadUsers(1, term);
+    setPage(0);
+    loadUsers(0, term);
   };
 
   const handleRefresh = () => {
     loadUsers(page, searchTerm);
   };
 
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
     setPage(newPage);
     loadUsers(newPage, searchTerm);
   };
 
-  const handlePageSizeChange = (newPageSize: number) => {
+  const handlePageSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newPageSize = parseInt(event.target.value, 10);
     setPageSize(newPageSize);
-    setPage(1);
-    loadUsers(1, searchTerm);
+    setPage(0);
+    loadUsers(0, searchTerm);
   };
 
   const handleUserSelection = (userId: number) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
@@ -110,9 +130,9 @@ export default function AddUsersToGroupPage() {
     try {
       setSaving(true);
       setError(null);
-      
+
       const response = await addUsersToGroup(Number(groupId), selectedUsers);
-      
+
       if (response.success) {
         setSuccessMessage("Users added successfully");
         setSelectedUsers([]);
@@ -122,7 +142,8 @@ export default function AddUsersToGroupPage() {
       } else {
         setError(response.error);
       }
-    } catch (err) {
+    } catch (error) {
+      console.error("Failed to add users to group:", error);
       setError("Failed to add users to group");
     } finally {
       setSaving(false);
@@ -181,6 +202,7 @@ export default function AddUsersToGroupPage() {
             columns: {
               name: "Name",
               idNumber: "EGN",
+              course: "Course",
               company: "Company",
               registrationDate: "Registration Date",
               actions: "Actions",
@@ -188,20 +210,34 @@ export default function AddUsersToGroupPage() {
             pagination: {
               rowsPerPage: "Rows per page:",
             },
-            showCompanyColumn: true,
           }}
         />
 
-        <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+        <Box
+          sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}
+        >
           <Button
             variant="contained"
             onClick={handleAddUsers}
             disabled={saving || selectedUsers.length === 0}
           >
-            {saving ? <CircularProgress size={24} /> : `Add Selected Users (${selectedUsers.length})`}
+            {saving ? (
+              <CircularProgress size={24} />
+            ) : (
+              `Add Selected Users (${selectedUsers.length})`
+            )}
           </Button>
         </Box>
       </Paper>
     </Container>
+  );
+}
+
+// Main component with Suspense wrapper
+export default function AddUsersToGroupPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AddUsersToGroupContent />
+    </Suspense>
   );
 }

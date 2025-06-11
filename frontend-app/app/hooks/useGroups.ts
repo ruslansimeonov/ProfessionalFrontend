@@ -33,7 +33,7 @@ export function useGroups(initialPage = 1, initialPageSize = 10) {
           setTotal(totalCount);
           setPage(responsePage);
         } else {
-          setError(response.error || "Failed to load groups");
+          setError("Failed to load groups");
         }
       } catch (err) {
         setError("Failed to load groups");
@@ -54,8 +54,8 @@ export function useGroups(initialPage = 1, initialPageSize = 10) {
       } else {
         setError(response.error);
       }
-    } catch (err) {
-      setError("Failed to load group users");
+    } catch (error) {
+      console.error("Failed to load group users:", error);
     } finally {
       setLoadingUsers(false);
     }

@@ -124,7 +124,6 @@ export default function OfficePortalPage() {
               pagination: {
                 rowsPerPage: "Rows per page:",
               },
-              showCompanyColumn: false,
             }}
           />
         )}

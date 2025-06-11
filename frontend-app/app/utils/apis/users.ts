@@ -12,7 +12,7 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
     const { data } = await api.get<User>(`/api/users/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return { success: true, data, error: "" };
+    return { success: true, data };
   } catch (error) {
     return handleApiError(error);
   }
@@ -30,7 +30,7 @@ export async function getUsers(): Promise<ApiResponse<User[]>> {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return { success: true, data, error: "" };
+    return { success: true, data };
   } catch (error) {
     return handleApiError(error);
   }

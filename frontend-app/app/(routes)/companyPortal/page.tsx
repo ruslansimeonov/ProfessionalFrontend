@@ -9,6 +9,8 @@ import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
 
+
+
 export default function CompanyPortalPage() {
   const router = useRouter();
   const { isAuthenticated, user: currentUser } = useStore();
@@ -123,7 +125,6 @@ export default function CompanyPortalPage() {
               pagination: {
                 rowsPerPage: "Rows per page:",
               },
-              showCompanyColumn: false,
             }}
           />
         )}
