@@ -82,7 +82,7 @@ export function SearchHeader({
               ),
             },
           }}
-          sx={{ width: 300 }}
+          sx={{ width: 300, ml: 2 }}
         />
         <Button
           variant="outlined"

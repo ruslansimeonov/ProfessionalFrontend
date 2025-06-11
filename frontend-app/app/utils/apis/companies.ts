@@ -19,3 +19,28 @@ export async function getCompanies(): Promise<ApiResponse<Company[]>> {
     return handleApiError(error);
   }
 }
+
+// ✅ Create a new company (Admin only)
+export async function createCompany(companyData: {
+  companyName: string;
+  taxNumber: string;
+  address: string;
+  MOL: string;
+  phoneNumber: string;
+  email: string;
+}): Promise<ApiResponse<Company>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data } = await api.post<Company>("/api/companies", companyData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
