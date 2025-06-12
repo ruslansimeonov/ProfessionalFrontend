@@ -44,3 +44,28 @@ export async function createCompany(companyData: {
     return handleApiError(error);
   }
 }
+
+export interface CompanyRegistrationData {
+  companyName: string;
+  taxNumber: string;
+  address: string;
+  MOL: string;
+  phoneNumber: string;
+  email: string;
+  contactPersonName: string;
+}
+
+// ✅ Register a new company (public access)
+export async function registerCompany(
+  companyData: CompanyRegistrationData
+): Promise<ApiResponse<Company>> {
+  try {
+    const { data } = await api.post(
+      "/api/public/companies/register",
+      companyData
+    );
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
