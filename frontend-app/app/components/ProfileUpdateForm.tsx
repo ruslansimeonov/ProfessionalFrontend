@@ -9,7 +9,7 @@ import {
   CircularProgress,
   Divider,
   Collapse,
-  Grid2,
+  Grid,
   AlertTitle,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -303,8 +303,8 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
         )}
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
-          <Grid2 container spacing={2}>
-            <Grid2 size={{ xs: 12, md: 4 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
                 label={t("personalInfo.formFields.firstName")}
@@ -316,8 +316,8 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 margin="normal"
                 variant={isEditing ? "outlined" : "filled"}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 12, md: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
                 label={t("personalInfo.formFields.middleName")}
@@ -328,8 +328,8 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 margin="normal"
                 variant={isEditing ? "outlined" : "filled"}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 12, md: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
                 label={t("personalInfo.formFields.lastName")}
@@ -341,9 +341,9 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 margin="normal"
                 variant={isEditing ? "outlined" : "filled"}
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label={t("personalInfo.formFields.phoneNumber")}
@@ -354,9 +354,9 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 margin="normal"
                 variant={isEditing ? "outlined" : "filled"}
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label={`${t("personalInfo.formFields.egn")} *`}
@@ -383,9 +383,9 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                     : {}
                 }
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label={`${t("personalInfo.formFields.residencyAddress")} *`}
@@ -414,9 +414,9 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                     : {}
                 }
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label={`${t("personalInfo.formFields.birthPlaceAddress")} *`}
@@ -445,9 +445,9 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                     : {}
                 }
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={{ xs: 12 }}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t("personalInfo.formFields.iban")}
@@ -458,8 +458,8 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 margin="normal"
                 variant={isEditing ? "outlined" : "filled"}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
 
           {isEditing && (
             <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>

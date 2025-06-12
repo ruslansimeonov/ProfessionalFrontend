@@ -20,7 +20,6 @@ import {
   Avatar,
   Alert,
   Skeleton,
-  Grid2,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -259,7 +258,7 @@ export default function HomePage() {
         }}
       />
       <Grid container spacing={3} alignItems="center">
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Typography
             variant="h3"
             component="h1"
@@ -288,7 +287,7 @@ export default function HomePage() {
             </Alert>
           )}
         </Grid>
-        <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
+        <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: "center" }}>
           <Box
             sx={{
               width: 120,
@@ -345,7 +344,7 @@ export default function HomePage() {
     return (
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
             <Card elevation={2} sx={{ height: "100%" }}>
               <CardContent>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -388,13 +387,13 @@ export default function HomePage() {
 
     return (
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
             Бързи действия
           </Typography>
         </Grid>
         {quickActions.map((action, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
             <Card
               elevation={2}
               sx={{
@@ -453,7 +452,7 @@ export default function HomePage() {
     return (
       <Grid container spacing={3}>
         {/* Recent Activity */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
               <NotificationsIcon sx={{ mr: 1 }} />
@@ -485,13 +484,18 @@ export default function HomePage() {
                       <ListItemText
                         primary={activity.description}
                         secondary={
-                          // Fix: Use a React fragment instead of Box to avoid div inside p
-                          <>
+                          <Box
+                            component="div"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
                             <Typography
                               component="span"
                               variant="caption"
                               color="text.secondary"
-                              sx={{ mr: 1 }}
                             >
                               {activity.timestamp}
                             </Typography>
@@ -500,10 +504,9 @@ export default function HomePage() {
                                 label={activity.user}
                                 size="small"
                                 variant="outlined"
-                                sx={{ ml: 1 }}
                               />
                             )}
-                          </>
+                          </Box>
                         }
                       />
                     </ListItem>
@@ -513,7 +516,7 @@ export default function HomePage() {
         </Grid>
 
         {/* Profile Completion / Quick Info */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
             <Typography variant="h6" component="h3" gutterBottom>
               {isAuthenticated ? "Състояние на профила" : "Започнете днес"}
@@ -620,13 +623,13 @@ export default function HomePage() {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Skeleton variant="rectangular" height={200} sx={{ mb: 4 }} />
-        <Grid2 container spacing={3}>
+        <Grid container spacing={3}>
           {Array.from({ length: 4 }).map((_, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
               <Skeleton variant="rectangular" height={150} />
             </Grid>
           ))}
-        </Grid2>
+        </Grid>
       </Container>
     );
   }

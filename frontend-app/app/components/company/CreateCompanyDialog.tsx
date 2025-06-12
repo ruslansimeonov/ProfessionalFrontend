@@ -10,7 +10,7 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Grid2,
+  Grid,
 } from "@mui/material";
 import {
   Business as BusinessIcon,
@@ -178,8 +178,8 @@ export default function CreateCompanyDialog({
           </Alert>
         )}
 
-        <Grid2 container spacing={2} sx={{ mt: 1 }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               required
               fullWidth
@@ -189,9 +189,9 @@ export default function CreateCompanyDialog({
               disabled={loading}
               autoFocus
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               required
               fullWidth
@@ -201,9 +201,9 @@ export default function CreateCompanyDialog({
               disabled={loading}
               placeholder="BG123456789"
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
               label="Address"
@@ -213,9 +213,9 @@ export default function CreateCompanyDialog({
               multiline
               rows={2}
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth
               label="Manager (MOL)"
@@ -223,9 +223,9 @@ export default function CreateCompanyDialog({
               onChange={handleChange("MOL")}
               disabled={loading}
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth
               label="Phone Number"
@@ -234,9 +234,9 @@ export default function CreateCompanyDialog({
               disabled={loading}
               placeholder="0888123456"
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
               label="Email"
@@ -246,8 +246,8 @@ export default function CreateCompanyDialog({
               disabled={loading}
               placeholder="info@company.com"
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>

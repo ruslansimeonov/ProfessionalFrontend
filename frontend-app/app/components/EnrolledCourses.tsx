@@ -67,8 +67,8 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                   alignItems: "flex-start",
                 }}
               >
-                <Grid container spacing={1} alignItems="center">
-                  <Grid item xs={12}>
+                <Grid container spacing={1}>
+                  <Grid size={12}>
                     <Box
                       sx={{
                         display: "flex",
@@ -89,7 +89,7 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12}>
+                  <Grid size={12}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                       <CalendarIcon
                         fontSize="small"
@@ -101,7 +101,7 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12}>
+                  <Grid size={12}>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <TimeIcon
@@ -126,7 +126,7 @@ const EnrolledCoursesCard: React.FC<EnrolledCoursesProps> = ({ courses }) => {
                   </Grid>
 
                   {course.courseDetails && (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                       <Typography
                         variant="body2"
                         color="text.secondary"

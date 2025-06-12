@@ -104,7 +104,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         files,
         docTypeNames,
       });
-      
+
       if (response.success) {
         setSuccess("Documents uploaded successfully!");
         // Clear selected files
@@ -140,13 +140,18 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         Upload Documents
       </Typography>
 
-      <Typography variant="body2" gutterBottom color="textSecondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        gutterBottom
+        color="textSecondary"
+        sx={{ mb: 3 }}
+      >
         Select the files for the document types you need to upload:
       </Typography>
 
       <Grid container spacing={2}>
         {docTypes.map(({ name, label }) => (
-          <Grid item xs={12} sm={6} key={name}>
+          <Grid size={{ xs: 12, md: 6 }} key={name}>
             <Card
               variant="outlined"
               sx={{
@@ -229,7 +234,13 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 
       <Divider sx={{ my: 3 }} />
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Chip
           label={`${selectedFilesCount} file${
             selectedFilesCount !== 1 ? "s" : ""
@@ -237,13 +248,15 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           color={selectedFilesCount > 0 ? "primary" : "default"}
           variant={selectedFilesCount > 0 ? "filled" : "outlined"}
         />
-        
+
         <Button
           variant="contained"
           color="primary"
           onClick={handleUpload}
           disabled={selectedFilesCount === 0 || uploading}
-          startIcon={uploading ? <CircularProgress size={20} /> : <UploadIcon />}
+          startIcon={
+            uploading ? <CircularProgress size={20} /> : <UploadIcon />
+          }
         >
           {uploading ? "Uploading..." : "Upload Selected Files"}
         </Button>

@@ -81,7 +81,7 @@ const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
           const isMissing = required && isDocTypeMissing(name, missingDocTypes);
 
           return (
-            <Grid item xs={12} sm={6} key={name}>
+            <Grid size={{ xs: 12, sm: 6 }} key={name}>
               <Card
                 variant="outlined"
                 sx={{
