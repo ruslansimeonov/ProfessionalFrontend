@@ -11,11 +11,14 @@ export interface RegisterForm {
   password: string;
   courseId: number;
   cityId: number;
+  invitationCode?: string; 
 }
 
 export interface RegisteredUserResponse {
   message: string;
-  user: User; // Using User type from types.ts instead of 'any'
+  user: User;
+  companyLinked: boolean;
+  companyName?: string | null; // Optional, can be null if no company is linked
 }
 
 // ✅ Register a User

@@ -27,6 +27,7 @@ export interface RegistrationData {
   username: string;
   email: string;
   password: string;
+  invitationCode?: string;
 }
 
 export interface RegistrationFormData {
@@ -36,6 +37,7 @@ export interface RegistrationFormData {
   cityId: number;
   email: string;
   password: string;
+  invitationCode?: string;
 }
 
 export function useCourseRegistration() {
@@ -111,12 +113,19 @@ export function useCourseRegistration() {
         username: formData.email,
         email: formData.email,
         password: formData.password,
+        invitationCode: formData.invitationCode, // Optional field
       };
 
       const result = await registerUser(registrationData);
 
       if (result.success) {
-        setSuccessMessage("Успешна регистрация! Влизане в профила...");
+        const companyMessage = result.data.companyLinked
+          ? ` You have been linked to ${result.data.companyName}.`
+          : "";
+
+        setSuccessMessage(
+          `Успешна регистрация!${companyMessage} Влизане в профила...`
+        );
 
         // Use the updated login method with the correct payload
         const loginResult = await login({

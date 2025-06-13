@@ -483,32 +483,36 @@ export default function HomePage() {
                       </ListItemIcon>
                       <ListItemText
                         primary={activity.description}
-                        secondary={
-                          <Box
-                            component="div"
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <Typography
-                              component="span"
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {activity.timestamp}
-                            </Typography>
-                            {activity.user && (
-                              <Chip
-                                label={activity.user}
-                                size="small"
-                                variant="outlined"
-                              />
-                            )}
-                          </Box>
-                        }
+                        // Fix: Use custom secondary content that doesn't create a <p> tag
+                        secondary={null}
+                        secondaryTypographyProps={{
+                          component: "div", // This forces it to render as div instead of p
+                        }}
                       />
+                      {/* Render the secondary content manually */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          mt: 0.5,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          component="span"
+                        >
+                          {activity.timestamp}
+                        </Typography>
+                        {activity.user && (
+                          <Chip
+                            label={activity.user}
+                            size="small"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
                     </ListItem>
                   ))}
             </List>

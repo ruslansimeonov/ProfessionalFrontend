@@ -24,6 +24,7 @@ import {
   ExitToApp as LogoutIcon,
   Login as LoginIcon,
   HowToReg as RegisterIcon,
+  Business as BusinessIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 
@@ -160,6 +161,16 @@ export default function Navbar() {
                   }}
                 >
                   {t("navigation.groups")}
+                </Button>
+              )}
+              {isAdmin && (
+                <Button
+                  color="inherit"
+                  component={Link}
+                  href="/officePortal/company"
+                  startIcon={<BusinessIcon />}
+                >
+                  Company Management
                 </Button>
               )}
               <Button

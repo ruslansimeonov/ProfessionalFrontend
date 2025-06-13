@@ -1,9 +1,12 @@
 "use client";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import FormCard from "@/app/components/common/FormCard";
 import PersonalInfoFields from "@/app/components/registration/PersonalInfoFields";
 import CourseSelectionFields from "@/app/components/registration/CourseSelectionFields";
 import AuthFields from "@/app/components/registration/AuthFields";
+import InvitationCodeField from "@/app/components/invitation/InvitationInput"; // Updated import path
 import SubmitButton from "@/app/components/registration/SubmitButton";
 import {
   useCourseRegistration,
@@ -11,6 +14,9 @@ import {
 } from "@/app/hooks/useCourseRegistration";
 
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
+  const invitationCode = searchParams.get("code");
+
   const {
     courses,
     cities,
@@ -24,8 +30,17 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue, // Add setValue
     formState: { errors },
   } = useForm<RegistrationFormData>();
+
+  // Set invitation code from URL parameter
+  useEffect(() => {
+    if (invitationCode) {
+      setValue("invitationCode", invitationCode.toUpperCase());
+    }
+  }, [invitationCode, setValue]);
 
   return (
     <FormCard
@@ -39,6 +54,14 @@ export default function RegisterPage() {
           register={register}
           errors={errors}
           validateFullName={validateFullName}
+        />
+
+        {/* Company Invitation Code */}
+        <InvitationCodeField
+          register={register}
+          errors={errors}
+          watch={watch}
+          setValue={setValue} // Pass setValue prop
         />
 
         {/* Course Selection */}
