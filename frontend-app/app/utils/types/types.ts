@@ -20,6 +20,27 @@ export interface Company {
   taxNumber: string;
   address: string;
   email: string;
+  phoneNumber: string;
+
+  MOL: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Invitation {
+  id: number;
+  invitationCode: string;
+  maxUses: number;
+  currentUses: number;
+  usageCount: number;
+  expiresAt: string;
+  isActive: boolean;
+  isExpired: boolean;
+  isUsable: boolean;
+  companyName: string;
+  createdByName: string;
+  createdAt: string;
 }
 
 export interface Course {
@@ -49,7 +70,7 @@ export interface Document {
   documentUrl: string;
   uploadedAt: Date;
   isActive: boolean;
-  documentStatus?: "complete" | "incomplete" | "unknown"; 
+  documentStatus?: "complete" | "incomplete" | "unknown";
 }
 
 export interface Certificate {

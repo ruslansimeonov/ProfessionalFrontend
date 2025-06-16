@@ -54,7 +54,7 @@ export default function HomePage() {
         {/* Quick Actions Section */}
         <QuickActions
           isAuthenticated={isAuthenticated}
-          userRole={user?.role}
+          userRole={Array.isArray(user?.role) ? user.role[0] : user?.role}
           onLogin={handleLogin}
           onRegister={handleRegister}
           onDashboard={handleDashboard}

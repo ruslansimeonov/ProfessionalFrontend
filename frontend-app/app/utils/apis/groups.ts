@@ -168,7 +168,8 @@ export async function getGroupUsersWithDocumentStatus(groupId: number): Promise<
     );
 
     return { success: true, data };
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Failed to get group users with document status:", error);
 
     return {
@@ -207,6 +208,7 @@ export async function getGroupDocumentStatusSummary(groupId: number): Promise<
     );
 
     return { success: true, data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Failed to get group document status summary:", error);
 

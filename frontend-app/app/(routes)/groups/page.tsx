@@ -51,7 +51,6 @@ export default function GroupsPage() {
     pageSize,
     total,
     handlePageChange,
-    handlePageSizeChange,
     loadGroups,
   } = useGroups();
 
@@ -199,20 +198,20 @@ export default function GroupsPage() {
     }
   };
 
-  // Pagination wrapper functions
-  const handlePageChangeWrapper = (
-    event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    handlePageChange(newPage);
-  };
+  // // Pagination wrapper functions
+  // const handlePageChangeWrapper = (
+  //   event: React.MouseEvent<HTMLButtonElement> | null,
+  //   newPage: number
+  // ) => {
+  //   handlePageChange(newPage);
+  // };
 
-  const handlePageSizeChangeWrapper = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newPageSize = parseInt(event.target.value, 10);
-    handlePageSizeChange(newPageSize);
-  };
+  // const handlePageSizeChangeWrapper = (
+  //   event: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const newPageSize = parseInt(event.target.value, 10);
+  //   handlePageSizeChange(newPageSize);
+  // };
 
   // Close success message
   const handleCloseSuccessMessage = () => {

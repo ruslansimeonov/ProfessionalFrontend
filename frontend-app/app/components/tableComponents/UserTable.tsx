@@ -9,7 +9,6 @@ import {
   Checkbox,
   Box,
   Tooltip,
-  CircularProgress,
 } from "@mui/material";
 import { User } from "@/app/utils/types/types";
 import { UserTableRow } from "./UserTableRow";

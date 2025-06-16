@@ -2,24 +2,6 @@ import { getAuthToken } from "../tokenHelpers";
 import { Company } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
-// // ✅ Fetch all companies (requires authentication)
-// export async function getCompanies(): Promise<ApiResponse<Company[]>> {
-//   try {
-//     const token = getAuthToken();
-//     if (!token) {
-//       return { success: false, error: "No token found" };
-//     }
-
-//     const { data } = await api.get<Company[]>("/api/companies", {
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-
-//     return { success: true, data };
-//   } catch (error) {
-//     return handleApiError(error);
-//   }
-// }
-
 /**
  * Get all companies (protected endpoint)
  */
@@ -78,8 +60,12 @@ export async function getCompanies(params?: {
       return {
         success: true,
         data: {
-          companies: response.data as Company[],
-          total: (response.data as Company[]).length,
+          companies: (response.data as { companies: Company[]; total: number })
+            .companies,
+          total:
+            (response.data as { companies: Company[]; total: number }).total ||
+            (response.data as { companies: Company[]; total: number }).companies
+              .length,
         },
       };
     }

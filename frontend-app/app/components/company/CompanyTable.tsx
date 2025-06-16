@@ -47,7 +47,6 @@ export default function CompaniesTable({
   total,
   page,
   rowsPerPage,
-  loading,
   onViewCompany,
   onPageChange,
   onRowsPerPageChange,

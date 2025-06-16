@@ -27,34 +27,7 @@ import { getCompanyById } from "@/app/utils/apis/companies";
 import { getCompanyInvitations } from "@/app/utils/apis/invitationCodes"; // Fixed import path
 import CreateInvitationDialog from "./CompanyInvitationDialog"; // Fixed import
 import InvitationsTable from "../invitation/InvitationsTable"; // Fixed import
-
-interface CompanyDetails {
-  id: number;
-  companyName: string;
-  taxNumber: string;
-  address: string;
-  MOL: string;
-  phoneNumber: string;
-  email: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Invitation {
-  id: number;
-  invitationCode: string;
-  maxUses: number;
-  currentUses: number;
-  usageCount: number;
-  expiresAt: string;
-  isActive: boolean;
-  isExpired: boolean;
-  isUsable: boolean;
-  companyName: string;
-  createdByName: string;
-  createdAt: string;
-}
+import { Company, Invitation } from "@/app/utils/types/types";
 
 interface CompanyManagementDialogProps {
   open: boolean;
@@ -67,7 +40,7 @@ export default function CompanyManagementDialog({
   onClose,
   companyId,
 }: CompanyManagementDialogProps) {
-  const [company, setCompany] = useState<CompanyDetails | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(false);
   const [invitationsLoading, setInvitationsLoading] = useState(false);
@@ -214,7 +187,7 @@ export default function CompanyManagementDialog({
                   Company Information
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Company Name
                     </Typography>
@@ -222,7 +195,7 @@ export default function CompanyManagementDialog({
                       {company.companyName}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Tax Number
                     </Typography>
@@ -233,13 +206,13 @@ export default function CompanyManagementDialog({
                       {company.taxNumber}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Email
                     </Typography>
                     <Typography variant="body1">{company.email}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Phone Number
                     </Typography>
@@ -247,13 +220,13 @@ export default function CompanyManagementDialog({
                       {company.phoneNumber || "N/A"}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Manager (MOL)
                     </Typography>
                     <Typography variant="body1">{company.MOL}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Status
                     </Typography>
@@ -264,13 +237,13 @@ export default function CompanyManagementDialog({
                       sx={{ textTransform: "capitalize" }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Address
                     </Typography>
                     <Typography variant="body1">{company.address}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Created
                     </Typography>
@@ -278,7 +251,7 @@ export default function CompanyManagementDialog({
                       {formatDate(company.createdAt)}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Last Updated
                     </Typography>

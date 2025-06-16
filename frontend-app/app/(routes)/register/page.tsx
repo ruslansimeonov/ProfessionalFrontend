@@ -1,7 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import FormCard from "@/app/components/common/FormCard";
 import PersonalInfoFields from "@/app/components/registration/PersonalInfoFields";
 import CourseSelectionFields from "@/app/components/registration/CourseSelectionFields";
@@ -12,8 +12,9 @@ import {
   useCourseRegistration,
   RegistrationFormData,
 } from "@/app/hooks/useCourseRegistration";
+import { Box, CircularProgress } from "@mui/material";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const searchParams = useSearchParams();
   const invitationCode = searchParams.get("code");
 
@@ -82,5 +83,30 @@ export default function RegisterPage() {
         />
       </form>
     </FormCard>
+  );
+}
+
+// Loading component for Suspense fallback
+function RegisterPageLoading() {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "50vh",
+      }}
+    >
+      <CircularProgress size={40} />
+    </Box>
+  );
+}
+
+// Main page component with Suspense wrapper
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterPageLoading />}>
+      <RegisterForm />
+    </Suspense>
   );
 }

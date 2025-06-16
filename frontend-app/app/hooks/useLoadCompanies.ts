@@ -1,22 +1,6 @@
 import { useState, useCallback } from "react";
 import { getCompanies } from "@/app/utils/apis/companies";
-
-interface Company {
-  id: number;
-  companyName: string;
-  taxNumber: string;
-  address: string;
-  MOL: string;
-  phoneNumber: string;
-  email: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  iban: string | null;
-  companyDetails: string;
-  userCount?: number;
-}
+import { Company } from "@/app/utils/types/types";
 
 export function useLoadCompanies() {
   // Initialize with empty array instead of undefined
@@ -57,8 +41,11 @@ export function useLoadCompanies() {
           setCompanies(response.data.companies || []);
           setTotal(response.data.total || 0);
         } else {
-          console.error("API Error:", response.error);
-          setError(response.error || "Failed to load companies");
+          const errorMessage = !response.success
+            ? "API request failed"
+            : "Failed to load companies";
+          console.error("API Error:", errorMessage);
+          setError(errorMessage);
           setCompanies([]);
           setTotal(0);
         }
