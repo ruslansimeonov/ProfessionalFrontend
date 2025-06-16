@@ -18,8 +18,11 @@ import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import CompaniesTable from "@/app/components/company/CompanyTable";
 import CreateCompanyDialog from "@/app/components/company/CreateCompanyDialog";
 import CompanyManagementDialog from "@/app/components/company/CompanyManagementDialog";
+import { useTranslation } from "react-i18next";
 
 export default function OfficePortalCompanyPage() {
+  const { t } = useTranslation();
+
   const router = useRouter();
   const { isAuthenticated, user } = useStore();
   const isAdmin = user?.role === "Admin";
@@ -99,7 +102,7 @@ export default function OfficePortalCompanyPage() {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <BusinessIcon color="primary" sx={{ fontSize: 32 }} />
             <Typography variant="h5" component="h1" fontWeight="bold">
-              Company Management
+              {t("company.management")}
             </Typography>
           </Box>
 
@@ -109,7 +112,7 @@ export default function OfficePortalCompanyPage() {
             onClick={() => setCreateCompanyDialogOpen(true)}
             sx={{ minWidth: "fit-content" }}
           >
-            Add Company
+            {t("companyPortal.addCompany")}
           </Button>
         </Box>
 
@@ -121,10 +124,10 @@ export default function OfficePortalCompanyPage() {
           onSearch={handleSearch}
           onRefresh={handleRefresh}
           onClear={() => setSearchTerm("")}
-          placeholder="Search companies by name or tax number..."
+          placeholder={t("search.companies")}
           labels={{
-            search: "Search",
-            refresh: "Refresh",
+            search: t("common.search"),
+            refresh: t("common.refresh"),
           }}
         />
 

@@ -31,8 +31,10 @@ import { Company } from "@/app/utils/types/types";
 import { getCompanies } from "@/app/utils/apis/companies";
 import FormDialog from "@/app/components/dialogs/FormDialog";
 import GroupListItem from "@/app/components/groups/GroupListItem";
+import { useTranslation } from "react-i18next";
 
 export default function GroupsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user: currentUser } = useStore();
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
@@ -93,7 +95,6 @@ export default function GroupsPage() {
           if (response && response.success) {
             // Now check for the correct structure: response.data.companies
             if (response.data && Array.isArray(response.data.companies)) {
-              console.log("Setting companies:", response.data.companies);
               setCompanies(response.data.companies); // Use response.data.companies, not response.data
             } else {
               console.error(
@@ -175,14 +176,14 @@ export default function GroupsPage() {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
         <SearchHeader
-          title="Course Groups"
+          title={t("groups.title")}
           searchTerm={searchTerm}
           loading={loading}
           onSearchChange={handleSearch}
           onSearch={() => handleSearch(searchTerm)}
           onRefresh={handleRefresh}
           onClear={() => handleSearch("")}
-          placeholder="Search groups by name..."
+          placeholder={t("groups.search.placeholder")}
         />
 
         {isAdmin && (
@@ -192,7 +193,7 @@ export default function GroupsPage() {
             onClick={handleCreateClick}
             sx={{ minWidth: "fit-content" }}
           >
-            Add Group
+            {t("groups.addGroup")}
           </Button>
         )}
 
@@ -209,10 +210,10 @@ export default function GroupsPage() {
               hasSearch={!!searchTerm}
               onRefresh={handleRefresh}
               labels={{
-                tryAgain: "Try Again",
-                noResults: "No groups found",
-                noUsers: "No users in this group",
-                showAll: "Show all groups",
+                tryAgain: t("common.tryAgain"),
+                noResults: t("common.noResults"),
+                noUsers: t("common.noUsers"),
+                showAll: t("common.showAll"),
               }}
             />
           ) : (
@@ -236,7 +237,7 @@ export default function GroupsPage() {
         {selectedGroup && !loading && (
           <Box sx={{ mt: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              Group Members
+              {t("groups.groupMembers")}
             </Typography>
             {isAdmin && (
               <Button
@@ -247,7 +248,7 @@ export default function GroupsPage() {
                 }
                 sx={{ ml: 2 }}
               >
-                Add Members
+                {t("groups.addMembers")}
               </Button>
             )}
             <UsersTable
@@ -258,19 +259,19 @@ export default function GroupsPage() {
               loading={loadingUsers}
               showCompany={true}
               onViewUser={(id) => router.push(`/officePortal/users/${id}`)}
-              onPageChange={handlePageChangeWrapper} // Fixed handler
-              onRowsPerPageChange={handlePageSizeChangeWrapper} // Fixed handler
+              onPageChange={handlePageChangeWrapper}
+              onRowsPerPageChange={handlePageSizeChangeWrapper}
               labels={{
                 columns: {
-                  name: "Name",
-                  idNumber: "EGN",
-                  course: "Course",
-                  company: "Company",
-                  registrationDate: "Registration Date",
-                  actions: "Actions",
+                  name: t("common.name"),
+                  idNumber: t("common.idNumber"),
+                  course: t("common.course"),
+                  company: t("common.company"),
+                  registrationDate: t("common.registrationDate"),
+                  actions: t("common.actions"),
                 },
                 pagination: {
-                  rowsPerPage: "Rows per page:",
+                  rowsPerPage: t("common.rowsPerPage"),
                 },
               }}
             />
@@ -280,16 +281,16 @@ export default function GroupsPage() {
         {/* Add Group Dialog */}
         <FormDialog
           open={openDialog}
-          title="Create New Group"
+          title={t("groups.createNew")}
           onClose={handleCloseDialog}
           onSubmit={handleCreateGroup}
           isLoading={createLoading}
           isValid={!!newGroup.name && !!newGroup.companyId}
-          submitLabel="Create"
+          submitLabel={t("groups.create")}
         >
           <TextField
             autoFocus
-            label="Group Name"
+            label={t("groups.groupName")}
             fullWidth
             value={newGroup.name}
             onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
@@ -298,25 +299,26 @@ export default function GroupsPage() {
           />
 
           <FormControl fullWidth>
-            <InputLabel>Company</InputLabel>
+            <InputLabel>{t("groups.company")}</InputLabel>
             <Select
               value={newGroup.companyId}
               onChange={(e) =>
                 setNewGroup({ ...newGroup, companyId: e.target.value })
               }
-              label="Company"
+              label={t("groups.company")}
               disabled={companiesLoading}
             >
               {companiesLoading ? (
                 <MenuItem disabled>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <CircularProgress size={16} />
-                    Loading companies...
+                    {t("groups.loadingCompanies")}
                   </Box>
                 </MenuItem>
               ) : companiesError ? (
-                (console.log("Error loading companies:", companiesError),
-                (<MenuItem disabled>Error loading companies</MenuItem>))
+                <MenuItem disabled>
+                  {t("groups.errorLoadingCompanies")}
+                </MenuItem>
               ) : companies &&
                 Array.isArray(companies) &&
                 companies.length > 0 ? (
@@ -326,7 +328,7 @@ export default function GroupsPage() {
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem disabled>No companies available</MenuItem>
+                <MenuItem disabled>{t("groups.noCompaniesAvailable")}</MenuItem>
               )}
             </Select>
           </FormControl>

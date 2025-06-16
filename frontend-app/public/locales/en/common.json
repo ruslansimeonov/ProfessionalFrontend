@@ -27,6 +27,22 @@
       "required": "Required field"
     }
   },
+  "common": {
+    "name": "Name",
+    "idNumber": "ID Number",
+    "course": "Course",
+    "company": "Company",
+    "registrationDate": "Registration Date",
+    "actions": "Actions",
+    "rowsPerPage": "Rows per page",
+    "search": "Search",
+    "refresh": "Refresh",
+    "tryAgain": "Try Again",
+    "noResults": "No results found",
+    "noUsers": "No users found",
+    "noUsersRegistered": "No users registered",
+    "showAll": "Show All"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "courses": "Courses",
@@ -119,5 +135,70 @@
   },
   "modes": {
     "adminMode": "Admin Mode"
+  },
+  "groups": {
+    "title": "Course Groups",
+    "addGroup": "Add Group",
+    "addMembers": "Add Members",
+    "groupMembers": "Group Members",
+    "createNew": "Create New Group",
+    "groupName": "Group Name",
+    "company": "Company",
+    "created": "Created",
+    "backToGroups": "Back to Groups",
+    "addUsersToGroup": "Add Users to Group",
+    "selectUsers": "Select Users",
+    "addSelectedUsers": "Add Selected Users",
+    "usersAddedSuccessfully": "Users added successfully",
+    "noCompaniesAvailable": "No companies available",
+    "errorLoadingCompanies": "Error loading companies",
+    "loadingCompanies": "Loading companies...",
+    "create": "Create",
+    "search": {
+      "placeholder": "Search groups by name...",
+      "users": "Search users..."
+    }
+  },
+  "officePortal": {
+    "title": "Office Portal Users",
+    "userManagement": "User Management",
+    "back": "Back",
+    "status": "Status",
+    "active": "Active",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "registeredOn": "Registered on",
+    "notSpecified": "Not specified",
+    "phoneNumber": "Phone Number"
+  },
+  "companyPortal": {
+    "title": "Company Users",
+    "addCompany": "Add Company"
+  },
+  "search": {
+    "placeholder": "Search...",
+    "byName": "Search by name or ID",
+    "byNameIdCourse": "Search by name, ID, course...",
+    "companies": "Search companies by name or tax number...",
+    "users": "Search users...",
+    "clear": "Clear search"
+  },
+  "loading": {
+    "users": "Loading users...",
+    "companies": "Loading companies...",
+    "documents": "Loading documents..."
+  },
+  "errors": {
+    "failedToLoadUsers": "Failed to load users",
+    "failedToLoadAvailableUsers": "Failed to load available users",
+    "failedToAddUsers": "Failed to add users to group",
+    "networkError": "Network error loading data"
+  },
+  "company": {
+    "management": "Company Management",
+    "registration": "Company Registration",
+    "registerCompany": "Register your company to access our professional training platform"
   }
 }

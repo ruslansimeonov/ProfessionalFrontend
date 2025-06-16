@@ -8,6 +8,7 @@ import {
   Divider,
 } from "@mui/material";
 import { formatDate } from "@/app/utils/documentUtils";
+import { useTranslation } from "react-i18next";
 
 interface GroupListItemProps {
   id: number;
@@ -26,6 +27,8 @@ export default function GroupListItem({
   isSelected,
   onClick,
 }: GroupListItemProps) {
+  const { t } = useTranslation();
+
   return (
     <React.Fragment>
       <ListItemButton
@@ -63,7 +66,7 @@ export default function GroupListItem({
                 color="text.secondary"
                 component="span"
               >
-                Created: {formatDate(createdAt)}
+                {t("groups.created")}: {formatDate(createdAt)}
               </Typography>
               {companyName && (
                 <Chip

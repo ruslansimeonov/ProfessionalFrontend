@@ -27,6 +27,22 @@
       "required": "Задължително поле"
     }
   },
+  "common": {
+    "name": "Име",
+    "idNumber": "ЕГН",
+    "course": "Курс",
+    "company": "Фирма",
+    "registrationDate": "Дата на регистрация",
+    "actions": "Действия",
+    "rowsPerPage": "Редове на страница",
+    "search": "Търси",
+    "refresh": "Обнови",
+    "tryAgain": "Опитай отново",
+    "noResults": "Няма намерени резултати",
+    "noUsers": "Няма намерени потребители",
+    "noUsersRegistered": "Няма регистрирани потребители",
+    "showAll": "Покажи всички"
+  },
   "navigation": {
     "dashboard": "Табло",
     "courses": "Курсове",
@@ -119,5 +135,70 @@
   },
   "modes": {
     "adminMode": "Админ режим"
+  },
+  "groups": {
+    "title": "Групи за курсове",
+    "addGroup": "Добави група",
+    "addMembers": "Добави членове",
+    "groupMembers": "Членове на групата",
+    "createNew": "Създай нова група",
+    "groupName": "Име на групата",
+    "company": "Фирма",
+    "created": "Създадена",
+    "backToGroups": "Назад към групите",
+    "addUsersToGroup": "Добави потребители към група",
+    "selectUsers": "Избери потребители",
+    "addSelectedUsers": "Добави избраните потребители",
+    "usersAddedSuccessfully": "Потребителите са добавени успешно",
+    "noCompaniesAvailable": "Няма налични фирми",
+    "errorLoadingCompanies": "Грешка при зареждане на фирмите",
+    "loadingCompanies": "Зареждане на фирми...",
+    "create": "Създай",
+    "search": {
+      "placeholder": "Търси групи по име...",
+      "users": "Търси потребители..."
+    }
+  },
+  "officePortal": {
+    "title": "Потребители в офис портала",
+    "userManagement": "Управление на потребители",
+    "back": "Назад",
+    "status": "Статус",
+    "active": "Активен",
+    "name": "Име",
+    "email": "Имейл",
+    "phone": "Телефон",
+    "company": "Фирма",
+    "registeredOn": "Регистриран на",
+    "notSpecified": "Не е посочен",
+    "phoneNumber": "Телефонен номер"
+  },
+  "companyPortal": {
+    "title": "Потребители на фирмата",
+    "addCompany": "Добави фирма"
+  },
+  "search": {
+    "placeholder": "Търси...",
+    "byName": "Търси по име или номер",
+    "byNameIdCourse": "Търси по име, номер, курс...",
+    "companies": "Търси фирми по име или данъчен номер...",
+    "users": "Търси потребители...",
+    "clear": "Изчисти търсенето"
+  },
+  "loading": {
+    "users": "Зареждане на потребители...",
+    "companies": "Зареждане на фирми...",
+    "documents": "Зареждане на документи..."
+  },
+  "errors": {
+    "failedToLoadUsers": "Неуспешно зареждане на потребители",
+    "failedToLoadAvailableUsers": "Неуспешно зареждане на налични потребители",
+    "failedToAddUsers": "Неуспешно добавяне на потребители към група",
+    "networkError": "Мрежова грешка при зареждане на данни"
+  },
+  "company": {
+    "management": "Управление на фирми",
+    "registration": "Регистрация на фирма",
+    "registerCompany": "Регистрирайте вашата фирма за достъп до нашата професионална обучителна платформа"
   }
 }

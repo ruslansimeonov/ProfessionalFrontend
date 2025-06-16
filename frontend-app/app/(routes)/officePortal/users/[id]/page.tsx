@@ -28,6 +28,7 @@ import { formatDate } from "@/app/utils/documentUtils";
 import AdminUserActions from "@/app/components/admin/AdminUserActions";
 import { User } from "@/app/utils/types/types";
 import { getUser } from "@/app/utils/apis/users";
+import { useTranslation } from "react-i18next";
 
 interface PageProps {
   params: Promise<{ id: string }>; // Updated for Next.js 15
@@ -35,6 +36,7 @@ interface PageProps {
 
 export default function OfficePortalUserProfilePage({ params }: PageProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { isAuthenticated, user: currentUser } = useStore();
   const [userId, setUserId] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -208,14 +210,13 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
             onClick={handleBack}
             variant="outlined"
           >
-            Назад
+            {t("officePortal.back")}
           </Button>
           <Typography variant="h5" component="h1">
-            Управление на потребител
+            {t("officePortal.userManagement")}
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* Admin actions like suspend user, reset password, etc. */}
           <AdminUserActions
             userId={user.details.id}
             userEmail={user.details.email}
@@ -230,7 +231,7 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="subtitle1" component="div">
               <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
-                Име:
+                {t("officePortal.name")}:
               </Box>
               {[
                 user.details.firstName,
@@ -250,7 +251,7 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
             >
               <EmailIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
               <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
-                Email:
+                {t("officePortal.email")}:
               </Box>
               {user.details.email}
             </Typography>
@@ -264,9 +265,9 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
             >
               <PhoneIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
               <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
-                Телефон:
+                {t("officePortal.phone")}:
               </Box>
-              {user.details.phoneNumber || "Не е посочен"}
+              {user.details.phoneNumber || t("officePortal.notSpecified")}
             </Typography>
           </Grid>
 
@@ -278,9 +279,11 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
             >
               <WorkIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
               <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
-                Фирма:
+                {t("officePortal.company")}:
               </Box>
-              {user.company ? user.company.companyName : "Не е посочена"}
+              {user.company
+                ? user.company.companyName
+                : t("officePortal.notSpecified")}
             </Typography>
           </Grid>
 
@@ -292,7 +295,7 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
             >
               <CalendarIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
               <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
-                Регистриран на:
+                {t("officePortal.registeredOn")}:
               </Box>
               {formatDate(user.details.createdAt)}
             </Typography>
@@ -301,9 +304,13 @@ export default function OfficePortalUserProfilePage({ params }: PageProps) {
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
-                Статус:
+                {t("officePortal.status")}:
               </Box>
-              <Chip label="Активен" color="success" size="small" />
+              <Chip
+                label={t("officePortal.active")}
+                color="success"
+                size="small"
+              />
             </Box>
           </Grid>
         </Grid>

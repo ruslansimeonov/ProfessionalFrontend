@@ -8,11 +8,13 @@ import { useLoadUsers } from "@/app/hooks/useLoadUsers";
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
+import { useTranslation } from "react-i18next";
 
 export default function OfficePortalPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useStore();
   const isAdmin = user?.role === "Admin";
+  const { t } = useTranslation();
 
   const {
     users,
@@ -40,8 +42,6 @@ export default function OfficePortalPage() {
   // }, [isAuthenticated, isAdmin, router]);
 
   useEffect(() => {
-    console.log("inside useEffect 2", isAuthenticated, isAdmin);
-
     if (!isAuthenticated || !isAdmin) {
       router.push("/");
       return;
@@ -68,17 +68,17 @@ export default function OfficePortalPage() {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
         <SearchHeader
-          title="Office Portal Users"
+          title={t("officePortal.title")}
           searchTerm={searchTerm}
           loading={loading}
           onSearchChange={setSearchTerm}
           onSearch={handleSearch}
           onRefresh={handleRefresh}
           onClear={() => setSearchTerm("")}
-          placeholder="Search by name or ID"
+          placeholder={t("search.byName")}
           labels={{
-            search: "Search",
-            refresh: "Refresh",
+            search: t("common.search"),
+            refresh: t("common.refresh"),
           }}
         />
 
@@ -88,10 +88,10 @@ export default function OfficePortalPage() {
           hasSearch={!!searchTerm}
           onRefresh={handleRefresh}
           labels={{
-            tryAgain: "Try Again",
-            noResults: "No users found",
-            noUsers: "No users registered",
-            showAll: "Show all users",
+            tryAgain: t("common.tryAgain"),
+            noResults: t("common.noResults"),
+            noUsers: t("common.noUsersRegistered"),
+            showAll: t("common.showAll"),
           }}
         />
 
@@ -114,15 +114,15 @@ export default function OfficePortalPage() {
             onRowsPerPageChange={handleChangeRowsPerPage}
             labels={{
               columns: {
-                name: "Name",
-                idNumber: "ID Number",
-                course: "Course",
-                registrationDate: "Registration Date",
-                actions: "Actions",
-                company: "Company",
+                name: t("common.name"),
+                idNumber: t("common.idNumber"),
+                course: t("common.course"),
+                registrationDate: t("common.registrationDate"),
+                actions: t("common.actions"),
+                company: t("common.company"),
               },
               pagination: {
-                rowsPerPage: "Rows per page:",
+                rowsPerPage: t("common.rowsPerPage"),
               },
             }}
           />

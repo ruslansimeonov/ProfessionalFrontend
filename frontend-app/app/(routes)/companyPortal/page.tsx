@@ -10,9 +10,12 @@ import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
 import CreateCompanyDialog from "@/app/components/company/CreateCompanyDialog";
+import { useTranslation } from "react-i18next";
 
 export default function CompanyPortalPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+
   const { isAuthenticated, user: currentUser } = useStore();
   const isCompany = currentUser?.role === "Company";
   const isAdmin = currentUser?.role === "Admin";
@@ -71,11 +74,6 @@ export default function CompanyPortalPage() {
     router.push(`/companyPortal/users/${userId}`);
   };
 
-  const handleCreateCompanySuccess = () => {
-    // Refresh the page or show a success message
-    handleRefresh();
-  };
-
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
@@ -83,22 +81,22 @@ export default function CompanyPortalPage() {
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             mb: 3,
           }}
         >
           <SearchHeader
-            title="Company Users"
+            title={t("companyPortal.title")}
             searchTerm={searchTerm}
             loading={loading}
             onSearchChange={setSearchTerm}
             onSearch={handleSearch}
             onRefresh={handleRefresh}
             onClear={() => setSearchTerm("")}
-            placeholder="Search by name, ID, course..."
+            placeholder={t("search.byNameIdCourse")}
             labels={{
-              search: "Search",
-              refresh: "Refresh",
+              search: t("common.search"),
+              refresh: t("common.refresh"),
             }}
           />
 
@@ -110,7 +108,7 @@ export default function CompanyPortalPage() {
               onClick={() => setCreateCompanyDialogOpen(true)}
               sx={{ ml: 2, minWidth: "fit-content" }}
             >
-              Add Company
+              {t("companyPortal.addCompany")}
             </Button>
           )}
         </Box>
@@ -121,10 +119,10 @@ export default function CompanyPortalPage() {
           hasSearch={!!searchTerm}
           onRefresh={handleRefresh}
           labels={{
-            tryAgain: "Try Again",
-            noResults: "No users found",
-            noUsers: "No users registered",
-            showAll: "Show all users",
+            tryAgain: t("common.tryAgain"),
+            noResults: t("common.noResults"),
+            noUsers: t("common.noUsersRegistered"),
+            showAll: t("common.showAll"),
           }}
         />
 
@@ -147,14 +145,14 @@ export default function CompanyPortalPage() {
             onRowsPerPageChange={handleChangeRowsPerPage}
             labels={{
               columns: {
-                name: "Name",
-                idNumber: "EGN",
-                course: "Course",
-                registrationDate: "Registration Date",
-                actions: "Actions",
+                name: t("common.name"),
+                idNumber: t("common.idNumber"),
+                course: t("common.course"),
+                registrationDate: t("common.registrationDate"),
+                actions: t("common.actions"),
               },
               pagination: {
-                rowsPerPage: "Rows per page:",
+                rowsPerPage: t("common.rowsPerPage"),
               },
             }}
           />
@@ -164,7 +162,7 @@ export default function CompanyPortalPage() {
         <CreateCompanyDialog
           open={createCompanyDialogOpen}
           onClose={() => setCreateCompanyDialogOpen(false)}
-          onSuccess={handleCreateCompanySuccess}
+          onSuccess={handleRefresh}
         />
       </Paper>
     </Container>

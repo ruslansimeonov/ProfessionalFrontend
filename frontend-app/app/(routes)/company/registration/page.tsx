@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { useCompanyRegistration } from "@/app/hooks/useCompanyRegistration";
 import { Business as BusinessIcon } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 const companyRegistrationSchema = z.object({
   companyName: z.string().min(2, "Company name must be at least 2 characters"),
@@ -33,6 +34,7 @@ type CompanyRegistrationFormData = z.infer<typeof companyRegistrationSchema>;
 export default function CompanyRegisterPage() {
   const { loading, errorMessage, successMessage, handleRegistration } =
     useCompanyRegistration();
+  const { t } = useTranslation();
 
   const {
     register,
@@ -74,10 +76,10 @@ export default function CompanyRegisterPage() {
               mb: 1,
             }}
           >
-            Company Registration
+            {t("company.registration")}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            Register your company to access our professional training platform
+            {t("company.registerCompany")}
           </Typography>
         </Box>
 

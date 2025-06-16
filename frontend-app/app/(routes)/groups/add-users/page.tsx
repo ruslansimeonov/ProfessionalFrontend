@@ -15,9 +15,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/app/store/useStore";
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
-import { fetchRegisteredUsers } from "@/app/utils/apis/users";
-import { addUsersToGroup, fetchAvailableUsersForGroup } from "@/app/utils/apis/groups";
+import {
+  addUsersToGroup,
+  fetchAvailableUsersForGroup,
+} from "@/app/utils/apis/groups";
 import { User } from "@/app/utils/types/types";
+import { useTranslation } from "react-i18next";
 
 // Loading component for Suspense fallback
 function LoadingFallback() {
@@ -34,6 +37,8 @@ function LoadingFallback() {
 
 // Component that uses useSearchParams
 function AddUsersToGroupContent() {
+  const { t } = useTranslation();
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, user: currentUser } = useStore();
@@ -53,32 +58,32 @@ function AddUsersToGroupContent() {
   const isAdmin = currentUser?.role === "Admin";
 
   // Load users with search and pagination
-const loadUsers = useCallback(
-  async (currentPage: number, searchTerm: string = "") => {
-    try {
-      setLoading(true);
-      setError(null);
+  const loadUsers = useCallback(
+    async (currentPage: number, searchTerm: string = "") => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Use the new API that filters out existing group members
-      // and applies company restrictions if applicable
-      const response = await fetchAvailableUsersForGroup(
-        Number(groupId),
-        currentPage + 1,
-        pageSize,
-        searchTerm
-      );
+        // Use the new API that filters out existing group members
+        // and applies company restrictions if applicable
+        const response = await fetchAvailableUsersForGroup(
+          Number(groupId),
+          currentPage + 1,
+          pageSize,
+          searchTerm
+        );
 
-      setUsers(response.users);
-      setTotal(response.total);
-    } catch (error) {
-      console.error("Failed to load available users:", error);
-      setError("Failed to load available users");
-    } finally {
-      setLoading(false);
-    }
-  },
-  [groupId, pageSize]
-);
+        setUsers(response.users);
+        setTotal(response.total);
+      } catch (error) {
+        console.error("Failed to load available users:", error);
+        setError(t("errors.failedToLoadAvailableUsers"));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [groupId, pageSize, t]
+  );
 
   useEffect(() => {
     if (!isAuthenticated || !isAdmin) {
@@ -137,7 +142,7 @@ const loadUsers = useCallback(
       const response = await addUsersToGroup(Number(groupId), selectedUsers);
 
       if (response.success) {
-        setSuccessMessage("Users added successfully");
+        setSuccessMessage(t("groups.usersAddedSuccessfully"));
         setSelectedUsers([]);
         setTimeout(() => {
           router.push("/groups");
@@ -147,7 +152,7 @@ const loadUsers = useCallback(
       }
     } catch (error) {
       console.error("Failed to add users to group:", error);
-      setError("Failed to add users to group");
+      setError(t("errors.failedToAddUsers"));
     } finally {
       setSaving(false);
     }
@@ -161,9 +166,9 @@ const loadUsers = useCallback(
             startIcon={<ArrowBackIcon />}
             onClick={() => router.push("/groups")}
           >
-            Back to Groups
+            {t("groups.backToGroups")}
           </Button>
-          <Typography variant="h5">Add Users to Group</Typography>
+          <Typography variant="h5">{t("groups.addUsersToGroup")}</Typography>
         </Box>
 
         {error && (
@@ -179,14 +184,14 @@ const loadUsers = useCallback(
         )}
 
         <SearchHeader
-          title="Select Users"
+          title={t("groups.selectUsers")}
           searchTerm={searchTerm}
           loading={loading}
           onSearchChange={handleSearch}
           onSearch={() => handleSearch(searchTerm)}
           onRefresh={handleRefresh}
           onClear={() => handleSearch("")}
-          placeholder="Search users..."
+          placeholder={t("groups.search.users")}
         />
 
         <UsersTable
@@ -203,15 +208,15 @@ const loadUsers = useCallback(
           onRowsPerPageChange={handlePageSizeChange}
           labels={{
             columns: {
-              name: "Name",
-              idNumber: "EGN",
-              course: "Course",
-              company: "Company",
-              registrationDate: "Registration Date",
-              actions: "Actions",
+              name: t("common.name"),
+              idNumber: t("common.idNumber"),
+              course: t("common.course"),
+              company: t("common.company"),
+              registrationDate: t("common.registrationDate"),
+              actions: t("common.actions"),
             },
             pagination: {
-              rowsPerPage: "Rows per page:",
+              rowsPerPage: t("common.rowsPerPage"),
             },
           }}
         />
@@ -227,7 +232,7 @@ const loadUsers = useCallback(
             {saving ? (
               <CircularProgress size={24} />
             ) : (
-              `Add Selected Users (${selectedUsers.length})`
+              `${t("groups.addSelectedUsers")} (${selectedUsers.length})`
             )}
           </Button>
         </Box>
