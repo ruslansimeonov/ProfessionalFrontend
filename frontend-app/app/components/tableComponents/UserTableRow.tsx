@@ -6,6 +6,7 @@ import {
   Button,
   Tooltip,
   Checkbox,
+  CircularProgress,
 } from "@mui/material";
 import {
   Person as PersonIcon,
@@ -13,22 +14,116 @@ import {
   VisibilityOutlined as ViewIcon,
   Business as BusinessIcon,
   Badge as BadgeIcon,
+  CheckCircle as CheckIcon,
+  Cancel as XIcon,
 } from "@mui/icons-material";
-import { User } from "@/app/utils/types/types";
+import { User, Document } from "@/app/utils/types/types";
 import { formatDate, getFullName } from "@/app/utils/formatUtils";
 
 interface UserTableRowProps {
   user: User;
   onViewUser: (id: number) => void;
   showCompany?: boolean;
-  selectable?: boolean; // Add selectable prop
-  isSelected?: boolean; // Add isSelected prop
-  onUserSelect?: (userId: number) => void; // Add onUserSelect prop
+  selectable?: boolean;
+  isSelected?: boolean;
+  onUserSelect?: (userId: number) => void;
+  showDocumentStatus?: boolean;
+  documentStatusLoading?: boolean;
   labels?: {
     view?: string;
     notEnrolled?: string;
   };
 }
+
+// Function to calculate overall document status from user's documents
+const calculateDocumentStatus = (
+  documents: Document[] = []
+): "complete" | "incomplete" | "unknown" => {
+  if (!documents || documents.length === 0) {
+    return "incomplete"; // Changed from "unknown" to "incomplete"
+  }
+
+  // Check if any documents have status
+  const documentsWithStatus = documents.filter((doc) => doc.documentStatus);
+
+  if (documentsWithStatus.length === 0) {
+    return "incomplete"; // Changed from "unknown" to "incomplete"
+  }
+
+  // If any document is incomplete, overall status is incomplete
+  const hasIncomplete = documentsWithStatus.some(
+    (doc) => doc.documentStatus === "incomplete"
+  );
+  if (hasIncomplete) {
+    return "incomplete";
+  }
+
+  // If all documents with status are complete, overall status is complete
+  const allComplete = documentsWithStatus.every(
+    (doc) => doc.documentStatus === "complete"
+  );
+  if (allComplete) {
+    return "complete";
+  }
+
+  // Default to incomplete if mixed or unclear
+  return "incomplete"; // Changed from "unknown" to "incomplete"
+};
+
+// Document status indicator component
+const DocumentStatusIndicator = ({
+  status,
+  loading,
+  documents = [],
+}: {
+  status?: "complete" | "incomplete" | "unknown";
+  loading?: boolean;
+  documents?: Document[];
+}) => {
+  if (loading) {
+    return (
+      <Box
+        sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+      >
+        <CircularProgress size={16} />
+      </Box>
+    );
+  }
+
+  // Calculate status from documents if not provided
+  const actualStatus = status || calculateDocumentStatus(documents);
+
+  // Count documents for tooltip
+  const totalDocs = documents.length;
+  const completeDocs = documents.filter(
+    (doc) => doc.documentStatus === "complete"
+  ).length;
+  const incompleteDocs = documents.filter(
+    (doc) => doc.documentStatus === "incomplete" || !doc.documentStatus
+  ).length;
+
+  const tooltipText =
+    totalDocs > 0
+      ? `Documents: ${completeDocs} complete, ${incompleteDocs} incomplete/missing (${totalDocs} total)`
+      : "No documents uploaded";
+
+  switch (actualStatus) {
+    case "complete":
+      return (
+        <Tooltip title={tooltipText}>
+          <CheckIcon sx={{ color: "success.main", fontSize: 20 }} />
+        </Tooltip>
+      );
+    case "incomplete":
+    case "unknown": // Treat unknown as incomplete
+    default:
+      return (
+        <Tooltip title={tooltipText}>
+          <XIcon sx={{ color: "error.main", fontSize: 20 }} />
+        </Tooltip>
+      );
+  }
+};
 
 export function UserTableRow({
   user,
@@ -37,6 +132,8 @@ export function UserTableRow({
   selectable = false,
   isSelected = false,
   onUserSelect,
+  showDocumentStatus = false,
+  documentStatusLoading = false,
   labels = {
     view: "View",
     notEnrolled: "Not enrolled",
@@ -57,6 +154,39 @@ export function UserTableRow({
     }
   };
 
+  // Calculate document status for row background color
+  const documentStatus = showDocumentStatus
+    ? calculateDocumentStatus(user.documents || [])
+    : null;
+
+  // Define row background colors based on document status
+  const getRowBackgroundColor = () => {
+    if (!showDocumentStatus || documentStatusLoading) {
+      return {}; // No special background
+    }
+
+    switch (documentStatus) {
+      case "complete":
+        return {
+          backgroundColor: "success.light",
+          "&:hover": {
+            backgroundColor: "success.main",
+            opacity: 0.4,
+          },
+        };
+      case "incomplete":
+      case "unknown":
+      default:
+        return {
+          backgroundColor: "error.light",
+          "&:hover": {
+            backgroundColor: "error.main",
+            opacity: 0.4,
+          },
+        };
+    }
+  };
+
   return (
     <TableRow
       hover
@@ -68,6 +198,8 @@ export function UserTableRow({
         ...(isSelected && {
           backgroundColor: "action.selected",
         }),
+        // Apply document status background colors
+        ...getRowBackgroundColor(),
       }}
     >
       {/* Selection Checkbox */}
@@ -77,6 +209,16 @@ export function UserTableRow({
             checked={isSelected}
             onChange={handleSelectChange}
             color="primary"
+          />
+        </TableCell>
+      )}
+
+      {/* Document Status Cell - Updated to use documents array */}
+      {showDocumentStatus && (
+        <TableCell align="center">
+          <DocumentStatusIndicator
+            documents={user.documents || []}
+            loading={documentStatusLoading}
           />
         </TableCell>
       )}

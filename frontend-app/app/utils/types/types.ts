@@ -49,6 +49,7 @@ export interface Document {
   documentUrl: string;
   uploadedAt: Date;
   isActive: boolean;
+  documentStatus?: "complete" | "incomplete" | "unknown"; 
 }
 
 export interface Certificate {

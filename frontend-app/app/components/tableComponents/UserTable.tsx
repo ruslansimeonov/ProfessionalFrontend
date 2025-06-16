@@ -7,6 +7,9 @@ import {
   TableRow,
   TablePagination,
   Checkbox,
+  Box,
+  Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import { User } from "@/app/utils/types/types";
 import { UserTableRow } from "./UserTableRow";
@@ -20,6 +23,8 @@ interface UsersTableProps {
   showCompany?: boolean;
   selectable?: boolean;
   selectedUsers?: number[];
+  showDocumentStatus?: boolean;
+  documentStatusLoading?: boolean;
   onUserSelect?: (userId: number) => void;
   onViewUser?: (id: number) => void;
   onPageChange: (
@@ -35,6 +40,7 @@ interface UsersTableProps {
       company?: string;
       registrationDate: string;
       actions: string;
+      documentStatus?: string;
     };
     pagination?: {
       rowsPerPage: string;
@@ -55,6 +61,8 @@ export function UsersTable({
   showCompany = false,
   selectable = false,
   selectedUsers = [],
+  showDocumentStatus = false,
+  documentStatusLoading = false,
   onUserSelect,
   onViewUser,
   onPageChange,
@@ -66,10 +74,8 @@ export function UsersTable({
     if (!onUserSelect) return;
 
     if (event.target.checked) {
-      // Select all users on current page
       users.forEach((user) => onUserSelect(user.details.id));
     } else {
-      // Deselect all users on current page
       users.forEach((user) => {
         if (selectedUsers.includes(user.details.id)) {
           onUserSelect(user.details.id);
@@ -106,6 +112,19 @@ export function UsersTable({
                 </TableCell>
               )}
 
+              {/* Document Status Column */}
+              {showDocumentStatus && (
+                <TableCell align="center" sx={{ width: 60 }}>
+                  <Tooltip
+                    title={labels?.columns?.documentStatus || "Document Status"}
+                  >
+                    <Box sx={{ fontWeight: "bold", fontSize: "0.75rem" }}>
+                      Docs
+                    </Box>
+                  </Tooltip>
+                </TableCell>
+              )}
+
               <TableCell sx={{ fontWeight: "bold" }}>
                 {labels?.columns?.name}
               </TableCell>
@@ -135,9 +154,11 @@ export function UsersTable({
                 user={user}
                 onViewUser={onViewUser || (() => {})}
                 showCompany={showCompany}
-                selectable={selectable} // Pass selectable prop
-                isSelected={selectedUsers.includes(user.details.id)} // Pass isSelected prop
-                onUserSelect={onUserSelect} // Pass onUserSelect prop
+                selectable={selectable}
+                isSelected={selectedUsers.includes(user.details.id)}
+                onUserSelect={onUserSelect}
+                showDocumentStatus={showDocumentStatus}
+                documentStatusLoading={documentStatusLoading}
                 labels={{
                   view: "View",
                   notEnrolled: "Not enrolled",

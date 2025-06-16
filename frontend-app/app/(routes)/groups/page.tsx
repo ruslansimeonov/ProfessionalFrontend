@@ -1,48 +1,48 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 import {
   Container,
+  Paper,
+  Box,
+  Typography,
+  Button,
+  List,
+  CircularProgress,
+  Pagination,
   TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Paper,
-  Box,
-  List,
-  Typography,
-  CircularProgress,
-  Pagination,
-  Button,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import {
   Add as AddIcon,
   PersonAdd as PersonAddIcon,
 } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
+
 import { useStore } from "@/app/store/useStore";
+import { useGroups } from "@/app/hooks/useGroups";
+import { useGroupDocumentStatus } from "@/app/hooks/useGroupDocumentStatus"; // ADD THIS IMPORT
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
-import { useGroups } from "@/app/hooks/useGroups";
 import { createGroup } from "@/app/utils/apis/groups";
 import { Company } from "@/app/utils/types/types";
 import { getCompanies } from "@/app/utils/apis/companies";
 import FormDialog from "@/app/components/dialogs/FormDialog";
 import GroupListItem from "@/app/components/groups/GroupListItem";
-import { useTranslation } from "react-i18next";
 
 export default function GroupsPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user: currentUser } = useStore();
-  const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [companies, setCompanies] = useState<Company[]>([]); // Keep as empty array
-  const [companiesLoading, setCompaniesLoading] = useState(false); // Add loading state
-  const [companiesError, setCompaniesError] = useState<string | null>(null); // Add error state
 
+  // Groups state
   const {
     groups,
     loading,
@@ -50,15 +50,27 @@ export default function GroupsPage() {
     page,
     pageSize,
     total,
-    groupUsers,
-    loadingUsers,
     handlePageChange,
     handlePageSizeChange,
     loadGroups,
-    handleGroupSelect,
   } = useGroups();
 
-  const isAdmin = currentUser?.role === "Admin";
+  // Document status state - ADD THIS
+  const {
+    users: usersWithDocumentStatus,
+    summary: documentSummary,
+    loading: documentStatusLoading,
+    error: documentStatusError,
+    loadUsersWithDocumentStatus,
+    loadDocumentStatusSummary,
+  } = useGroupDocumentStatus();
+
+  // Local state
+  const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companiesLoading, setCompaniesLoading] = useState(false);
+  const [companiesError, setCompaniesError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [newGroup, setNewGroup] = useState({
     name: "",
@@ -66,21 +78,16 @@ export default function GroupsPage() {
   });
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handlePageChangeWrapper = (
-    event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    handlePageChange(newPage);
-  };
+  const isAdmin = currentUser?.role === "Admin";
 
-  const handlePageSizeChangeWrapper = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newPageSize = parseInt(event.target.value, 10);
-    handlePageSizeChange(newPageSize);
-  };
+  // Load initial data
+  useEffect(() => {
+    loadGroups();
+  }, [loadGroups]);
 
+  // Load companies when dialog opens
   useEffect(() => {
     if (openDialog) {
       const fetchCompanies = async () => {
@@ -91,11 +98,9 @@ export default function GroupsPage() {
           const response = await getCompanies();
           console.log("Raw API response:", response);
 
-          // More defensive checking
           if (response && response.success) {
-            // Now check for the correct structure: response.data.companies
             if (response.data && Array.isArray(response.data.companies)) {
-              setCompanies(response.data.companies); // Use response.data.companies, not response.data
+              setCompanies(response.data.companies);
             } else {
               console.error(
                 "Response.data.companies is not an array:",
@@ -121,6 +126,7 @@ export default function GroupsPage() {
     }
   }, [openDialog]);
 
+  // Search handling
   const handleSearch = useCallback(
     (term: string) => {
       setSearchTerm(term);
@@ -131,15 +137,35 @@ export default function GroupsPage() {
 
   const handleRefresh = useCallback(() => {
     loadGroups(page, pageSize, searchTerm);
-  }, [page, pageSize, searchTerm, loadGroups]);
-
-  const handleGroupClick = async (groupId: number) => {
-    setSelectedGroup(groupId === selectedGroup ? null : groupId);
-    if (groupId !== selectedGroup) {
-      await handleGroupSelect(groupId);
+    if (selectedGroup) {
+      loadUsersWithDocumentStatus(selectedGroup);
     }
-  };
+  }, [
+    page,
+    pageSize,
+    searchTerm,
+    loadGroups,
+    selectedGroup,
+    loadUsersWithDocumentStatus,
+  ]);
 
+  // UPDATED: Group selection with document status loading
+  const handleGroupClick = useCallback(
+    async (groupId: number) => {
+      const newSelectedGroup = groupId === selectedGroup ? null : groupId;
+      setSelectedGroup(newSelectedGroup);
+
+      if (newSelectedGroup) {
+        // Load users with document status instead of regular users
+        await loadUsersWithDocumentStatus(newSelectedGroup);
+        // Optionally load summary too
+        await loadDocumentStatusSummary(newSelectedGroup);
+      }
+    },
+    [selectedGroup, loadUsersWithDocumentStatus, loadDocumentStatusSummary]
+  );
+
+  // Create group handlers
   const handleCreateClick = () => {
     setOpenDialog(true);
   };
@@ -157,8 +183,9 @@ export default function GroupsPage() {
 
       const response = await createGroup(newGroup);
       if (response.success) {
+        setSuccessMessage("Group created successfully");
         handleCloseDialog();
-        handleRefresh(); // Refresh the groups list
+        loadGroups();
       } else {
         setCreateError(response.error || "Failed to create group");
       }
@@ -170,6 +197,26 @@ export default function GroupsPage() {
     } finally {
       setCreateLoading(false);
     }
+  };
+
+  // Pagination wrapper functions
+  const handlePageChangeWrapper = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    handlePageChange(newPage);
+  };
+
+  const handlePageSizeChangeWrapper = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newPageSize = parseInt(event.target.value, 10);
+    handlePageSizeChange(newPageSize);
+  };
+
+  // Close success message
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
   };
 
   return (
@@ -233,34 +280,61 @@ export default function GroupsPage() {
           )}
         </Box>
 
-        {/* Show Users Table when a group is selected */}
+        {/* Show Users Table when a group is selected - UPDATED */}
         {selectedGroup && !loading && (
           <Box sx={{ mt: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              {t("groups.groupMembers")}
-            </Typography>
-            {isAdmin && (
-              <Button
-                variant="outlined"
-                startIcon={<PersonAddIcon />}
-                onClick={() =>
-                  router.push(`/groups/add-users?groupId=${selectedGroup}`)
-                }
-                sx={{ ml: 2 }}
-              >
-                {t("groups.addMembers")}
-              </Button>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6">{t("groups.groupMembers")}</Typography>
+              {isAdmin && (
+                <Button
+                  variant="outlined"
+                  startIcon={<PersonAddIcon />}
+                  onClick={() =>
+                    router.push(`/groups/add-users?groupId=${selectedGroup}`)
+                  }
+                >
+                  {t("groups.addMembers")}
+                </Button>
+              )}
+            </Box>
+
+            {/* Document Status Error Alert */}
+            {documentStatusError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {documentStatusError}
+              </Alert>
             )}
+
+            {/* Document Status Summary */}
+            {documentSummary && (
+              <Box sx={{ mb: 2 }}>
+                <Alert severity="info">
+                  Document Completion: {documentSummary.completeDocuments}/
+                  {documentSummary.totalUsers} users (
+                  {documentSummary.completionPercentage}%)
+                </Alert>
+              </Box>
+            )}
+
             <UsersTable
-              users={groupUsers}
-              total={groupUsers.length}
-              page={page}
-              rowsPerPage={pageSize}
-              loading={loadingUsers}
+              users={usersWithDocumentStatus} // USE USERS WITH DOCUMENT STATUS
+              total={usersWithDocumentStatus.length}
+              page={0} // Reset to 0 since we're showing all group users
+              rowsPerPage={usersWithDocumentStatus.length || 10}
+              loading={documentStatusLoading} // USE DOCUMENT STATUS LOADING
               showCompany={true}
+              showDocumentStatus={true}
+              documentStatusLoading={documentStatusLoading}
               onViewUser={(id) => router.push(`/officePortal/users/${id}`)}
-              onPageChange={handlePageChangeWrapper}
-              onRowsPerPageChange={handlePageSizeChangeWrapper}
+              onPageChange={() => {}} // No pagination for group users
+              onRowsPerPageChange={() => {}} // No pagination for group users
               labels={{
                 columns: {
                   name: t("common.name"),
@@ -269,6 +343,7 @@ export default function GroupsPage() {
                   company: t("common.company"),
                   registrationDate: t("common.registrationDate"),
                   actions: t("common.actions"),
+                  documentStatus: t("common.documentStatus"),
                 },
                 pagination: {
                   rowsPerPage: t("common.rowsPerPage"),
@@ -334,7 +409,7 @@ export default function GroupsPage() {
           </FormControl>
         </FormDialog>
 
-        {/* Pagination */}
+        {/* Pagination for Groups */}
         {groups.length > 0 && (
           <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
             <Pagination
@@ -345,6 +420,18 @@ export default function GroupsPage() {
             />
           </Box>
         )}
+
+        {/* Success Message Snackbar */}
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={4000}
+          onClose={handleCloseSuccessMessage}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity="success" onClose={handleCloseSuccessMessage}>
+            {successMessage}
+          </Alert>
+        </Snackbar>
       </Paper>
     </Container>
   );

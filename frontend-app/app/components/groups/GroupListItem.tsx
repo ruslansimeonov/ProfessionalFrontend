@@ -80,7 +80,7 @@ export default function GroupListItem({
           }
           slotProps={{
             secondary: {
-              component: "div", // New way to prevent <p> wrapper
+              component: "div",
             },
           }}
         />
