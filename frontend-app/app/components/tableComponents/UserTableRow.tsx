@@ -42,8 +42,6 @@ export function UserTableRow({
     notEnrolled: "Not enrolled",
   },
 }: UserTableRowProps) {
-  console.log(user, "UserTableRow");
-
   // Get the latest enrolled course
   const latestEnrolledCourse =
     user.enrolledCourses && user.enrolledCourses.length > 0

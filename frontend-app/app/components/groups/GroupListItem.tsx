@@ -75,6 +75,11 @@ export default function GroupListItem({
               )}
             </Box>
           }
+          slotProps={{
+            secondary: {
+              component: "div", // New way to prevent <p> wrapper
+            },
+          }}
         />
       </ListItemButton>
       <Divider />

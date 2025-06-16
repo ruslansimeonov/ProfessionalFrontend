@@ -16,7 +16,7 @@ import { useStore } from "@/app/store/useStore";
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
 import { fetchRegisteredUsers } from "@/app/utils/apis/users";
-import { addUsersToGroup } from "@/app/utils/apis/groups";
+import { addUsersToGroup, fetchAvailableUsersForGroup } from "@/app/utils/apis/groups";
 import { User } from "@/app/utils/types/types";
 
 // Loading component for Suspense fallback
@@ -53,29 +53,32 @@ function AddUsersToGroupContent() {
   const isAdmin = currentUser?.role === "Admin";
 
   // Load users with search and pagination
-  const loadUsers = useCallback(
-    async (currentPage: number, searchTerm: string = "") => {
-      try {
-        setLoading(true);
-        setError(null);
+const loadUsers = useCallback(
+  async (currentPage: number, searchTerm: string = "") => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await fetchRegisteredUsers(
-          currentPage + 1,
-          pageSize,
-          searchTerm
-        );
+      // Use the new API that filters out existing group members
+      // and applies company restrictions if applicable
+      const response = await fetchAvailableUsersForGroup(
+        Number(groupId),
+        currentPage + 1,
+        pageSize,
+        searchTerm
+      );
 
-        setUsers(response.users);
-        setTotal(response.total);
-      } catch (error) {
-        console.error("Failed to load users:", error);
-        setError("Failed to load users");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [pageSize]
-  );
+      setUsers(response.users);
+      setTotal(response.total);
+    } catch (error) {
+      console.error("Failed to load available users:", error);
+      setError("Failed to load available users");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [groupId, pageSize]
+);
 
   useEffect(() => {
     if (!isAuthenticated || !isAdmin) {

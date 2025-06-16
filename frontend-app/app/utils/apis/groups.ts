@@ -74,8 +74,6 @@ export async function createGroup(
   }
 }
 
-
-
 export async function addUsersToGroup(
   groupId: number,
   userIds: number[]
@@ -97,5 +95,53 @@ export async function addUsersToGroup(
     return { success: true, data };
   } catch (error) {
     return handleApiError(error);
+  }
+}
+
+export async function fetchAvailableUsersForGroup(
+  groupId: number,
+  page: number,
+  rowsPerPage: number,
+  search?: string
+): Promise<{ users: User[]; total: number }> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiUrl = `${baseUrl}/api/groups/${groupId}/available-users`;
+
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: rowsPerPage.toString(),
+    });
+
+    if (search && search.trim() !== "") {
+      queryParams.append("search", search);
+    }
+
+    const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      users: data.users,
+      total: data.pagination.total,
+    };
+  } catch (error) {
+    console.error("Error fetching available users for group:", error);
+    throw error;
   }
 }

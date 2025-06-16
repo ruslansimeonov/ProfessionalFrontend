@@ -61,8 +61,6 @@ export function UsersTable({
   onRowsPerPageChange,
   labels,
 }: UsersTableProps) {
-  console.log(users);
-
   // Handle select all functionality
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!onUserSelect) return;

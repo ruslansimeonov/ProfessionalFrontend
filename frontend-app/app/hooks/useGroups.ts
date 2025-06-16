@@ -28,7 +28,6 @@ export function useGroups(initialPage = 1, initialPageSize = 10) {
             total: totalCount,
             page: responsePage,
           } = response.data;
-          console.log("Fetched groups:", fetchedGroups); // Debug log
           setGroups(fetchedGroups);
           setTotal(totalCount);
           setPage(responsePage);

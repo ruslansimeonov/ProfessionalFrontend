@@ -37,7 +37,9 @@ export default function GroupsPage() {
   const { user: currentUser } = useStore();
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [companies, setCompanies] = useState<Company[]>([]); // Replace with actual type
+  const [companies, setCompanies] = useState<Company[]>([]); // Keep as empty array
+  const [companiesLoading, setCompaniesLoading] = useState(false); // Add loading state
+  const [companiesError, setCompaniesError] = useState<string | null>(null); // Add error state
 
   const {
     groups,
@@ -79,15 +81,39 @@ export default function GroupsPage() {
 
   useEffect(() => {
     if (openDialog) {
-      // Fetch companies when the dialog opens
       const fetchCompanies = async () => {
         try {
+          setCompaniesLoading(true);
+          setCompaniesError(null);
+
           const response = await getCompanies();
-          if (response.success) {
-            setCompanies(response.data);
+          console.log("Raw API response:", response);
+
+          // More defensive checking
+          if (response && response.success) {
+            // Now check for the correct structure: response.data.companies
+            if (response.data && Array.isArray(response.data.companies)) {
+              console.log("Setting companies:", response.data.companies);
+              setCompanies(response.data.companies); // Use response.data.companies, not response.data
+            } else {
+              console.error(
+                "Response.data.companies is not an array:",
+                response.data
+              );
+              setCompaniesError("Invalid data format received");
+              setCompanies([]);
+            }
+          } else {
+            console.error("API call failed:", response);
+            setCompaniesError(response?.error || "Failed to load companies");
+            setCompanies([]);
           }
         } catch (error) {
-          console.error("Failed to fetch companies", error);
+          console.error("Exception in fetch companies:", error);
+          setCompaniesError("Network error loading companies");
+          setCompanies([]);
+        } finally {
+          setCompaniesLoading(false);
         }
       };
       fetchCompanies();
@@ -144,8 +170,6 @@ export default function GroupsPage() {
       setCreateLoading(false);
     }
   };
-
-  console.log("companies", companies);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -272,6 +296,7 @@ export default function GroupsPage() {
             error={!!createError}
             helperText={createError}
           />
+
           <FormControl fullWidth>
             <InputLabel>Company</InputLabel>
             <Select
@@ -280,12 +305,29 @@ export default function GroupsPage() {
                 setNewGroup({ ...newGroup, companyId: e.target.value })
               }
               label="Company"
+              disabled={companiesLoading}
             >
-              {companies.map((company) => (
-                <MenuItem key={company.id} value={company.id}>
-                  {company.companyName}
+              {companiesLoading ? (
+                <MenuItem disabled>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress size={16} />
+                    Loading companies...
+                  </Box>
                 </MenuItem>
-              ))}
+              ) : companiesError ? (
+                (console.log("Error loading companies:", companiesError),
+                (<MenuItem disabled>Error loading companies</MenuItem>))
+              ) : companies &&
+                Array.isArray(companies) &&
+                companies.length > 0 ? (
+                companies.map((company) => (
+                  <MenuItem key={company.id} value={company.id}>
+                    {company.companyName}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No companies available</MenuItem>
+              )}
             </Select>
           </FormControl>
         </FormDialog>
