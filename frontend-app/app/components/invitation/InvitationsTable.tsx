@@ -38,7 +38,7 @@ interface Invitation {
 
 interface InvitationsTableProps {
   invitations: Invitation[];
-  onDeactivate: (invitationId: number) => void;
+  onDeactivate: (invitationId: number) => Promise<void>;
   onRefresh: () => void;
 }
 
@@ -170,7 +170,20 @@ export default function InvitationsTable({
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => onDeactivate(invitation.id)}
+                          onClick={async () => {
+                            try {
+                              await onDeactivate(invitation.id);
+                            } catch (error) {
+                              console.error(
+                                "Failed to deactivate invitation:",
+                                error
+                              );
+                              // Could show a toast notification here
+                            }
+                          }}
+                          disabled={
+                            !invitation.isActive || invitation.isExpired
+                          }
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>

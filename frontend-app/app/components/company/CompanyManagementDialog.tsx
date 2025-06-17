@@ -26,8 +26,15 @@ import {
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
 } from "@mui/icons-material";
-import { getCompanyById, approveCompany, rejectCompany } from "@/app/utils/apis/companies";
-import { getCompanyInvitations } from "@/app/utils/apis/invitationCodes";
+import {
+  getCompanyById,
+  approveCompany,
+  rejectCompany,
+} from "@/app/utils/apis/companies";
+import {
+  deactivateInvitationCode,
+  getCompanyInvitations,
+} from "@/app/utils/apis/invitationCodes";
 import CreateInvitationDialog from "./CompanyInvitationDialog";
 import InvitationsTable from "../invitation/InvitationsTable";
 import { Company, Invitation } from "@/app/utils/types/types";
@@ -51,7 +58,7 @@ export default function CompanyManagementDialog({
   const [invitationsLoading, setInvitationsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createInvitationOpen, setCreateInvitationOpen] = useState(false);
-  
+
   // Company approval/rejection states
   const [approvalLoading, setApprovalLoading] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -126,7 +133,7 @@ export default function CompanyManagementDialog({
       setError(null);
 
       const response = await approveCompany(companyId);
-      
+
       if (response.success) {
         setSuccessMessage("Company approved successfully!");
         // Reload company data to reflect new status
@@ -153,7 +160,7 @@ export default function CompanyManagementDialog({
       setError(null);
 
       const response = await rejectCompany(companyId, rejectionReason);
-      
+
       if (response.success) {
         setSuccessMessage("Company rejected successfully!");
         setRejectDialogOpen(false);
@@ -180,11 +187,29 @@ export default function CompanyManagementDialog({
 
   const handleDeactivateInvitation = async (invitationId: number) => {
     try {
-      // TODO: Implement deactivation API call
+      setError(null);
+
       console.log("Deactivating invitation:", invitationId);
-      loadInvitations(); // Refresh the list
+
+      const response = await deactivateInvitationCode(invitationId);
+
+      if (response.success) {
+        console.log("Invitation deactivated successfully");
+        // Refresh the invitations list to reflect the change
+        await loadInvitations();
+
+        // Optionally show success message
+        setSuccessMessage("Invitation code deactivated successfully!");
+
+        // Clear success message after a few seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        console.error("Failed to deactivate invitation:", response.error);
+        setError(response.error || "Failed to deactivate invitation");
+      }
     } catch (error) {
-      console.error("Failed to deactivate invitation:", error);
+      console.error("Error deactivating invitation:", error);
+      setError("Failed to deactivate invitation");
     }
   };
 
@@ -271,9 +296,16 @@ export default function CompanyManagementDialog({
             <Box>
               {/* Company Information */}
               <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
                   <Typography variant="h6">Company Information</Typography>
-                  
+
                   {/* Approval Actions for Pending Companies */}
                   {isPending && (
                     <Box sx={{ display: "flex", gap: 1 }}>
@@ -286,10 +318,14 @@ export default function CompanyManagementDialog({
                           onClick={handleApproveCompany}
                           disabled={approvalLoading}
                         >
-                          {approvalLoading ? <CircularProgress size={16} /> : "Approve"}
+                          {approvalLoading ? (
+                            <CircularProgress size={16} />
+                          ) : (
+                            "Approve"
+                          )}
                         </Button>
                       </Tooltip>
-                      
+
                       <Tooltip title="Reject Company">
                         <Button
                           variant="contained"
@@ -310,7 +346,9 @@ export default function CompanyManagementDialog({
                 {isPending && (
                   <Alert severity="warning" sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                      <strong>This company is pending approval.</strong> Please review the company details and approve or reject the registration.
+                      <strong>This company is pending approval.</strong> Please
+                      review the company details and approve or reject the
+                      registration.
                     </Typography>
                   </Alert>
                 )}
@@ -318,7 +356,8 @@ export default function CompanyManagementDialog({
                 {isRejected && (
                   <Alert severity="error" sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                      <strong>This company has been rejected.</strong> The company registration was declined.
+                      <strong>This company has been rejected.</strong> The
+                      company registration was declined.
                     </Typography>
                   </Alert>
                 )}
@@ -464,10 +503,13 @@ export default function CompanyManagementDialog({
       </Dialog>
 
       {/* Rejection Confirmation Dialog */}
-      <Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Reject Company Registration
-        </DialogTitle>
+      <Dialog
+        open={rejectDialogOpen}
+        onClose={() => setRejectDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Reject Company Registration</DialogTitle>
         <DialogContent>
           <Typography variant="body1" gutterBottom>
             Are you sure you want to reject the registration for{" "}

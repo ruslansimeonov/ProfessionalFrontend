@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
   getPendingCompanies,
   approveCompany,
@@ -26,7 +26,7 @@ export function usePendingCompanies() {
       if (response.success && response.data) {
         setCompanies(response.data.companies || []);
       } else {
-        setError(response.error || "Failed to load pending companies");
+        setError("Failed to load pending companies");
         setCompanies([]);
       }
     } catch (err) {
