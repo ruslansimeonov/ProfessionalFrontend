@@ -13,10 +13,6 @@ import {
   CircularProgress,
   Pagination,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Alert,
   Snackbar,
 } from "@mui/material";
@@ -33,9 +29,9 @@ import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
 import { createGroup } from "@/app/utils/apis/groups";
 import { Company } from "@/app/utils/types/types";
-import { getCompanies } from "@/app/utils/apis/companies";
 import FormDialog from "@/app/components/dialogs/FormDialog";
 import GroupListItem from "@/app/components/groups/GroupListItem";
+import CompanyAutocomplete from "@/app/components/company/CompanyAutocomplete";
 
 export default function GroupsPage() {
   const { t } = useTranslation();
@@ -69,13 +65,10 @@ export default function GroupsPage() {
   // Local state
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [companiesLoading, setCompaniesLoading] = useState(false);
-  const [companiesError, setCompaniesError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [newGroup, setNewGroup] = useState({
     name: "",
-    companyId: "",
+    company: null as Company | null, // Changed from companyId to company object
   });
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -90,62 +83,6 @@ export default function GroupsPage() {
       loadGroups();
     }
   }, [isAuthenticated, isAdmin, loadGroups]);
-
-  // Load companies when dialog opens - PREVENT DUPLICATE CALLS
-  useEffect(() => {
-    let abortController: AbortController | null = null;
-
-    if (openDialog && companies.length === 0 && !companiesLoading) {
-      const fetchCompanies = async () => {
-        try {
-          abortController = new AbortController();
-          setCompaniesLoading(true);
-          setCompaniesError(null);
-
-          const response = await getCompanies();
-
-          if (abortController.signal.aborted) return;
-
-          console.log("Raw API response:", response);
-
-          if (response && response.success) {
-            if (response.data && Array.isArray(response.data.companies)) {
-              setCompanies(response.data.companies);
-            } else {
-              console.error(
-                "Response.data.companies is not an array:",
-                response.data
-              );
-              setCompaniesError("Invalid data format received");
-              setCompanies([]);
-            }
-          } else {
-            console.error("API call failed:", response);
-            setCompaniesError(response?.error || "Failed to load companies");
-            setCompanies([]);
-          }
-        } catch (error) {
-          if (abortController?.signal.aborted) return;
-
-          console.error("Exception in fetch companies:", error);
-          setCompaniesError("Network error loading companies");
-          setCompanies([]);
-        } finally {
-          if (!abortController?.signal.aborted) {
-            setCompaniesLoading(false);
-          }
-        }
-      };
-
-      fetchCompanies();
-    }
-
-    return () => {
-      if (abortController) {
-        abortController.abort();
-      }
-    };
-  }, [openDialog, companies.length, companiesLoading]);
 
   // Search handling - DEBOUNCED to prevent multiple calls
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -167,9 +104,8 @@ export default function GroupsPage() {
     [pageSize, loadGroups]
   );
 
-  // Update the refresh handler as well
   const handleRefresh = useCallback(() => {
-    initialLoadRef.current = false; // Reset initial load flag
+    initialLoadRef.current = false;
     loadGroups(page, pageSize, searchTerm);
     if (selectedGroup) {
       loadUsersWithDocumentStatus(selectedGroup);
@@ -203,7 +139,7 @@ export default function GroupsPage() {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setNewGroup({ name: "", companyId: "" });
+    setNewGroup({ name: "", company: null });
     setCreateError(null);
   };
 
@@ -212,7 +148,16 @@ export default function GroupsPage() {
       setCreateLoading(true);
       setCreateError(null);
 
-      const response = await createGroup(newGroup);
+      if (!newGroup.company) {
+        setCreateError("Please select a company");
+        return;
+      }
+
+      const response = await createGroup({
+        name: newGroup.name,
+        companyId: newGroup.company.id,
+      });
+
       if (response.success) {
         setSuccessMessage("Group created successfully");
         handleCloseDialog();
@@ -391,14 +336,14 @@ export default function GroupsPage() {
           </Box>
         )}
 
-        {/* Add Group Dialog */}
+        {/* Add Group Dialog - UPDATED */}
         <FormDialog
           open={openDialog}
           title={t("groups.createNew")}
           onClose={handleCloseDialog}
           onSubmit={handleCreateGroup}
           isLoading={createLoading}
-          isValid={!!newGroup.name && !!newGroup.companyId}
+          isValid={!!newGroup.name && !!newGroup.company}
           submitLabel={t("groups.create")}
         >
           <TextField
@@ -407,44 +352,30 @@ export default function GroupsPage() {
             fullWidth
             value={newGroup.name}
             onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-            error={!!createError}
-            helperText={createError}
+            error={!!createError && !newGroup.name}
+            helperText={
+              !newGroup.name && createError ? "Group name is required" : ""
+            }
+            sx={{ mb: 2 }}
           />
 
-          <FormControl fullWidth>
-            <InputLabel>{t("groups.company")}</InputLabel>
-            <Select
-              value={newGroup.companyId}
-              onChange={(e) =>
-                setNewGroup({ ...newGroup, companyId: e.target.value })
-              }
-              label={t("groups.company")}
-              disabled={companiesLoading}
-            >
-              {companiesLoading ? (
-                <MenuItem disabled>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CircularProgress size={16} />
-                    {t("groups.loadingCompanies")}
-                  </Box>
-                </MenuItem>
-              ) : companiesError ? (
-                <MenuItem disabled>
-                  {t("groups.errorLoadingCompanies")}
-                </MenuItem>
-              ) : companies &&
-                Array.isArray(companies) &&
-                companies.length > 0 ? (
-                companies.map((company) => (
-                  <MenuItem key={company.id} value={company.id}>
-                    {company.companyName}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem disabled>{t("groups.noCompaniesAvailable")}</MenuItem>
-              )}
-            </Select>
-          </FormControl>
+          <CompanyAutocomplete
+            value={newGroup.company}
+            onChange={(company) => setNewGroup({ ...newGroup, company })}
+            label={t("groups.company")}
+            placeholder="Search by company name or ID..."
+            required
+            error={!!createError && !newGroup.company}
+            helperText={
+              !newGroup.company && createError ? "Please select a company" : ""
+            }
+          />
+
+          {createError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {createError}
+            </Alert>
+          )}
         </FormDialog>
 
         {/* Pagination for Groups */}

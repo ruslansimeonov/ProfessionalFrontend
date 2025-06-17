@@ -154,3 +154,117 @@ export async function registerCompany(
     return handleApiError(error);
   }
 }
+
+// Add this function to your existing companies.ts file
+
+export async function searchCompanies(
+  searchTerm: string
+): Promise<ApiResponse<{ companies: Company[] }>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data } = await api.get<{ companies: Company[] }>(
+      "/api/companies/search",
+      {
+        params: { q: searchTerm },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Get all pending companies (Admin only)
+ */
+export async function getPendingCompanies(): Promise<
+  ApiResponse<{ companies: Company[]; total: number }>
+> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data } = await api.get<{ companies: Company[]; total: number }>(
+      "/api/companies/pending",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Approve a pending company (Admin only)
+ */
+export async function approveCompany(companyId: number): Promise<
+  ApiResponse<{
+    success: boolean;
+    message: string;
+    company: Company;
+  }>
+> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data } = await api.put(
+      `/api/companies/${companyId}/approve`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Reject a pending company (Admin only)
+ */
+export async function rejectCompany(
+  companyId: number,
+  rejectionReason?: string
+): Promise<
+  ApiResponse<{
+    success: boolean;
+    message: string;
+    company: Company;
+    rejectionReason: string;
+  }>
+> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data } = await api.put(
+      `/api/companies/${companyId}/reject`,
+      { rejectionReason },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

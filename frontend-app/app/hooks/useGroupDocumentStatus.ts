@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from "react";
 import { getGroupUsersWithDocumentStatus } from "@/app/utils/apis/groups";
 import { User } from "@/app/utils/types/types";

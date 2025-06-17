@@ -16,29 +16,34 @@ import {
   Paper,
   IconButton,
   Tooltip,
+  TextField,
 } from "@mui/material";
 import {
   Business as BusinessIcon,
   Close as CloseIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
 } from "@mui/icons-material";
-import { getCompanyById } from "@/app/utils/apis/companies";
-import { getCompanyInvitations } from "@/app/utils/apis/invitationCodes"; // Fixed import path
-import CreateInvitationDialog from "./CompanyInvitationDialog"; // Fixed import
-import InvitationsTable from "../invitation/InvitationsTable"; // Fixed import
+import { getCompanyById, approveCompany, rejectCompany } from "@/app/utils/apis/companies";
+import { getCompanyInvitations } from "@/app/utils/apis/invitationCodes";
+import CreateInvitationDialog from "./CompanyInvitationDialog";
+import InvitationsTable from "../invitation/InvitationsTable";
 import { Company, Invitation } from "@/app/utils/types/types";
 
 interface CompanyManagementDialogProps {
   open: boolean;
   onClose: () => void;
   companyId: number | null;
+  onCompanyUpdated?: () => void; // Callback to refresh parent data
 }
 
 export default function CompanyManagementDialog({
   open,
   onClose,
   companyId,
+  onCompanyUpdated,
 }: CompanyManagementDialogProps) {
   const [company, setCompany] = useState<Company | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -46,6 +51,12 @@ export default function CompanyManagementDialog({
   const [invitationsLoading, setInvitationsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createInvitationOpen, setCreateInvitationOpen] = useState(false);
+  
+  // Company approval/rejection states
+  const [approvalLoading, setApprovalLoading] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Load company details
   const loadCompanyData = useCallback(async () => {
@@ -101,8 +112,66 @@ export default function CompanyManagementDialog({
     if (open && companyId) {
       loadCompanyData();
       loadInvitations();
+      setSuccessMessage(null);
+      setError(null);
     }
   }, [open, companyId, loadCompanyData, loadInvitations]);
+
+  // Handle company approval
+  const handleApproveCompany = async () => {
+    if (!companyId) return;
+
+    try {
+      setApprovalLoading(true);
+      setError(null);
+
+      const response = await approveCompany(companyId);
+      
+      if (response.success) {
+        setSuccessMessage("Company approved successfully!");
+        // Reload company data to reflect new status
+        await loadCompanyData();
+        // Notify parent to refresh data
+        onCompanyUpdated?.();
+      } else {
+        setError(response.error || "Failed to approve company");
+      }
+    } catch (err) {
+      console.error("Error approving company:", err);
+      setError("Failed to approve company");
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
+  // Handle company rejection
+  const handleRejectCompany = async () => {
+    if (!companyId) return;
+
+    try {
+      setApprovalLoading(true);
+      setError(null);
+
+      const response = await rejectCompany(companyId, rejectionReason);
+      
+      if (response.success) {
+        setSuccessMessage("Company rejected successfully!");
+        setRejectDialogOpen(false);
+        setRejectionReason("");
+        // Reload company data to reflect new status
+        await loadCompanyData();
+        // Notify parent to refresh data
+        onCompanyUpdated?.();
+      } else {
+        setError(response.error || "Failed to reject company");
+      }
+    } catch (err) {
+      console.error("Error rejecting company:", err);
+      setError("Failed to reject company");
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
 
   const handleCreateInvitationSuccess = () => {
     loadInvitations(); // Refresh invitations list
@@ -125,6 +194,8 @@ export default function CompanyManagementDialog({
         return "success";
       case "pending":
         return "warning";
+      case "rejected":
+        return "error";
       case "inactive":
         return "error";
       default:
@@ -136,13 +207,24 @@ export default function CompanyManagementDialog({
     return new Date(dateString).toLocaleString("bg-BG");
   };
 
+  const handleCloseDialog = () => {
+    setSuccessMessage(null);
+    setError(null);
+    setRejectionReason("");
+    setRejectDialogOpen(false);
+    onClose();
+  };
+
   if (!open) return null;
+
+  const isPending = company?.status === "pending";
+  const isRejected = company?.status === "rejected";
 
   return (
     <>
       <Dialog
         open={open}
-        onClose={onClose}
+        onClose={handleCloseDialog}
         maxWidth="lg"
         fullWidth
         PaperProps={{
@@ -161,7 +243,7 @@ export default function CompanyManagementDialog({
             <BusinessIcon color="primary" />
             <Typography variant="h6">Company Management</Typography>
           </Box>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={handleCloseDialog} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -179,13 +261,68 @@ export default function CompanyManagementDialog({
             </Alert>
           )}
 
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {successMessage}
+            </Alert>
+          )}
+
           {company && !loading && (
             <Box>
               {/* Company Information */}
               <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  Company Information
-                </Typography>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography variant="h6">Company Information</Typography>
+                  
+                  {/* Approval Actions for Pending Companies */}
+                  {isPending && (
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Tooltip title="Approve Company">
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          startIcon={<ApproveIcon />}
+                          onClick={handleApproveCompany}
+                          disabled={approvalLoading}
+                        >
+                          {approvalLoading ? <CircularProgress size={16} /> : "Approve"}
+                        </Button>
+                      </Tooltip>
+                      
+                      <Tooltip title="Reject Company">
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          startIcon={<RejectIcon />}
+                          onClick={() => setRejectDialogOpen(true)}
+                          disabled={approvalLoading}
+                        >
+                          Reject
+                        </Button>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Status Alert for Pending/Rejected Companies */}
+                {isPending && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    <Typography variant="body2">
+                      <strong>This company is pending approval.</strong> Please review the company details and approve or reject the registration.
+                    </Typography>
+                  </Alert>
+                )}
+
+                {isRejected && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    <Typography variant="body2">
+                      <strong>This company has been rejected.</strong> The company registration was declined.
+                    </Typography>
+                  </Alert>
+                )}
+
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">
@@ -262,67 +399,118 @@ export default function CompanyManagementDialog({
                 </Grid>
               </Paper>
 
-              {/* Invitation Codes Section */}
-              <Paper variant="outlined" sx={{ p: 3 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="h6">Invitation Codes</Typography>
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <Tooltip title="Refresh invitations">
-                      <IconButton onClick={loadInvitations} size="small">
-                        <RefreshIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={<AddIcon />}
-                      onClick={() => setCreateInvitationOpen(true)}
-                    >
-                      Create Invitation
-                    </Button>
-                  </Box>
-                </Box>
-
-                {invitationsLoading ? (
+              {/* Invitation Codes Section - Only show for active companies */}
+              {company.status === "active" && (
+                <Paper variant="outlined" sx={{ p: 3 }}>
                   <Box
-                    sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: 2,
+                    }}
                   >
-                    <CircularProgress size={24} />
+                    <Typography variant="h6">Invitation Codes</Typography>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Tooltip title="Refresh invitations">
+                        <IconButton onClick={loadInvitations} size="small">
+                          <RefreshIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        onClick={() => setCreateInvitationOpen(true)}
+                      >
+                        Create Invitation
+                      </Button>
+                    </Box>
                   </Box>
-                ) : (
-                  <InvitationsTable
-                    invitations={invitations}
-                    onDeactivate={handleDeactivateInvitation}
-                    onRefresh={loadInvitations}
-                  />
-                )}
-              </Paper>
+
+                  {invitationsLoading ? (
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                    >
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : (
+                    <InvitationsTable
+                      invitations={invitations}
+                      onDeactivate={handleDeactivateInvitation}
+                      onRefresh={loadInvitations}
+                    />
+                  )}
+                </Paper>
+              )}
+
+              {/* Message for non-active companies */}
+              {company.status !== "active" && (
+                <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
+                  <Typography variant="body1" color="text.secondary">
+                    Invitation codes are only available for active companies.
+                  </Typography>
+                </Paper>
+              )}
             </Box>
           )}
         </DialogContent>
 
         <DialogActions sx={{ p: 3, pt: 0 }}>
-          <Button onClick={onClose} variant="outlined">
+          <Button onClick={handleCloseDialog} variant="outlined">
             Close
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Create Invitation Dialog */}
-      <CreateInvitationDialog
-        open={createInvitationOpen}
-        onClose={() => setCreateInvitationOpen(false)}
-        onSuccess={handleCreateInvitationSuccess}
-        companyId={companyId}
-        companyName={company?.companyName}
-      />
+      {/* Rejection Confirmation Dialog */}
+      <Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Reject Company Registration
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            Are you sure you want to reject the registration for{" "}
+            <strong>{company?.companyName}</strong>?
+          </Typography>
+          <TextField
+            label="Rejection Reason (Optional)"
+            multiline
+            rows={3}
+            fullWidth
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            placeholder="Provide a reason for rejection..."
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRejectDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleRejectCompany}
+            color="error"
+            variant="contained"
+            disabled={approvalLoading}
+          >
+            {approvalLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              "Reject Company"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Create Invitation Dialog - Only for active companies */}
+      {company?.status === "active" && (
+        <CreateInvitationDialog
+          open={createInvitationOpen}
+          onClose={() => setCreateInvitationOpen(false)}
+          onSuccess={handleCreateInvitationSuccess}
+          companyId={companyId}
+          companyName={company?.companyName}
+        />
+      )}
     </>
   );
 }
