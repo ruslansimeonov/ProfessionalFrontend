@@ -1,5 +1,4 @@
-// app/hooks/useGroups.ts
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getGroups } from "@/app/utils/apis/groups";
 import { Group } from "../utils/types/types";
 
@@ -10,15 +9,15 @@ export function useGroups() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [initialized, setInitialized] = useState(false);
 
-  // Add ref to track ongoing requests
+  // Simple loading ref to prevent concurrent calls
   const loadingRef = useRef(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const loadGroups = useCallback(
     async (
-      currentPage: number = page,
-      currentPageSize: number = pageSize,
+      currentPage: number = 1,
+      currentPageSize: number = 10,
       search: string = ""
     ) => {
       // Prevent multiple simultaneous calls
@@ -27,20 +26,12 @@ export function useGroups() {
         return;
       }
 
-      // Cancel any existing request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-
       try {
         loadingRef.current = true;
         setLoading(true);
         setError(null);
 
-        console.log("Loading groups:", {
+        console.log("🔵 Loading groups:", {
           currentPage,
           currentPageSize,
           search,
@@ -48,34 +39,42 @@ export function useGroups() {
 
         const response = await getGroups(currentPage, currentPageSize, search);
 
-        // Check if request was aborted
-        if (abortController.signal.aborted) {
-          return;
-        }
+        console.log("🎯 Response received:", response);
 
         if (response.success && response.data) {
-          setGroups(response.data.groups || []);
-          setTotal(response.data.total || 0);
+          const { groups: responseGroups, total: responseTotal } =
+            response.data;
+
+          console.log("✅ Setting state:", {
+            groupsCount: responseGroups?.length || 0,
+            total: responseTotal || 0,
+          });
+
+          setGroups(responseGroups || []);
+          setTotal(responseTotal || 0);
           setPage(currentPage);
           setPageSize(currentPageSize);
+          setInitialized(true);
+
+          console.log("🏁 State updated successfully");
         } else {
+          console.error("❌ API response error:");
           setError("Failed to load groups");
+          setGroups([]);
+          setTotal(0);
         }
       } catch (err) {
-        if (abortController.signal.aborted) {
-          return; // Request was cancelled, don't set error
-        }
-
-        console.error("Load groups error:", err);
+        console.error("💥 Exception:", err);
         setError("Failed to load groups");
+        setGroups([]);
+        setTotal(0);
       } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-          loadingRef.current = false;
-        }
+        console.log("🔄 Cleaning up...");
+        setLoading(false);
+        loadingRef.current = false;
       }
     },
-    [page, pageSize] // Remove from dependencies to prevent loops
+    []
   );
 
   const handlePageChange = useCallback(
@@ -90,21 +89,11 @@ export function useGroups() {
   const handlePageSizeChange = useCallback(
     (newPageSize: number) => {
       if (newPageSize !== pageSize && !loadingRef.current) {
-        loadGroups(1, newPageSize); // Reset to first page
+        loadGroups(1, newPageSize);
       }
     },
     [loadGroups, pageSize]
   );
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      loadingRef.current = false;
-    };
-  }, []);
 
   return {
     groups,
@@ -113,6 +102,7 @@ export function useGroups() {
     page,
     pageSize,
     total,
+    initialized,
     loadGroups,
     handlePageChange,
     handlePageSizeChange,

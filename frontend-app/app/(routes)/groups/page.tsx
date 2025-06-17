@@ -49,6 +49,7 @@ export default function GroupsPage() {
     page,
     pageSize,
     total,
+    initialized,
     handlePageChange,
     loadGroups,
   } = useGroups();
@@ -77,16 +78,17 @@ export default function GroupsPage() {
   const isAdmin = currentUser?.role === "Admin";
 
   useEffect(() => {
-    if (isAuthenticated && isAdmin && !initialLoadRef.current) {
+    if (isAuthenticated && isAdmin && !initialLoadRef.current && !initialized) {
       console.log("Loading groups for the first time...");
       initialLoadRef.current = true;
-      loadGroups();
+      loadGroups(1, pageSize, ""); // Explicitly pass empty search
     }
-  }, [isAuthenticated, isAdmin, loadGroups]);
+  }, [isAuthenticated, isAdmin, loadGroups, initialized, pageSize]);
 
   // Search handling - DEBOUNCED to prevent multiple calls
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Update search handling to reset page to 1
   const handleSearch = useCallback(
     (term: string) => {
       setSearchTerm(term);
@@ -98,7 +100,7 @@ export default function GroupsPage() {
 
       // Debounce search
       searchTimeoutRef.current = setTimeout(() => {
-        loadGroups(1, pageSize, term);
+        loadGroups(1, pageSize, term); // Always start from page 1 for search
       }, 300);
     },
     [pageSize, loadGroups]
@@ -106,12 +108,11 @@ export default function GroupsPage() {
 
   const handleRefresh = useCallback(() => {
     initialLoadRef.current = false;
-    loadGroups(page, pageSize, searchTerm);
+    loadGroups(1, pageSize, searchTerm); // Reset to page 1
     if (selectedGroup) {
       loadUsersWithDocumentStatus(selectedGroup);
     }
   }, [
-    page,
     pageSize,
     searchTerm,
     loadGroups,

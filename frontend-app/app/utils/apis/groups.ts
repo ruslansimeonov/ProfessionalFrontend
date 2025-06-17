@@ -25,13 +25,32 @@ export async function getGroups(
       return { success: false, error: "No token found" };
     }
 
+    console.log("API Request:", {
+      url: "/api/groups",
+      params: { page, pageSize, search: searchTerm },
+    });
+
     const { data } = await api.get<PaginatedGroups>("/api/groups", {
       params: { page, pageSize, search: searchTerm },
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    console.log("API Response received:", data);
+
+    // Debug the exact response structure
+    console.log("Response structure:", {
+      hasData: !!data,
+      dataType: typeof data,
+      dataKeys: data ? Object.keys(data) : [],
+      groupsProperty: data?.groups,
+      totalProperty: data?.total,
+    });
+
+    // Make sure we return the response
+    console.log("🚀 Returning success response from API");
     return { success: true, data };
   } catch (error) {
+    console.error("❌ getGroups API error:", error);
     return handleApiError(error);
   }
 }
