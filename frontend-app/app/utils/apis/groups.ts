@@ -151,6 +151,13 @@ export async function getGroupUsersWithDocumentStatus(groupId: number): Promise<
     users: User[];
     total: number;
     groupId: number;
+    summary: {
+      totalUsers: number;
+      completeDocuments: number;
+      incompleteDocuments: number;
+      unknownDocuments: number;
+      completionPercentage: number;
+    };
     timestamp: string;
   }>
 > {
@@ -177,46 +184,6 @@ export async function getGroupUsersWithDocumentStatus(groupId: number): Promise<
       error:
         error.response?.data?.message ||
         "Failed to load group users with document status",
-    };
-  }
-}
-
-export async function getGroupDocumentStatusSummary(groupId: number): Promise<
-  ApiResponse<{
-    groupId: number;
-    summary: {
-      totalUsers: number;
-      completeDocuments: number;
-      incompleteDocuments: number;
-      unknownDocuments: number;
-      completionPercentage: number;
-    };
-    timestamp: string;
-  }>
-> {
-  try {
-    const token = getAuthToken();
-    if (!token) {
-      return { success: false, error: "Authentication required" };
-    }
-
-    const { data } = await api.get(
-      `/api/groups/${groupId}/document-status-summary`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    return { success: true, data };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error("Failed to get group document status summary:", error);
-
-    return {
-      success: false,
-      error:
-        error.response?.data?.message ||
-        "Failed to load document status summary",
     };
   }
 }

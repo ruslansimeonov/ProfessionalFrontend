@@ -1,98 +1,120 @@
-import { useState, useCallback, useEffect } from "react";
-import { Group, User } from "../utils/types/types";
-import { getGroups, getGroupUsers } from "../utils/apis/groups";
+// app/hooks/useGroups.ts
+import { useState, useCallback, useEffect, useRef } from "react";
+import { getGroups } from "@/app/utils/apis/groups";
+import { Group } from "../utils/types/types";
 
-export function useGroups(initialPage = 1, initialPageSize = 10) {
+export function useGroups() {
   const [groups, setGroups] = useState<Group[]>([]);
-  const [groupUsers, setGroupUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(initialPage);
-  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
 
+  // Add ref to track ongoing requests
+  const loadingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const loadGroups = useCallback(
-    async (currentPage = page, currentPageSize = pageSize, searchTerm = "") => {
+    async (
+      currentPage: number = page,
+      currentPageSize: number = pageSize,
+      search: string = ""
+    ) => {
+      // Prevent multiple simultaneous calls
+      if (loadingRef.current) {
+        console.log("Groups already loading, skipping...");
+        return;
+      }
+
+      // Cancel any existing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       try {
+        loadingRef.current = true;
         setLoading(true);
-        const response = await getGroups(
+        setError(null);
+
+        console.log("Loading groups:", {
           currentPage,
           currentPageSize,
-          searchTerm
-        );
+          search,
+        });
+
+        const response = await getGroups(currentPage, currentPageSize, search);
+
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         if (response.success && response.data) {
-          const {
-            groups: fetchedGroups,
-            total: totalCount,
-            page: responsePage,
-          } = response.data;
-          setGroups(fetchedGroups);
-          setTotal(totalCount);
-          setPage(responsePage);
+          setGroups(response.data.groups || []);
+          setTotal(response.data.total || 0);
+          setPage(currentPage);
+          setPageSize(currentPageSize);
         } else {
           setError("Failed to load groups");
         }
       } catch (err) {
-        setError("Failed to load groups");
+        if (abortController.signal.aborted) {
+          return; // Request was cancelled, don't set error
+        }
+
         console.error("Load groups error:", err);
+        setError("Failed to load groups");
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+          loadingRef.current = false;
+        }
       }
     },
-    [page, pageSize]
+    [page, pageSize] // Remove from dependencies to prevent loops
   );
-
-  const handleGroupSelect = useCallback(async (groupId: number) => {
-    try {
-      setLoadingUsers(true);
-      const response = await getGroupUsers(groupId);
-      if ("data" in response) {
-        setGroupUsers(response.data);
-      } else {
-        setError(response.error);
-      }
-    } catch (error) {
-      console.error("Failed to load group users:", error);
-    } finally {
-      setLoadingUsers(false);
-    }
-  }, []);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      setPage(newPage);
-      loadGroups(newPage, pageSize);
+      if (newPage !== page && !loadingRef.current) {
+        loadGroups(newPage, pageSize);
+      }
     },
-    [pageSize, loadGroups]
+    [loadGroups, page, pageSize]
   );
 
   const handlePageSizeChange = useCallback(
     (newPageSize: number) => {
-      setPageSize(newPageSize);
-      setPage(1);
-      loadGroups(1, newPageSize);
+      if (newPageSize !== pageSize && !loadingRef.current) {
+        loadGroups(1, newPageSize); // Reset to first page
+      }
     },
-    [loadGroups]
+    [loadGroups, pageSize]
   );
 
+  // Cleanup on unmount
   useEffect(() => {
-    loadGroups();
-  }, [loadGroups]);
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      loadingRef.current = false;
+    };
+  }, []);
 
   return {
     groups,
-    groupUsers,
     loading,
-    loadingUsers,
     error,
     page,
     pageSize,
     total,
+    loadGroups,
     handlePageChange,
     handlePageSizeChange,
-    loadGroups,
-    handleGroupSelect,
   };
 }

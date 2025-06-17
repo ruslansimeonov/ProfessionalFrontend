@@ -1,8 +1,5 @@
 import { useState, useCallback } from "react";
-import {
-  getGroupUsersWithDocumentStatus,
-  getGroupDocumentStatusSummary,
-} from "@/app/utils/apis/groups";
+import { getGroupUsersWithDocumentStatus } from "@/app/utils/apis/groups";
 import { User } from "@/app/utils/types/types";
 
 interface DocumentStatusSummary {
@@ -14,63 +11,55 @@ interface DocumentStatusSummary {
 }
 
 export function useGroupDocumentStatus() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [summary, setSummary] = useState<DocumentStatusSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadUsersWithDocumentStatus = useCallback(async (groupId: number) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
+      console.log("Loading users with document status for group:", groupId);
 
       const response = await getGroupUsersWithDocumentStatus(groupId);
 
-      if (response.success) {
-        setUsers(response.data.users);
+      if (response.success && response.data) {
+        // Extract both users and summary from the single response
+        setUsers(response.data.users || []);
+        setSummary(response.data.summary || null);
+
+        console.log("Loaded users and summary:", {
+          usersCount: response.data.users?.length || 0,
+          summary: response.data.summary,
+        });
       } else {
-        setError(response.error);
+        setError("Failed to load group users");
+        setUsers([]);
+        setSummary(null);
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load users with document status"
-      );
+      console.error("Error loading users with document status:", err);
+      setError(err instanceof Error ? err.message : "Failed to load data");
+      setUsers([]);
+      setSummary(null);
     } finally {
       setLoading(false);
     }
   }, []);
-
-  const loadDocumentStatusSummary = useCallback(async (groupId: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await getGroupDocumentStatusSummary(groupId);
-
-      if (response.success) {
-        setSummary(response.data.summary);
-      } else {
-        setError(response.error);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load document status summary"
-      );
-    } finally {
-      setLoading(false);
-    }
+  const clearData = useCallback(() => {
+    setUsers([]);
+    setSummary(null);
+    setError(null);
   }, []);
 
   return {
-    loading,
-    error,
     users,
     summary,
+    loading,
+    error,
     loadUsersWithDocumentStatus,
-    loadDocumentStatusSummary,
+    clearData,
   };
 }

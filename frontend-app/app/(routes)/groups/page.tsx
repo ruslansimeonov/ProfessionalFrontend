@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import {
@@ -27,7 +27,7 @@ import {
 
 import { useStore } from "@/app/store/useStore";
 import { useGroups } from "@/app/hooks/useGroups";
-import { useGroupDocumentStatus } from "@/app/hooks/useGroupDocumentStatus"; // ADD THIS IMPORT
+import { useGroupDocumentStatus } from "@/app/hooks/useGroupDocumentStatus";
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
@@ -40,7 +40,10 @@ import GroupListItem from "@/app/components/groups/GroupListItem";
 export default function GroupsPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { user: currentUser } = useStore();
+  const { user: currentUser, isAuthenticated } = useStore();
+
+  // Add ref to track if initial load is done
+  const initialLoadRef = useRef(false);
 
   // Groups state
   const {
@@ -54,14 +57,13 @@ export default function GroupsPage() {
     loadGroups,
   } = useGroups();
 
-  // Document status state - ADD THIS
+  // Document status state
   const {
     users: usersWithDocumentStatus,
     summary: documentSummary,
     loading: documentStatusLoading,
     error: documentStatusError,
     loadUsersWithDocumentStatus,
-    loadDocumentStatusSummary,
   } = useGroupDocumentStatus();
 
   // Local state
@@ -81,20 +83,29 @@ export default function GroupsPage() {
 
   const isAdmin = currentUser?.role === "Admin";
 
-  // Load initial data
   useEffect(() => {
-    loadGroups();
-  }, [loadGroups]);
+    if (isAuthenticated && isAdmin && !initialLoadRef.current) {
+      console.log("Loading groups for the first time...");
+      initialLoadRef.current = true;
+      loadGroups();
+    }
+  }, [isAuthenticated, isAdmin, loadGroups]);
 
-  // Load companies when dialog opens
+  // Load companies when dialog opens - PREVENT DUPLICATE CALLS
   useEffect(() => {
-    if (openDialog) {
+    let abortController: AbortController | null = null;
+
+    if (openDialog && companies.length === 0 && !companiesLoading) {
       const fetchCompanies = async () => {
         try {
+          abortController = new AbortController();
           setCompaniesLoading(true);
           setCompaniesError(null);
 
           const response = await getCompanies();
+
+          if (abortController.signal.aborted) return;
+
           console.log("Raw API response:", response);
 
           if (response && response.success) {
@@ -114,27 +125,51 @@ export default function GroupsPage() {
             setCompanies([]);
           }
         } catch (error) {
+          if (abortController?.signal.aborted) return;
+
           console.error("Exception in fetch companies:", error);
           setCompaniesError("Network error loading companies");
           setCompanies([]);
         } finally {
-          setCompaniesLoading(false);
+          if (!abortController?.signal.aborted) {
+            setCompaniesLoading(false);
+          }
         }
       };
+
       fetchCompanies();
     }
-  }, [openDialog]);
 
-  // Search handling
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, [openDialog, companies.length, companiesLoading]);
+
+  // Search handling - DEBOUNCED to prevent multiple calls
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleSearch = useCallback(
     (term: string) => {
       setSearchTerm(term);
-      loadGroups(1, pageSize, term);
+
+      // Clear existing timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      // Debounce search
+      searchTimeoutRef.current = setTimeout(() => {
+        loadGroups(1, pageSize, term);
+      }, 300);
     },
     [pageSize, loadGroups]
   );
 
+  // Update the refresh handler as well
   const handleRefresh = useCallback(() => {
+    initialLoadRef.current = false; // Reset initial load flag
     loadGroups(page, pageSize, searchTerm);
     if (selectedGroup) {
       loadUsersWithDocumentStatus(selectedGroup);
@@ -148,20 +183,17 @@ export default function GroupsPage() {
     loadUsersWithDocumentStatus,
   ]);
 
-  // UPDATED: Group selection with document status loading
+  // Group selection with document status loading
   const handleGroupClick = useCallback(
     async (groupId: number) => {
       const newSelectedGroup = groupId === selectedGroup ? null : groupId;
       setSelectedGroup(newSelectedGroup);
 
       if (newSelectedGroup) {
-        // Load users with document status instead of regular users
         await loadUsersWithDocumentStatus(newSelectedGroup);
-        // Optionally load summary too
-        await loadDocumentStatusSummary(newSelectedGroup);
       }
     },
-    [selectedGroup, loadUsersWithDocumentStatus, loadDocumentStatusSummary]
+    [selectedGroup, loadUsersWithDocumentStatus]
   );
 
   // Create group handlers
@@ -184,6 +216,8 @@ export default function GroupsPage() {
       if (response.success) {
         setSuccessMessage("Group created successfully");
         handleCloseDialog();
+        // Refresh groups list
+        initialLoadRef.current = false;
         loadGroups();
       } else {
         setCreateError(response.error || "Failed to create group");
@@ -198,25 +232,30 @@ export default function GroupsPage() {
     }
   };
 
-  // // Pagination wrapper functions
-  // const handlePageChangeWrapper = (
-  //   event: React.MouseEvent<HTMLButtonElement> | null,
-  //   newPage: number
-  // ) => {
-  //   handlePageChange(newPage);
-  // };
-
-  // const handlePageSizeChangeWrapper = (
-  //   event: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   const newPageSize = parseInt(event.target.value, 10);
-  //   handlePageSizeChange(newPageSize);
-  // };
+  // Cleanup search timeout
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Close success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
+  // Show loading if not authenticated or not admin
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -279,7 +318,7 @@ export default function GroupsPage() {
           )}
         </Box>
 
-        {/* Show Users Table when a group is selected - UPDATED */}
+        {/* Show Users Table when a group is selected */}
         {selectedGroup && !loading && (
           <Box sx={{ mt: 3 }}>
             <Box
@@ -323,17 +362,17 @@ export default function GroupsPage() {
             )}
 
             <UsersTable
-              users={usersWithDocumentStatus} // USE USERS WITH DOCUMENT STATUS
+              users={usersWithDocumentStatus}
               total={usersWithDocumentStatus.length}
-              page={0} // Reset to 0 since we're showing all group users
+              page={0}
               rowsPerPage={usersWithDocumentStatus.length || 10}
-              loading={documentStatusLoading} // USE DOCUMENT STATUS LOADING
+              loading={documentStatusLoading}
               showCompany={true}
               showDocumentStatus={true}
               documentStatusLoading={documentStatusLoading}
               onViewUser={(id) => router.push(`/officePortal/users/${id}`)}
-              onPageChange={() => {}} // No pagination for group users
-              onRowsPerPageChange={() => {}} // No pagination for group users
+              onPageChange={() => {}}
+              onRowsPerPageChange={() => {}}
               labels={{
                 columns: {
                   name: t("common.name"),
