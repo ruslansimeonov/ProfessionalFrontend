@@ -11,7 +11,7 @@ export interface RegisterForm {
   password: string;
   courseId: number;
   cityId: number;
-  invitationCode?: string; 
+  invitationCode?: string;
 }
 
 export interface RegisteredUserResponse {
@@ -19,6 +19,9 @@ export interface RegisteredUserResponse {
   user: User;
   companyLinked: boolean;
   companyName?: string | null; // Optional, can be null if no company is linked
+  groupLinked: boolean;
+  groupName?: string | null; // Optional, can be null if no group is linked
+  groupCode?: string | null; // Optional, can be null if no group code is provided
 }
 
 // ✅ Register a User

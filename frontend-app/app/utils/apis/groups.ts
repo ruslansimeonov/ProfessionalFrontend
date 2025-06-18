@@ -1,5 +1,5 @@
 import { getAuthToken } from "../tokenHelpers";
-import { Group, User } from "../types/types";
+import { Group, GroupCapacity, User } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
 
 export interface PaginatedGroups {
@@ -51,6 +51,111 @@ export async function getGroups(
     return { success: true, data };
   } catch (error) {
     console.error("❌ getGroups API error:", error);
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Get group by ID
+ */
+export async function getGroupById(
+  groupId: number
+): Promise<ApiResponse<Group>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No token found" };
+    }
+
+    const { data } = await api.get<Group>(`/api/groups/${groupId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Get group capacity information
+ */
+export async function getGroupCapacity(
+  groupId: number
+): Promise<ApiResponse<{ capacity: GroupCapacity }>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    console.log("Getting group capacity for group ID:", groupId);
+
+    const { data } = await api.get<{ capacity: GroupCapacity }>(
+      `/api/groups/${groupId}/capacity`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Get group capacity error:", error);
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Update group information
+ */
+export async function updateGroup(
+  groupId: number,
+  data: {
+    name: string;
+    companyId?: number | null;
+  }
+): Promise<ApiResponse<Group>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data: responseData } = await api.put<Group>(
+      `/api/groups/${groupId}`,
+      data,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    return { success: true, data: responseData };
+  } catch (error) {
+    console.error("Update group error:", error);
+    return handleApiError(error);
+  }
+}
+
+/**
+ * Remove user from group
+ */
+export async function removeUserFromGroup(
+  groupId: number,
+  userId: number
+): Promise<ApiResponse<void>> {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    await api.delete(`/api/groups/${groupId}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Remove user from group error:", error);
     return handleApiError(error);
   }
 }

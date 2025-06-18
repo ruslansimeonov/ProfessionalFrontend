@@ -32,6 +32,7 @@ import { Company } from "@/app/utils/types/types";
 import FormDialog from "@/app/components/dialogs/FormDialog";
 import GroupListItem from "@/app/components/groups/GroupListItem";
 import CompanyAutocomplete from "@/app/components/company/CompanyAutocomplete";
+import GroupManagementDialog from "@/app/components/groups/GroupManagementDialog";
 
 export default function GroupsPage() {
   const { t } = useTranslation();
@@ -75,7 +76,19 @@ export default function GroupsPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // 🆕 Add the missing state variables for group management dialog
+  const [managementDialogOpen, setManagementDialogOpen] = useState(false);
+  const [selectedGroupForManagement, setSelectedGroupForManagement] = useState<
+    number | null
+  >(null);
+
   const isAdmin = currentUser?.role === "Admin";
+
+  // 🆕 Move handleManageGroup function before useEffect where it's used
+  const handleManageGroup = (groupId: number) => {
+    setSelectedGroupForManagement(groupId);
+    setManagementDialogOpen(true);
+  };
 
   useEffect(() => {
     if (isAuthenticated && isAdmin && !initialLoadRef.current && !initialized) {
@@ -255,9 +268,13 @@ export default function GroupsPage() {
                   id={group.id}
                   name={group.name}
                   createdAt={group.createdAt}
-                  companyName={group.companyName}
+                  companyName={group.companyName ?? null}
+                  currentParticipants={group.currentParticipants}
+                  maxParticipants={group.maxParticipants}
+                  status={group.status}
                   isSelected={selectedGroup === group.id}
                   onClick={handleGroupClick}
+                  onManage={handleManageGroup}
                 />
               ))}
             </List>
@@ -337,7 +354,7 @@ export default function GroupsPage() {
           </Box>
         )}
 
-        {/* Add Group Dialog - UPDATED */}
+        {/* Add Group Dialog */}
         <FormDialog
           open={openDialog}
           title={t("groups.createNew")}
@@ -403,6 +420,19 @@ export default function GroupsPage() {
           </Alert>
         </Snackbar>
       </Paper>
+
+      {/* 🆕 Group Management Dialog - Fixed with proper state variables */}
+      <GroupManagementDialog
+        open={managementDialogOpen}
+        onClose={() => setManagementDialogOpen(false)}
+        groupId={selectedGroupForManagement}
+        onGroupUpdated={() => {
+          loadGroups();
+          if (selectedGroup) {
+            loadUsersWithDocumentStatus(selectedGroup);
+          }
+        }}
+      />
     </Container>
   );
 }

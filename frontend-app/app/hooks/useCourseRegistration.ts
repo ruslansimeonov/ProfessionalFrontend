@@ -28,6 +28,7 @@ export interface RegistrationData {
   email: string;
   password: string;
   invitationCode?: string;
+  groupCode?: string;
 }
 
 export interface RegistrationFormData {
@@ -38,6 +39,7 @@ export interface RegistrationFormData {
   email: string;
   password: string;
   invitationCode?: string;
+  groupCode?: string;
 }
 
 export function useCourseRegistration() {
@@ -92,6 +94,7 @@ export function useCourseRegistration() {
   };
 
   // Form submission handler
+  // Update the handleRegistration function
   const handleRegistration = async (formData: RegistrationFormData) => {
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -113,19 +116,30 @@ export function useCourseRegistration() {
         username: formData.email,
         email: formData.email,
         password: formData.password,
-        invitationCode: formData.invitationCode, // Optional field
+        invitationCode: formData.invitationCode, // Company invitation code
+        groupCode: formData.groupCode, // 🆕 Group invitation code
       };
 
       const result = await registerUser(registrationData);
 
       if (result.success) {
-        const companyMessage = result.data.companyLinked
-          ? ` You have been linked to ${result.data.companyName}.`
-          : "";
+        const successMessages = ["Успешна регистрация!"];
 
-        setSuccessMessage(
-          `Успешна регистрация!${companyMessage} Влизане в профила...`
-        );
+        // Handle company linking message
+        if (result.data.companyLinked && result.data.companyName) {
+          successMessages.push(
+            `Добавени сте към компанията ${result.data.companyName}.`
+          );
+        }
+
+        // 🆕 Handle group linking message
+        if (result.data.groupLinked && result.data.groupName) {
+          successMessages.push(
+            `Добавени сте към групата ${result.data.groupName}.`
+          );
+        }
+
+        setSuccessMessage(successMessages.join(" ") + " Влизане в профила...");
 
         // Use the updated login method with the correct payload
         const loginResult = await login({

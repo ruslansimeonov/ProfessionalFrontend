@@ -84,8 +84,19 @@ export interface Certificate {
 export interface Group {
   id: number;
   name: string;
-  companyId: number;
-  companyName: string | null;
+  description?: string;
+  companyId?: number;
+  companyName?: string | null;
+
+  // Capacity management
+  maxParticipants: number;
+  currentParticipants: number;
+
+  // Status tracking
+  status: "active" | "full" | "closed" | "completed" | "cancelled";
+  registrationDeadline?: string;
+  isRegistrationOpen: boolean;
+
   createdAt: Date;
   updatedAt: Date;
   users?: {
@@ -94,6 +105,31 @@ export interface Group {
     lastName: string;
     email: string;
   }[];
+}
+
+// Group invitation interface
+export interface GroupInvitation {
+  id: number;
+  groupId: number;
+  invitationCode: string;
+  description?: string;
+  maxUses: number;
+  currentUses: number;
+  usageCount: number; // Alias for currentUses
+  expiresAt: string;
+  isActive: boolean;
+  isExpired: boolean;
+  isUsable: boolean;
+  createdByName: string;
+  createdAt: string;
+}
+
+// Group capacity info
+export interface GroupCapacity {
+  hasCapacity: boolean;
+  currentParticipants: number;
+  maxParticipants: number;
+  availableSpots: number;
 }
 
 export interface User {
