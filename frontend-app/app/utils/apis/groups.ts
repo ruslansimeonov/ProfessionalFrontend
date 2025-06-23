@@ -1,3 +1,7 @@
+// Legacy API file - now with tRPC migration comments
+// TODO: Gradually replace these REST calls with direct tRPC hooks in components
+// Use useGroupsTRPC, useGroupManagementTRPC, useAvailableUsersTRPC instead
+
 import { getAuthToken } from "../tokenHelpers";
 import { Group, GroupCapacity, User } from "../types/types";
 import { api, ApiResponse, handleApiError } from "./api";
@@ -14,6 +18,10 @@ interface CreateGroupData {
   companyId: string | number;
 }
 
+/**
+ * Get all groups with pagination and search
+ * TODO: Replace with trpc.groups.getAll.useQuery({ page, pageSize, search })
+ */
 export async function getGroups(
   page: number = 1,
   pageSize: number = 10,
@@ -24,11 +32,6 @@ export async function getGroups(
     if (!token) {
       return { success: false, error: "No token found" };
     }
-
-    console.log("API Request:", {
-      url: "/api/groups",
-      params: { page, pageSize, search: searchTerm },
-    });
 
     const { data } = await api.get<PaginatedGroups>("/api/groups", {
       params: { page, pageSize, search: searchTerm },

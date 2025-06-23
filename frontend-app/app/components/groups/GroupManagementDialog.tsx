@@ -25,6 +25,10 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   Group as GroupIcon,
@@ -56,6 +60,7 @@ import {
 import {
   getGroupInvitations,
   deactivateGroupInvitation,
+  updateGroupStatus,
 } from "@/app/utils/apis/groupInvitationCodes";
 import CompanyAutocomplete from "@/app/components/company/CompanyAutocomplete";
 import GroupInvitationDialog from "./GroupInvitationDialog";
@@ -107,6 +112,14 @@ export default function GroupManagementDialog({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState(0);
+
+  const statusOptions = [
+    { value: "draft", label: "Draft", color: "default" },
+    { value: "full", label: "Full", color: "warning" },
+    { value: "closed", label: "Closed", color: "error" },
+    { value: "completed", label: "Completed", color: "info" },
+    { value: "cancelled", label: "Cancelled", color: "error" },
+  ];
 
   // Edit states
   const [editMode, setEditMode] = useState(false);

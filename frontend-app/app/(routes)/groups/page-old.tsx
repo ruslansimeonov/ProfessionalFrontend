@@ -22,15 +22,16 @@ import {
 } from "@mui/icons-material";
 
 import { useStore } from "@/app/store/useStore";
-import { useGroupsTRPC } from "@/app/hooks/trpc/useGroupsTRPC";
-import { useGroupManagementTRPC } from "@/app/hooks/trpc/useGroupManagementTRPC";
+import { useGroups } from "@/app/hooks/useGroups";
+import { useGroupDocumentStatus } from "@/app/hooks/useGroupDocumentStatus";
 import { SearchHeader } from "@/app/components/tableComponents/SearchHeader";
 import { StateMessages } from "@/app/components/tableComponents/StateMessages";
 import { UsersTable } from "@/app/components/tableComponents/UserTable";
+import { createGroup } from "@/app/utils/apis/groups";
 import { Company } from "@/app/utils/types/types";
-import CompanyAutocomplete from "@/app/components/company/CompanyAutocomplete";
 import FormDialog from "@/app/components/dialogs/FormDialog";
 import GroupListItem from "@/app/components/groups/GroupListItem";
+import CompanyAutocomplete from "@/app/components/company/CompanyAutocomplete";
 import GroupManagementDialog from "@/app/components/groups/GroupManagementDialog";
 
 export default function GroupsPage() {
@@ -38,21 +39,30 @@ export default function GroupsPage() {
   const router = useRouter();
   const { user: currentUser, isAuthenticated } = useStore();
 
-  // tRPC hooks - Type-safe and automatic!
+  // Add ref to track if initial load is done
+  const initialLoadRef = useRef(false);
+
+  // Groups state
   const {
     groups,
-    total,
-    page,
-    pageSize,
     loading,
     error,
-    creating,
-    loadGroups,
+    page,
+    pageSize,
+    total,
+    initialized,
     handlePageChange,
-    handleSearchChange,
-    createGroup,
-    refetch,
-  } = useGroupsTRPC();
+    loadGroups,
+  } = useGroups();
+
+  // Document status state
+  const {
+    users: usersWithDocumentStatus,
+    summary: documentSummary,
+    loading: documentStatusLoading,
+    error: documentStatusError,
+    loadUsersWithDocumentStatus,
+  } = useGroupDocumentStatus();
 
   // Local state
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
@@ -60,58 +70,81 @@ export default function GroupsPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [newGroup, setNewGroup] = useState({
     name: "",
-    company: null as Company | null,
+    company: null as Company | null, // Changed from companyId to company object
   });
+  const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // 🆕 Add the missing state variables for group management dialog
   const [managementDialogOpen, setManagementDialogOpen] = useState(false);
   const [selectedGroupForManagement, setSelectedGroupForManagement] = useState<
     number | null
   >(null);
 
-  // Group management hook for selected group
-  const { usersWithDocumentStatus, documentSummary, usersLoading } =
-    useGroupManagementTRPC(selectedGroup);
-
   const isAdmin = currentUser?.role === "Admin";
-  const initialLoadRef = useRef(false);
 
-  // Load groups on mount
-  useEffect(() => {
-    if (isAuthenticated && isAdmin && !initialLoadRef.current) {
-      console.log("Loading groups for the first time...");
-      initialLoadRef.current = true;
-      loadGroups({ page: 1, pageSize: 10 });
-    }
-  }, [isAuthenticated, isAdmin, loadGroups]);
-
-  // Search handling
-  const handleSearch = useCallback(
-    (term: string) => {
-      setSearchTerm(term);
-      handleSearchChange(term);
-    },
-    [handleSearchChange]
-  );
-
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
-  // Group selection
-  const handleGroupClick = useCallback(
-    (groupId: number) => {
-      const newSelectedGroup = groupId === selectedGroup ? null : groupId;
-      setSelectedGroup(newSelectedGroup);
-    },
-    [selectedGroup]
-  );
-
-  // Group management
+  // 🆕 Move handleManageGroup function before useEffect where it's used
   const handleManageGroup = (groupId: number) => {
     setSelectedGroupForManagement(groupId);
     setManagementDialogOpen(true);
   };
+
+  useEffect(() => {
+    if (isAuthenticated && isAdmin && !initialLoadRef.current && !initialized) {
+      console.log("Loading groups for the first time...");
+      initialLoadRef.current = true;
+      loadGroups(1, pageSize, ""); // Explicitly pass empty search
+    }
+  }, [isAuthenticated, isAdmin, loadGroups, initialized, pageSize]);
+
+  // Search handling - DEBOUNCED to prevent multiple calls
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update search handling to reset page to 1
+  const handleSearch = useCallback(
+    (term: string) => {
+      setSearchTerm(term);
+
+      // Clear existing timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      // Debounce search
+      searchTimeoutRef.current = setTimeout(() => {
+        loadGroups(1, pageSize, term); // Always start from page 1 for search
+      }, 300);
+    },
+    [pageSize, loadGroups]
+  );
+
+  const handleRefresh = useCallback(() => {
+    initialLoadRef.current = false;
+    loadGroups(1, pageSize, searchTerm); // Reset to page 1
+    if (selectedGroup) {
+      loadUsersWithDocumentStatus(selectedGroup);
+    }
+  }, [
+    pageSize,
+    searchTerm,
+    loadGroups,
+    selectedGroup,
+    loadUsersWithDocumentStatus,
+  ]);
+
+  // Group selection with document status loading
+  const handleGroupClick = useCallback(
+    async (groupId: number) => {
+      const newSelectedGroup = groupId === selectedGroup ? null : groupId;
+      setSelectedGroup(newSelectedGroup);
+
+      if (newSelectedGroup) {
+        await loadUsersWithDocumentStatus(newSelectedGroup);
+      }
+    },
+    [selectedGroup, loadUsersWithDocumentStatus]
+  );
 
   // Create group handlers
   const handleCreateClick = () => {
@@ -126,6 +159,7 @@ export default function GroupsPage() {
 
   const handleCreateGroup = async () => {
     try {
+      setCreateLoading(true);
       setCreateError(null);
 
       if (!newGroup.company) {
@@ -133,31 +167,51 @@ export default function GroupsPage() {
         return;
       }
 
-      await createGroup({
+      const response = await createGroup({
         name: newGroup.name,
         companyId: newGroup.company.id,
       });
 
-      setSuccessMessage("Group created successfully");
-      handleCloseDialog();
+      if (response.success) {
+        setSuccessMessage("Group created successfully");
+        handleCloseDialog();
+        // Refresh groups list
+        initialLoadRef.current = false;
+        loadGroups();
+      } else {
+        setCreateError(response.error || "Failed to create group");
+      }
     } catch (error) {
       console.error("Failed to create group:", error);
       setCreateError(
         error instanceof Error ? error.message : "Failed to create group"
       );
+    } finally {
+      setCreateLoading(false);
     }
   };
 
+  // Cleanup search timeout
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Close success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
 
+  // Show loading if not authenticated or not admin
   if (!isAuthenticated || !isAdmin) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Alert severity="error">
-          Access denied. Admin privileges required.
-        </Alert>
+        <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
+          <CircularProgress />
+        </Box>
       </Container>
     );
   }
@@ -165,7 +219,6 @@ export default function GroupsPage() {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
-        {/* Search Header */}
         <SearchHeader
           title={t("groups.title")}
           searchTerm={searchTerm}
@@ -182,10 +235,9 @@ export default function GroupsPage() {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleCreateClick}
-            disabled={creating}
             sx={{ minWidth: "fit-content" }}
           >
-            {creating ? "Creating..." : t("groups.addGroup")}
+            {t("groups.addGroup")}
           </Button>
         )}
 
@@ -254,6 +306,13 @@ export default function GroupsPage() {
               )}
             </Box>
 
+            {/* Document Status Error Alert */}
+            {documentStatusError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {documentStatusError}
+              </Alert>
+            )}
+
             {/* Document Status Summary */}
             {documentSummary && (
               <Box sx={{ mb: 2 }}>
@@ -270,10 +329,10 @@ export default function GroupsPage() {
               total={usersWithDocumentStatus.length}
               page={0}
               rowsPerPage={usersWithDocumentStatus.length || 10}
-              loading={usersLoading}
+              loading={documentStatusLoading}
               showCompany={true}
               showDocumentStatus={true}
-              documentStatusLoading={usersLoading}
+              documentStatusLoading={documentStatusLoading}
               onViewUser={(id) => router.push(`/officePortal/users/${id}`)}
               onPageChange={() => {}}
               onRowsPerPageChange={() => {}}
@@ -301,7 +360,7 @@ export default function GroupsPage() {
           title={t("groups.createNew")}
           onClose={handleCloseDialog}
           onSubmit={handleCreateGroup}
-          isLoading={creating}
+          isLoading={createLoading}
           isValid={!!newGroup.name && !!newGroup.company}
           submitLabel={t("groups.create")}
         >
@@ -362,15 +421,15 @@ export default function GroupsPage() {
         </Snackbar>
       </Paper>
 
-      {/* Group Management Dialog */}
+      {/* 🆕 Group Management Dialog - Fixed with proper state variables */}
       <GroupManagementDialog
         open={managementDialogOpen}
         onClose={() => setManagementDialogOpen(false)}
         groupId={selectedGroupForManagement}
         onGroupUpdated={() => {
-          refetch();
+          loadGroups();
           if (selectedGroup) {
-            // Refresh selected group data if needed
+            loadUsersWithDocumentStatus(selectedGroup);
           }
         }}
       />

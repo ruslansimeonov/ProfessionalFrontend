@@ -1,18 +1,24 @@
 import { useState, useCallback, useRef } from "react";
-import { getGroups } from "@/app/utils/apis/groups";
-import { Group } from "../utils/types/types";
+import { useGroupsTRPC } from "./trpc/useGroupsTRPC";
 
+// Legacy hook that now uses tRPC internally
+// This maintains backward compatibility while using type-safe tRPC
 export function useGroups() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const [initialized, setInitialized] = useState(false);
+  const initialLoadRef = useRef(false);
 
-  // Simple loading ref to prevent concurrent calls
-  const loadingRef = useRef(false);
+  // Use the new tRPC hook
+  const {
+    groups,
+    total,
+    page,
+    pageSize,
+    loading,
+    error,
+    loadGroups: trpcLoadGroups,
+    handlePageChange: trpcHandlePageChange,
+  } = useGroupsTRPC();
 
   const loadGroups = useCallback(
     async (
@@ -20,79 +26,60 @@ export function useGroups() {
       currentPageSize: number = 10,
       search: string = ""
     ) => {
-      // Prevent multiple simultaneous calls
-      if (loadingRef.current) {
+      if (initialLoadRef.current) {
         console.log("Groups already loading, skipping...");
         return;
       }
 
       try {
-        loadingRef.current = true;
-        setLoading(true);
-        setError(null);
+        initialLoadRef.current = true;
+        setSearchTerm(search);
 
-        console.log("🔵 Loading groups:", {
+        console.log("🔵 Loading groups with tRPC:", {
           currentPage,
           currentPageSize,
           search,
         });
 
-        const response = await getGroups(currentPage, currentPageSize, search);
+        // Use tRPC loadGroups
+        trpcLoadGroups({
+          page: currentPage,
+          pageSize: currentPageSize,
+          search: search || undefined,
+        });
 
-        console.log("🎯 Response received:", response);
-
-        if (response.success && response.data) {
-          const { groups: responseGroups, total: responseTotal } =
-            response.data;
-
-          console.log("✅ Setting state:", {
-            groupsCount: responseGroups?.length || 0,
-            total: responseTotal || 0,
-          });
-
-          setGroups(responseGroups || []);
-          setTotal(responseTotal || 0);
-          setPage(currentPage);
-          setPageSize(currentPageSize);
-          setInitialized(true);
-
-          console.log("🏁 State updated successfully");
-        } else {
-          console.error("❌ API response error:");
-          setError("Failed to load groups");
-          setGroups([]);
-          setTotal(0);
-        }
+        setInitialized(true);
+        console.log("🏁 tRPC groups loaded successfully");
       } catch (err) {
-        console.error("💥 Exception:", err);
-        setError("Failed to load groups");
-        setGroups([]);
-        setTotal(0);
+        console.error("💥 tRPC Exception:", err);
       } finally {
         console.log("🔄 Cleaning up...");
-        setLoading(false);
-        loadingRef.current = false;
+        initialLoadRef.current = false;
       }
     },
-    []
+    [trpcLoadGroups]
   );
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      if (newPage !== page && !loadingRef.current) {
-        loadGroups(newPage, pageSize);
+      if (newPage !== page && !loading) {
+        trpcHandlePageChange(newPage);
       }
     },
-    [loadGroups, page, pageSize]
+    [trpcHandlePageChange, page, loading]
   );
 
   const handlePageSizeChange = useCallback(
     (newPageSize: number) => {
-      if (newPageSize !== pageSize && !loadingRef.current) {
-        loadGroups(1, newPageSize);
+      if (newPageSize !== pageSize && !loading) {
+        trpcLoadGroups({
+          page: 1,
+          pageSize: newPageSize,
+          search: searchTerm || undefined,
+        });
       }
     },
-    [loadGroups, pageSize]
+    [trpcLoadGroups, pageSize, loading, searchTerm]
   );
 
   return {
